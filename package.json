@@ -29,7 +29,9 @@
   "dependencies": {
     "@bornfight/b-reset": "^1.0.8",
     "gsap": "^3.7.1",
-    "poly-fluid-sizing": "^1.1.0"
+    "poly-fluid-sizing": "^1.1.0",
+    "sass": "^1.43.3",
+    "sass-loader": "^12.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",
