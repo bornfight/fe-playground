@@ -64,12 +64,14 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
     value: function init() {
       _gsap.default.set(this.getBgImgs(), {
         autoAlpha: 0,
-        scale: 1.05
+        scale: 1.05,
+        overwrite: true
       });
 
       _gsap.default.set(this.getBgImgs()[0], {
         autoAlpha: 1,
-        scale: 1
+        scale: 1,
+        overwrite: true
       });
 
       this.listItems = this.getListItems().length - 1;
@@ -89,7 +91,8 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
         _gsap.default.to(_this.getList(), {
           duration: 0.3,
           y: offset,
-          ease: "power4.out"
+          ease: "power4.out",
+          overwrite: true
         });
       }, false);
     }
@@ -111,13 +114,15 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
 
             _gsap.default.to(ev.currentTarget, {
               duration: 0.3,
-              autoAlpha: 1
+              autoAlpha: 1,
+              overwrite: true
             });
 
             _gsap.default.to(".is-visible", {
               duration: 0.2,
               autoAlpha: 0,
-              scale: 1.05
+              scale: 1.05,
+              overwrite: true
             });
 
             if (!_this2.getBgImgs()[currentId].classList.contains("is-visible")) {
@@ -127,7 +132,8 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
             _gsap.default.to(_this2.getBgImgs()[currentId], {
               duration: 0.6,
               autoAlpha: 1,
-              scale: 1
+              scale: 1,
+              overwrite: true
             });
           });
         }
@@ -147,13 +153,14 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
       if (aboveCurrent > 0) {
         for (var i = 1; i <= aboveCurrent; i++) {
           var opacity = 0.5 / i;
-          var offset = 5 * i;
+          var offset = 2 * i;
 
           _gsap.default.to(this.getListItems()[id + i], {
             duration: 0.5,
             autoAlpha: opacity,
-            x: offset,
-            ease: "power3.out"
+            x: "".concat(offset, "vw"),
+            ease: "power3.out",
+            overwrite: true
           });
         }
       }
@@ -162,13 +169,14 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
         for (var _i = 0; _i <= belowCurrent; _i++) {
           var _opacity = 0.5 / _i;
 
-          var _offset = 5 * _i;
+          var _offset = 2 * _i;
 
           _gsap.default.to(this.getListItems()[id - _i], {
             duration: 0.5,
             autoAlpha: _opacity,
-            x: _offset,
-            ease: "power3.out"
+            x: "".concat(_offset, "vw"),
+            ease: "power3.out",
+            overwrite: true
           });
         }
       }

@@ -36,12 +36,14 @@ export default class VerticalMouseDrivenCarousel {
     init() {
         gsap.set(this.getBgImgs(), {
             autoAlpha: 0,
-            scale: 1.05
+            scale: 1.05,
+            overwrite: true
         });
 
         gsap.set(this.getBgImgs()[0], {
             autoAlpha: 1,
-            scale: 1
+            scale: 1,
+            overwrite: true
         });
 
         this.listItems = this.getListItems().length - 1;
@@ -62,7 +64,8 @@ export default class VerticalMouseDrivenCarousel {
                 gsap.to(this.getList(), {
                     duration: 0.3,
                     y: offset,
-                    ease: "power4.out"
+                    ease: "power4.out",
+                    overwrite: true
                 });
             },
             false
@@ -78,13 +81,15 @@ export default class VerticalMouseDrivenCarousel {
 
                 gsap.to(ev.currentTarget, {
                     duration: 0.3,
-                    autoAlpha: 1
+                    autoAlpha: 1,
+                    overwrite: true
                 });
 
                 gsap.to(".is-visible", {
                     duration: 0.2,
                     autoAlpha: 0,
-                    scale: 1.05
+                    scale: 1.05,
+                    overwrite: true
                 });
 
                 if (!this.getBgImgs()[currentId].classList.contains("is-visible")) {
@@ -94,7 +99,8 @@ export default class VerticalMouseDrivenCarousel {
                 gsap.to(this.getBgImgs()[currentId], {
                     duration: 0.6,
                     autoAlpha: 1,
-                    scale: 1
+                    scale: 1,
+                    overwrite: true
                 });
             });
         }
@@ -108,12 +114,13 @@ export default class VerticalMouseDrivenCarousel {
         if (aboveCurrent > 0) {
             for (let i = 1; i <= aboveCurrent; i++) {
                 let opacity = 0.5 / i;
-                let offset = 5 * i;
+                let offset = 2 * i;
                 gsap.to(this.getListItems()[id + i], {
                     duration: 0.5,
                     autoAlpha: opacity,
-                    x: offset,
-                    ease: "power3.out"
+                    x: `${offset}vw`,
+                    ease: "power3.out",
+                    overwrite: true
                 });
             }
         }
@@ -121,12 +128,13 @@ export default class VerticalMouseDrivenCarousel {
         if (belowCurrent > 0) {
             for (let i = 0; i <= belowCurrent; i++) {
                 let opacity = 0.5 / i;
-                let offset = 5 * i;
+                let offset = 2 * i;
                 gsap.to(this.getListItems()[id - i], {
                     duration: 0.5,
                     autoAlpha: opacity,
-                    x: offset,
-                    ease: "power3.out"
+                    x: `${offset}vw`,
+                    ease: "power3.out",
+                    overwrite: true
                 });
             }
         }
