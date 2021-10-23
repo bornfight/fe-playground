@@ -11,6 +11,10 @@ export default class VerticalMouseDrivenCarousel {
 
         this.posY = 0;
 
+        if (this.getCarousel() == null) {
+            return;
+        }
+
         this.initCursor();
         this.init();
         this.bgImgController();
