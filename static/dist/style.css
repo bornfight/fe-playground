@@ -696,6 +696,115 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
  * Template Example
  */
 /**
+ * Mouse Driven Vertical Carousel
+ */
+.e-mouse-driven-vertical-carousel {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-line-pack: stretch;
+      align-content: stretch;
+  width: 100%;
+  background-color: #000000;
+  margin-bottom: 100vh; }
+
+.e-mouse-driven-vertical-carousel .c-header {
+  display: block;
+  width: 100%; }
+
+.e-mouse-driven-vertical-carousel .u-a5 {
+  font-family: "Roboto", sans-serif;
+  font-size: 5vw;
+  line-height: 4.5vw;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  color: #ffffff; }
+
+.e-mouse-driven-vertical-carousel .u-b4 {
+  font-family: "Roboto", sans-serif;
+  font-size: 1vw;
+  line-height: 1.2vw;
+  letter-spacing: 0.01em;
+  font-weight: normal;
+  color: #ffffff; }
+
+.e-mouse-driven-vertical-carousel a {
+  text-decoration: none; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__list {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  z-index: 1; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__list-item a {
+  display: block;
+  padding-bottom: 4vw;
+  padding-top: 4vw;
+  padding-left: 45.83333%; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__eyebrow {
+  position: relative;
+  padding-bottom: 1.2vw; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__eyebrow span {
+  position: absolute;
+  left: -2vw;
+  top: 0; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__title {
+  width: 100%; }
+
+.e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform; }
+
+.e-mouse-driven-vertical-carousel .u-media-wrapper {
+  position: relative;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  height: 0; }
+
+.e-mouse-driven-vertical-carousel .u-media-wrapper.e-mouse-driven-vertical-carousel .u-media-wrapper--16-9 {
+  padding-bottom: 56.25%; }
+
+.e-mouse-driven-vertical-carousel .c-gradient-overlay {
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle at 49% 50%, rgba(2, 21, 25, 0.3), rgba(2, 21, 25, 0.6)); }
+
+/**
  * Pages
  */
 /**

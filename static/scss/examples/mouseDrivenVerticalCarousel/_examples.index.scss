@@ -1,0 +1,122 @@
+/**
+ * Mouse Driven Vertical Carousel
+ */
+.e-mouse-driven-vertical-carousel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: stretch;
+    width: 100%;
+    background-color: $black;
+    margin-bottom: 100vh;
+
+    .c-header {
+        display: block;
+        width: 100%;
+    }
+
+    .u-a5 {
+        font-family: $font-secondary;
+        font-size: 5vw;
+        line-height: 4.5vw;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+        text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        color: $white;
+    }
+
+    .u-b4 {
+        font-family: $font-primary;
+        font-size: 1vw;
+        line-height: 1.2vw;
+        letter-spacing: 0.01em;
+        font-weight: normal;
+        color: $white;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+
+
+    .c-mouse-vertical-carousel {
+        position: relative;
+        overflow: hidden;
+        min-height: 100vh;
+
+        &__list {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            z-index: 1;
+        }
+
+        &__list-item {
+            a {
+                display: block;
+                padding-bottom: 4vw;
+                padding-top: 4vw;
+                padding-left: percentage(11/24);
+            }
+        }
+
+        &__eyebrow {
+            position: relative;
+            padding-bottom: 1.2vw;
+
+            span {
+                position: absolute;
+                left: -2vw;
+                top: 0;
+            }
+        }
+
+        &__title {
+            width: 100%;
+        }
+
+        &__bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+        }
+    }
+
+    //MEDIA WRAPPER
+    .u-media-wrapper {
+        position: relative;
+        width: 100%;
+        background-size: cover;
+        background-position: center;
+        height: 0;
+
+        &#{&}--16-9 {
+            padding-bottom: percentage(9/16);
+        }
+    }
+
+    // GRADIENT IMAGE OVERLAY
+    .c-gradient-overlay {
+        position: absolute;
+        display: block;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(
+                        circle at 49% 50%,
+                        rgba(2, 21, 25, 0.3),
+                        rgba(2, 21, 25, 0.6)
+        );
+    }
+}

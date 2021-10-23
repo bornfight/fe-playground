@@ -12,6 +12,7 @@
  * Components
  */
 import TemplateComponent from "./examples/TemplateExample/TemplateComponent";
+import VerticalMouseDrivenCarousel from "./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel";
 
 /**
  * Check if document is ready cross-browser
@@ -74,4 +75,11 @@ ready(() => {
      */
     const templateComponent = new TemplateComponent();
     templateComponent.init();
+
+    /**
+     * VerticalMouseDrivenCarousel component
+     * @type {VerticalMouseDrivenCarousel}
+     */
+    const verticalMouseDrivenCarousel = new VerticalMouseDrivenCarousel();
+    verticalMouseDrivenCarousel.init();
 });
