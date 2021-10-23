@@ -13,6 +13,7 @@
  */
 import TemplateComponent from "./examples/TemplateExample/TemplateComponent";
 import VerticalMouseDrivenCarousel from "./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel";
+import ScrollingMarquee from "./examples/ScrollingMarquee/ScrollingMarquee";
 
 /**
  * Check if document is ready cross-browser
@@ -81,5 +82,10 @@ ready(() => {
      * @type {VerticalMouseDrivenCarousel}
      */
     const verticalMouseDrivenCarousel = new VerticalMouseDrivenCarousel();
-    verticalMouseDrivenCarousel.init();
+
+    /**
+     * ScrollingMarquee component
+     * @type {ScrollingMarquee}
+     */
+    const scrollingMarquee = new ScrollingMarquee();
 });

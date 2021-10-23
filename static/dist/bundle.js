@@ -33,6 +33,11 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
       listItem: ".js-mouse-driven-vertical-carousel-list-item"
     };
     this.posY = 0;
+
+    if (this.getCarousel() == null) {
+      return;
+    }
+
     this.initCursor();
     this.init();
     this.bgImgController();
@@ -196,6 +201,115 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _gsap = _interopRequireDefault(require("gsap"));
+
+var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+_gsap.default.registerPlugin(_ScrollTrigger.default);
+
+var ScrollingMarquee = /*#__PURE__*/function () {
+  function ScrollingMarquee() {
+    _classCallCheck(this, ScrollingMarquee);
+
+    this.dividers = document.querySelectorAll(".js-scrolling-marquee-divider");
+    this.lines = document.querySelectorAll(".js-scrolling-marquee-line");
+    this.winWidth = window.innerWidth;
+    this.topAnimOffset = this.lines[0].offsetHeight;
+
+    if (this.dividers.length < 1 || this.lines.length < 1) {
+      return;
+    }
+
+    this.randomDividerPosition();
+    this.linesTrigger();
+  }
+
+  _createClass(ScrollingMarquee, [{
+    key: "randomDividerPosition",
+    value: function randomDividerPosition() {
+      var _this = this;
+
+      this.dividers.forEach(function (divider, index) {
+        var random = Math.random();
+
+        if (random > 0.8) {
+          random = 0.7;
+        } else if (random < 0.1) {
+          random = 0.3;
+        }
+
+        divider.style.left = "".concat(_this.winWidth * random, "px");
+
+        _this.dividerController(divider, index);
+      });
+    }
+  }, {
+    key: "linesTrigger",
+    value: function linesTrigger() {
+      var _this2 = this;
+
+      this.lines.forEach(function (line) {
+        _this2.lineController(line);
+      });
+    }
+  }, {
+    key: "lineController",
+    value: function lineController(line) {
+      _gsap.default.to(line, {
+        scrollTrigger: {
+          trigger: line,
+          start: "top bottom",
+          end: "bottom+=".concat(this.topAnimOffset * 2, " top"),
+          scrub: true
+        },
+        x: "-100%",
+        ease: "power3.inOut"
+      });
+    }
+  }, {
+    key: "dividerController",
+    value: function dividerController(divider, index) {
+      var random = Math.random();
+      var offset = random * 200;
+
+      if (index % 2 === 0) {
+        offset = -offset;
+      }
+
+      _gsap.default.to(divider, {
+        scrollTrigger: {
+          trigger: divider,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true
+        },
+        x: "".concat(offset, "%"),
+        scaleX: 1 + random
+      });
+    }
+  }]);
+
+  return ScrollingMarquee;
+}();
+
+exports.default = ScrollingMarquee;
+
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -269,12 +383,14 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
 
 var _MouseDrivenVerticalCarousel = _interopRequireDefault(require("./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel"));
+
+var _ScrollingMarquee = _interopRequireDefault(require("./examples/ScrollingMarquee/ScrollingMarquee"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -352,9 +468,14 @@ ready(function () {
    */
 
   var verticalMouseDrivenCarousel = new _MouseDrivenVerticalCarousel.default();
-  verticalMouseDrivenCarousel.init();
+  /**
+   * ScrollingMarquee component
+   * @type {ScrollingMarquee}
+   */
+
+  var scrollingMarquee = new _ScrollingMarquee.default();
 });
 
-},{"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":1,"./examples/TemplateExample/TemplateComponent":2}]},{},[3])
+},{"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":1,"./examples/ScrollingMarquee/ScrollingMarquee":2,"./examples/TemplateExample/TemplateComponent":3}]},{},[4])
 
 //# sourceMappingURL=bundle.js.map
