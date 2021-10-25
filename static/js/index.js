@@ -14,6 +14,7 @@
 import TemplateComponent from "./examples/TemplateExample/TemplateComponent";
 import VerticalMouseDrivenCarousel from "./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel";
 import ScrollingMarquee from "./examples/ScrollingMarquee/ScrollingMarquee";
+import ThreeScrollytelling from "./examples/3dScrollytelling/ThreeScrollytelling";
 
 /**
  * Check if document is ready cross-browser
@@ -88,4 +89,11 @@ ready(() => {
      * @type {ScrollingMarquee}
      */
     const scrollingMarquee = new ScrollingMarquee();
+
+    /**
+     * threeScrollytelling component
+     * @type {threeScrollytelling}
+     */
+    const threeScrollytelling = new ThreeScrollytelling();
+    threeScrollytelling.init();
 });

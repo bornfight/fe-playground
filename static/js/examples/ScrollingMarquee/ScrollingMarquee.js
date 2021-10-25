@@ -7,14 +7,13 @@ export default class ScrollingMarquee {
     constructor() {
         this.dividers = document.querySelectorAll(".js-scrolling-marquee-divider");
         this.lines = document.querySelectorAll(".js-scrolling-marquee-line");
-        this.winWidth = window.innerWidth;
-        this.topAnimOffset = this.lines[0].offsetHeight;
-
 
         if (this.dividers.length < 1 || this.lines.length < 1) {
             return;
         }
 
+        this.topAnimOffset = this.lines[0].offsetHeight;
+        this.winWidth = window.innerWidth;
         this.randomDividerPosition();
         this.linesTrigger();
     }
