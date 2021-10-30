@@ -187,12 +187,15 @@
  * Transition easing map
  */
 /**
+ * Transition variables
+ */
+/**
  * Transitions map
  */
 /**
  * Roboto
  */
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1");
 @font-face {
   font-family: "Roboto";
   src: url("../fonts/Roboto-Regular.woff2?1") format("woff2"), url("../fonts/Roboto-Regular.woff?1") format("woff");
@@ -1277,7 +1280,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
       -ms-flex-align: center;
           align-items: center;
   position: relative;
-  background-color: #bad5ca; }
+  background-image: linear-gradient(-225deg, #B7F8DB 0%, #50A7C2 100%); }
 
 .c-panning-container .c-title-wrapper {
   mix-blend-mode: difference;
@@ -1344,17 +1347,25 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  background-color: rgba(255, 255, 255, 0.1);
-  -webkit-transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
-  transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  background-color: rgba(255, 255, 255, 0.2);
+  -webkit-transition: all 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  transition: all 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955);
   cursor: pointer;
   background-position: center;
-  background-size: cover; }
+  background-size: cover;
+  opacity: 0.35;
+  -webkit-filter: blur(12px) brightness(150%) contrast(255%);
+          filter: blur(12px) brightness(150%) contrast(255%);
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  will-change: filter; }
 
 .c-panning__row span:hover {
   opacity: 1;
-  -webkit-transform: scale(1.05);
-          transform: scale(1.05); }
+  -webkit-transform: scale(1.025);
+          transform: scale(1.025);
+  -webkit-filter: blur(0) brightness(100%) contrast(100%);
+          filter: blur(0) brightness(100%) contrast(100%); }
 
 .c-panning__row span:after {
   content: "";
@@ -1439,7 +1450,8 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   line-height: 1em; }
 
 .c-title__title-current {
-  display: block; }
+  display: block;
+  font-family: "Playfair Display", serif; }
 
 /**
  * Pages

@@ -1,5 +1,5 @@
 //PANNING
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1');
 $serif-font: 'Playfair Display', serif;
 
 .c-panning-wrapper {
@@ -13,7 +13,7 @@ $serif-font: 'Playfair Display', serif;
     justify-content: center;
     align-items: center;
     position: relative;
-    background-color: #bad5ca;
+    background-image: linear-gradient(-225deg, #B7F8DB 0%, #50A7C2 100%);
 
     .c-title-wrapper {
         mix-blend-mode: difference;
@@ -62,17 +62,20 @@ $serif-font: 'Playfair Display', serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: transparentize($white, 0.9);
-            transition: getTransition();
+            background-color: transparentize($white, 0.8);
+            transition: all 0.3s $ease-in-out-quad;
             cursor: pointer;
             background-position: center;
             background-size: cover;
-            //opacity: 0.3;
-            //backface-visibility: hidden;
+            opacity: 0.35;
+            filter: blur(12px) brightness(150%) contrast(255%);
+            backface-visibility: hidden;
+            will-change: filter;
 
             &:hover {
                 opacity: 1;
-                transform: scale(1.05);
+                transform: scale(1.025);
+                filter: blur(0) brightness(100%) contrast(100%);
             }
 
             &:after {
@@ -187,6 +190,7 @@ $serif-font: 'Playfair Display', serif;
 
     &__title-current {
         display: block;
+        font-family: $serif-font;
 
         div {
         }
