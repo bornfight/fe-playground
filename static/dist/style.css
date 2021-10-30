@@ -192,6 +192,7 @@
 /**
  * Roboto
  */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap");
 @font-face {
   font-family: "Roboto";
   src: url("../fonts/Roboto-Regular.woff2?1") format("woff2"), url("../fonts/Roboto-Regular.woff?1") format("woff");
@@ -1261,6 +1262,184 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex; }
+
+.c-panning-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  position: relative;
+  background-color: #bad5ca; }
+
+.c-panning-container .c-title-wrapper {
+  mix-blend-mode: difference;
+  color: #ffffff; }
+
+.is-light .c-panning-container .c-title-wrapper {
+  color: #ffffff; }
+
+.c-panning {
+  width: 133.33333%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  z-index: 2;
+  padding: 8.33333% 8.33333%; }
+
+.is-light .c-panning {
+  background-color: #ffffff; }
+
+.c-panning__inner {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  width: 100%;
+  height: 100%;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+.c-panning__row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding-bottom: 60px; }
+
+.c-panning__row span {
+  width: 25%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  -webkit-transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  cursor: pointer;
+  background-position: center;
+  background-size: cover; }
+
+.c-panning__row span:hover {
+  opacity: 1;
+  -webkit-transform: scale(1.05);
+          transform: scale(1.05); }
+
+.c-panning__row span:after {
+  content: "";
+  display: block;
+  padding-bottom: 75%; }
+
+.c-panning__row--1 span:nth-child(1) {
+  margin-left: 4.16667%;
+  margin-top: 10%; }
+
+.c-panning__row--1 span:nth-child(2) {
+  margin-top: 5%;
+  margin-bottom: 5%; }
+
+.c-panning__row--1 span:nth-child(2):after {
+  padding-bottom: 133.33333%; }
+
+.c-panning__row--1 span:nth-child(3) {
+  margin-right: 4.16667%; }
+
+.c-panning__row--2 {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
+
+.c-panning__row--2 span {
+  width: 20.83333%; }
+
+.c-panning__row--2 span:nth-child(2) {
+  margin-top: -5%;
+  margin-left: 8.33333%; }
+
+.c-panning__row--2 span:nth-child(2):after {
+  padding-bottom: 133.33333%; }
+
+.c-panning__row--2 span:nth-child(1) {
+  margin-right: 8.33333%; }
+
+.c-panning__row--2 span:nth-child(3) {
+  margin-top: 5%; }
+
+.c-panning__row--2 span:nth-child(4) {
+  margin-top: -10%; }
+
+.c-panning__row--2 span:nth-child(4):after {
+  padding-bottom: 133.33333%; }
+
+.c-panning__row--3 {
+  padding-bottom: 0; }
+
+.c-panning__row--3 span:nth-child(1) {
+  margin-left: 4.16667%; }
+
+.c-panning__row--3 span:nth-child(2) {
+  margin-top: 5%; }
+
+.c-panning__row--3 span:nth-child(3) {
+  margin-right: 4.16667%; }
+
+.c-title-wrapper {
+  position: relative;
+  z-index: 3;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  pointer-events: none;
+  width: 100%;
+  text-align: center; }
+
+.c-title {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+
+.c-title__title {
+  font-family: "Playfair Display", serif;
+  font-weight: 100;
+  font-size: 5.83333vw;
+  line-height: 1em; }
+
+.c-title__title-current {
+  display: block; }
 
 /**
  * Pages
