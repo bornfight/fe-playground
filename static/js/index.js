@@ -15,6 +15,7 @@ import TemplateComponent from "./examples/TemplateExample/TemplateComponent";
 import VerticalMouseDrivenCarousel from "./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel";
 import ScrollingMarquee from "./examples/ScrollingMarquee/ScrollingMarquee";
 import ThreeScrollytelling from "./examples/3dScrollytelling/ThreeScrollytelling";
+import PanningGallery from "./examples/PanningGallery/PanningGallery";
 
 /**
  * Check if document is ready cross-browser
@@ -96,4 +97,11 @@ ready(() => {
      */
     const threeScrollytelling = new ThreeScrollytelling();
     threeScrollytelling.init();
+
+    /**
+     * PanningGallery component
+     * @type {PanningGallery}
+     */
+    const panningGallery = new PanningGallery();
+    panningGallery.init();
 });
