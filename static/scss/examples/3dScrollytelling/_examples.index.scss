@@ -59,7 +59,7 @@
     }
 
     &__header-title {
-        @include fluidValue("max-width", null, 480px);
+        @include fluidValue("max-width", null, 620px);
         position: relative;
         display: inline-block;
     }

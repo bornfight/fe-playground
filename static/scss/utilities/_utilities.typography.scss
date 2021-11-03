@@ -1,9 +1,28 @@
+.u-a7 {
+    @include fontSize("a7");
+
+    font-family: $font-primary;
+    line-height: 100%;
+    letter-spacing: normal;
+    font-weight: 400;
+}
+
+.u-a6 {
+    @include fontSize("a6");
+
+    font-family: $font-primary;
+    line-height: 100%;
+    letter-spacing: normal;
+    font-weight: 400;
+}
+
 .u-a5 {
     @include fontSize("a5");
 
     font-family: $font-primary;
     line-height: 100%;
     letter-spacing: normal;
+    font-weight: 400;
 }
 
 .u-a4 {
@@ -12,6 +31,7 @@
     font-family: $font-secondary;
     line-height: 107%;
     letter-spacing: -1.33 / 64 * 1em;
+    font-weight: 400;
 }
 
 .u-a3 {
@@ -20,6 +40,7 @@
     font-family: $font-primary;
     line-height: 116%;
     letter-spacing: -1 / 48 * 1em;
+    font-weight: 400;
 }
 
 .u-a2 {
@@ -28,6 +49,7 @@
     font-family: $font-secondary;
     line-height: 112%;
     letter-spacing: -0.8 / 41 * 1em;
+    font-weight: 400;
 }
 
 .u-a1 {
@@ -36,6 +58,7 @@
     font-family: $font-primary;
     line-height: 130%;
     letter-spacing: normal;
+    font-weight: 400;
 }
 
 .u-b0 {
@@ -44,14 +67,16 @@
     font-family: $font-secondary;
     line-height: 144%;
     letter-spacing: normal;
+    font-weight: 400;
 }
 
 .u-b1 {
     @include fontSize("b1");
 
     font-family: $font-primary;
-    line-height: 110%;
+    line-height: 132%;
     letter-spacing: normal;
+    font-weight: 400;
 }
 
 .u-b2 {
@@ -60,6 +85,7 @@
     font-family: $font-secondary;
     line-height: 133%;
     letter-spacing: -0.1 / 15 * 1em;
+    font-weight: 400;
 }
 
 .u-b3 {
@@ -68,6 +94,7 @@
     font-family: $font-primary;
     line-height: 110%;
     letter-spacing: normal;
+    font-weight: 400;
 }
 
 .u-b4 {
@@ -76,6 +103,7 @@
     font-family: $font-secondary;
     line-height: 125%;
     letter-spacing: normal;
+    font-weight: 400;
 }
 
 .u-uppercase {

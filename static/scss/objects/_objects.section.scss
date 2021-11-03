@@ -1,2 +1,16 @@
 .o-section {
+
+    &--homepage {
+        @include fluidValue("padding-top", "s-120");
+        @include fluidValue("padding-bottom", "s-120");
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+
+        h1 {
+            @include fluidValue("padding-bottom", "s-40");
+        }
+    }
 }

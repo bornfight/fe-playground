@@ -5,9 +5,16 @@ body {
 
 body {
     @extend .u-b0;
-
+    font-family: $font-primary;
+    position: relative;
     color: $black;
     background-color: $white;
+
+    &.is-dark {
+        background-color: $black;
+        color: $white;
+    }
+
 
     // custom scrollbar
     scrollbar-width: thin;

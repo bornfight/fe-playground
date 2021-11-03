@@ -1,0 +1,14 @@
+//LOGO
+.c-logo {
+    display: inline-flex;
+    width: get-vw(120px);
+    height: auto;
+    min-width: 120px;
+
+    svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        fill: currentColor;
+    }
+}

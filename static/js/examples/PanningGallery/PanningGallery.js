@@ -1,5 +1,5 @@
-import { gsap } from "gsap/dist/gsap";
-import { SplitText } from "gsap/dist/SplitText";
+import {gsap} from "gsap/dist/gsap";
+import {SplitText} from "gsap/dist/SplitText";
 
 gsap.registerPlugin(SplitText);
 
@@ -35,6 +35,10 @@ export default class PanningGallery {
     }
 
     init() {
+        if (this.panningElement == null) {
+            return;
+        }
+
         console.log("PanningGallery init()");
 
         let panElementW = this.panningElement.clientWidth;
@@ -66,7 +70,8 @@ export default class PanningGallery {
         }
     }
 
-    initMouseLeave() {}
+    initMouseLeave() {
+    }
 
     onMouseMove(ev) {
         let mouseX = ev.clientX;
@@ -99,7 +104,7 @@ export default class PanningGallery {
         titleSplitTimeline.clear().time(0);
         titleSplit.revert();
 
-        titleSplit.split({ type: "chars" });
+        titleSplit.split({type: "chars"});
         titleSplitTimeline.from(titleSplit.chars, {
             duration: 1,
             scale: 1.15,
