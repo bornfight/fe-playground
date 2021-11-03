@@ -16,6 +16,7 @@ import VerticalMouseDrivenCarousel from "./examples/MouseDrivenVerticalCarousel/
 import ScrollingMarquee from "./examples/ScrollingMarquee/ScrollingMarquee";
 import ThreeScrollytelling from "./examples/3dScrollytelling/ThreeScrollytelling";
 import PanningGallery from "./examples/PanningGallery/PanningGallery";
+import HoverClippingNavigation from "./examples/HoverClippingNavigation/HoverClippingNavigation";
 
 /**
  * Check if document is ready cross-browser
@@ -104,4 +105,11 @@ ready(() => {
      */
     const panningGallery = new PanningGallery();
     panningGallery.init();
+
+    /**
+     * HoverClippingNavigation component
+     * @type {HoverClippingNavigation}
+     */
+    const hoverClippingNavigation = new HoverClippingNavigation();
+    hoverClippingNavigation.init();
 });

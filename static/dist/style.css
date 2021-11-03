@@ -1537,6 +1537,51 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   display: block;
   font-family: "Playfair Display", serif; }
 
+.e-clipping-nav-wrapper {
+  background-color: rgba(0, 0, 0, 0.9);
+  min-height: 100vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
+
+.e-clipping-nav {
+  position: relative; }
+
+.e-clipping-nav ul {
+  margin: 0;
+  list-style-type: none;
+  font-family: "Arial Black";
+  font-size: 50px;
+  line-height: 1;
+  font-weight: 900;
+  -webkit-text-decoration: uppercase;
+          text-decoration: uppercase; }
+
+.e-clipping-nav ul li {
+  cursor: pointer;
+  height: 60px;
+  padding: 5px 0; }
+
+.e-clipping-nav__main {
+  color: transparent;
+  -webkit-text-stroke: 1px #ffffff; }
+
+.e-clipping-nav__clipping {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  height: 60px;
+  color: #ffffff; }
+
 /**
  * Components
  */

@@ -6067,6 +6067,87 @@ var _gsap = _interopRequireDefault(require("gsap"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var HoverClippingNavigation = /*#__PURE__*/function () {
+  function HoverClippingNavigation() {
+    _classCallCheck(this, HoverClippingNavigation);
+
+    this.DOM = {
+      wrapper: ".js-list-wrapper",
+      clipList: ".js-clip-list",
+      clipListWrapper: ".js-clip-list-wrapper"
+    };
+  }
+  /**
+   * Init
+   */
+
+
+  _createClass(HoverClippingNavigation, [{
+    key: "init",
+    value: function init() {
+      var wrapper = document.querySelector(this.DOM.wrapper);
+
+      if (wrapper == null) {
+        return;
+      }
+
+      var clipList = document.querySelector(this.DOM.clipList);
+      var clipListWrapper = document.querySelector(this.DOM.clipListWrapper);
+      var centerHeight = clipListWrapper.offsetHeight / 2;
+
+      _gsap.default.set(clipListWrapper, {
+        y: 0
+      });
+
+      _gsap.default.set(clipList, {
+        y: 0
+      });
+
+      wrapper.addEventListener("mousemove", function (ev) {
+        var posY = ev.pageY - wrapper.offsetTop;
+        var offsetWrapper = posY - centerHeight;
+        var offsetList = -posY + centerHeight;
+
+        _gsap.default.to(clipListWrapper, {
+          duration: 0.5,
+          delay: 0.1,
+          ease: "power4.out",
+          y: offsetWrapper
+        });
+
+        _gsap.default.to(clipList, {
+          duration: 0.5,
+          delay: 0.1,
+          ease: "power4.out",
+          y: offsetList
+        });
+      });
+    }
+  }]);
+
+  return HoverClippingNavigation;
+}();
+
+exports.default = HoverClippingNavigation;
+
+},{"gsap":"gsap"}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = _interopRequireDefault(require("gsap"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -6250,7 +6331,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
 
 exports.default = VerticalMouseDrivenCarousel;
 
-},{"gsap":"gsap"}],6:[function(require,module,exports){
+},{"gsap":"gsap"}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6403,7 +6484,7 @@ var PanningGallery = /*#__PURE__*/function () {
 
 exports.default = PanningGallery;
 
-},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],7:[function(require,module,exports){
+},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6512,7 +6593,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],8:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6593,7 +6674,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -6605,6 +6686,8 @@ var _ScrollingMarquee = _interopRequireDefault(require("./examples/ScrollingMarq
 var _ThreeScrollytelling = _interopRequireDefault(require("./examples/3dScrollytelling/ThreeScrollytelling"));
 
 var _PanningGallery = _interopRequireDefault(require("./examples/PanningGallery/PanningGallery"));
+
+var _HoverClippingNavigation = _interopRequireDefault(require("./examples/HoverClippingNavigation/HoverClippingNavigation"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6702,8 +6785,15 @@ ready(function () {
 
   var panningGallery = new _PanningGallery.default();
   panningGallery.init();
+  /**
+   * HoverClippingNavigation component
+   * @type {HoverClippingNavigation}
+   */
+
+  var hoverClippingNavigation = new _HoverClippingNavigation.default();
+  hoverClippingNavigation.init();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":4,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":5,"./examples/PanningGallery/PanningGallery":6,"./examples/ScrollingMarquee/ScrollingMarquee":7,"./examples/TemplateExample/TemplateComponent":8}]},{},[9])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":4,"./examples/HoverClippingNavigation/HoverClippingNavigation":5,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":6,"./examples/PanningGallery/PanningGallery":7,"./examples/ScrollingMarquee/ScrollingMarquee":8,"./examples/TemplateExample/TemplateComponent":9}]},{},[10])
 
 //# sourceMappingURL=bundle.js.map

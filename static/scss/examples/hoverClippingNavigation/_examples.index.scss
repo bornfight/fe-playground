@@ -1,0 +1,41 @@
+.e-clipping-nav-wrapper {
+    background-color: $black-90;
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.e-clipping-nav {
+position: relative;
+    ul {
+        margin: 0;
+        list-style-type: none;
+        font-family: "Arial Black";
+        font-size: 50px;
+        line-height: 1;
+        font-weight: 900;
+        text-decoration: uppercase;
+
+        li {
+            cursor: pointer;
+            height: 60px;
+            padding: 5px 0;
+        }
+    }
+
+    &__main {
+        color: transparent;
+        -webkit-text-stroke: 1px $white;
+    }
+
+    &__clipping {
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        height: 60px;
+        color: $white;
+    }
+}
