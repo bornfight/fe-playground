@@ -695,6 +695,10 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   padding-left: 8.33333%;
   padding-right: 8.33333%; }
 
+.o-container--wide {
+  padding-left: 20px;
+  padding-right: 20px; }
+
 .o-footer {
   padding: 20px 0;
   position: fixed;
@@ -1581,6 +1585,16 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   overflow: hidden;
   height: 60px;
   color: #ffffff; }
+
+.letters {
+  display: block;
+  width: 100%; }
+
+.letters--alt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  mix-blend-mode: difference; }
 
 /**
  * Components
