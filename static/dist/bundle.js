@@ -6885,10 +6885,11 @@ var Studio = /*#__PURE__*/function () {
         paused: true
       });
 
-      var duration = 0.01;
+      var duration = 0.1;
       var each = 0.15;
       studioTimeline.add("start").to(this.lettersAlt, {
         autoAlpha: 1,
+        fill: "cyan",
         duration: duration,
         stagger: {
           from: "random",
@@ -6898,6 +6899,7 @@ var Studio = /*#__PURE__*/function () {
         autoAlpha: 0,
         duration: duration,
         stagger: {
+          grid: [3, 6],
           from: "random",
           each: each
         }

@@ -57,7 +57,7 @@ export default class Studio {
             paused: true,
         });
 
-        const duration = 0.01;
+        const duration = 0.1;
         const each = 0.15;
 
         studioTimeline
@@ -66,6 +66,7 @@ export default class Studio {
                 this.lettersAlt,
                 {
                     autoAlpha: 1,
+                    fill: "cyan",
                     duration: duration,
                     stagger: {
                         from: "random",
@@ -80,6 +81,7 @@ export default class Studio {
                     autoAlpha: 0,
                     duration: duration,
                     stagger: {
+                        grid: [3, 6],
                         from: "random",
                         each: each,
                     },
