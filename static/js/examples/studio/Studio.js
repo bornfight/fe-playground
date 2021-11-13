@@ -14,6 +14,8 @@ export default class Studio {
             studio: ".js-studio",
             letter: ".js-letter-initial",
             letterAlt: ".js-letter-alt",
+            trailing: ".js-trailing",
+            trailingImage: ".js-trailing-image",
         };
 
         /**
@@ -32,17 +34,32 @@ export default class Studio {
          * @type {NodeListOf<Element>}
          */
         this.lettersAlt = document.querySelectorAll(this.DOM.letterAlt);
+
+        //trailing
+        /**
+         *
+         * @type {Element}
+         */
+        this.trailing = document.querySelector(this.DOM.trailing);
+
+        /**
+         *
+         * @type {NodeListOf<Element>}
+         */
+        this.trailingImages = document.querySelectorAll(this.DOM.trailingImage);
     }
 
     /**
      * Init
      */
     init() {
-        if (this.studio === null) {
-            return;
+        if (this.studio) {
+            this.studioHover();
         }
 
-        this.studioHover();
+        if (this.trailing) {
+            this.trailingImage();
+        }
     }
 
     /**
@@ -95,6 +112,16 @@ export default class Studio {
 
         this.studio.addEventListener("mouseleave", () => {
             studioTimeline.timeScale(2).reverse();
+        });
+    }
+
+    trailingImage() {
+        document.addEventListener("mousemove", (e) => {
+            gsap.to(this.DOM.trailingImage, {
+                x: e.clientX,
+                y: e.clientY,
+                stagger: 0.075,
+            });
         });
     }
 }

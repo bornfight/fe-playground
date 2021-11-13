@@ -19,6 +19,11 @@
         background-image: url("../images/studio/noise.png");
         animation: noise 1s steps(2) infinite;
     }
+
+    //modifiers
+    &--trailing {
+        align-items: flex-start;
+    }
 }
 
 @keyframes noise {
@@ -69,6 +74,14 @@
 
 .c-studio {
     position: relative;
+
+    //modifiers
+    &--trailing {
+
+        .letter-alt {
+            display: none;
+        }
+    }
 }
 
 .letters {
@@ -80,5 +93,61 @@
         top: 0;
         left: 0;
         mix-blend-mode: difference;
+    }
+}
+
+.c-trailing {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    $scale-decrease-index: 1;
+
+    i {
+        display: block;
+        width: get-vw(934px * $scale-decrease-index);
+        height: get-vw(317px * $scale-decrease-index);
+        position: absolute;
+        pointer-events: none;
+        z-index: 6;
+        mix-blend-mode: difference;
+
+        &:nth-child(2) {
+            opacity: 0.75;
+            z-index: 5;
+        }
+
+        &:nth-child(3) {
+            opacity: 0.5;
+            z-index: 4;
+        }
+
+        &:nth-child(4) {
+            opacity: 0.25;
+            z-index: 3;
+        }
+
+        &:nth-child(5) {
+            opacity: 0.1;
+            z-index: 2;
+        }
+
+        &:nth-child(6) {
+            opacity: 0.05;
+            z-index: 1;
+        }
+    }
+
+    img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: translate(-50%, -50%);
+        object-fit: cover;
     }
 }

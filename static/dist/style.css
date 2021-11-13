@@ -1612,6 +1612,11 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   -webkit-animation: noise 1s steps(2) infinite;
           animation: noise 1s steps(2) infinite; }
 
+.c-studio-wrapper--trailing {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
 @-webkit-keyframes noise {
   0% {
     -webkit-transform: translate3d(0, 9rem, 0);
@@ -1685,6 +1690,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .c-studio {
   position: relative; }
 
+.c-studio--trailing .letter-alt {
+  display: none; }
+
 .letters {
   display: block;
   width: 100%; }
@@ -1694,6 +1702,54 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   top: 0;
   left: 0;
   mix-blend-mode: difference; }
+
+.c-trailing {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0; }
+
+.c-trailing i {
+  display: block;
+  width: 64.86111vw;
+  height: 22.01389vw;
+  position: absolute;
+  pointer-events: none;
+  z-index: 6;
+  mix-blend-mode: difference; }
+
+.c-trailing i:nth-child(2) {
+  opacity: 0.75;
+  z-index: 5; }
+
+.c-trailing i:nth-child(3) {
+  opacity: 0.5;
+  z-index: 4; }
+
+.c-trailing i:nth-child(4) {
+  opacity: 0.25;
+  z-index: 3; }
+
+.c-trailing i:nth-child(5) {
+  opacity: 0.1;
+  z-index: 2; }
+
+.c-trailing i:nth-child(6) {
+  opacity: 0.05;
+  z-index: 1; }
+
+.c-trailing img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  -o-object-fit: cover;
+     object-fit: cover; }
 
 /**
  * Components

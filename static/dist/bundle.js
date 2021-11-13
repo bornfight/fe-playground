@@ -6835,7 +6835,9 @@ var Studio = /*#__PURE__*/function () {
     this.DOM = {
       studio: ".js-studio",
       letter: ".js-letter-initial",
-      letterAlt: ".js-letter-alt"
+      letterAlt: ".js-letter-alt",
+      trailing: ".js-trailing",
+      trailingImage: ".js-trailing-image"
     };
     /**
      *
@@ -6854,7 +6856,20 @@ var Studio = /*#__PURE__*/function () {
      * @type {NodeListOf<Element>}
      */
 
-    this.lettersAlt = document.querySelectorAll(this.DOM.letterAlt);
+    this.lettersAlt = document.querySelectorAll(this.DOM.letterAlt); //trailing
+
+    /**
+     *
+     * @type {Element}
+     */
+
+    this.trailing = document.querySelector(this.DOM.trailing);
+    /**
+     *
+     * @type {NodeListOf<Element>}
+     */
+
+    this.trailingImages = document.querySelectorAll(this.DOM.trailingImage);
   }
   /**
    * Init
@@ -6864,11 +6879,13 @@ var Studio = /*#__PURE__*/function () {
   _createClass(Studio, [{
     key: "init",
     value: function init() {
-      if (this.studio === null) {
-        return;
+      if (this.studio) {
+        this.studioHover();
       }
 
-      this.studioHover();
+      if (this.trailing) {
+        this.trailingImage();
+      }
     }
     /**
      *
@@ -6909,6 +6926,19 @@ var Studio = /*#__PURE__*/function () {
       });
       this.studio.addEventListener("mouseleave", function () {
         studioTimeline.timeScale(2).reverse();
+      });
+    }
+  }, {
+    key: "trailingImage",
+    value: function trailingImage() {
+      var _this = this;
+
+      document.addEventListener("mousemove", function (e) {
+        _gsap.gsap.to(_this.DOM.trailingImage, {
+          x: e.clientX,
+          y: e.clientY,
+          stagger: 0.075
+        });
       });
     }
   }]);
