@@ -17,6 +17,7 @@ import ScrollingMarquee from "./examples/ScrollingMarquee/ScrollingMarquee";
 import ThreeScrollytelling from "./examples/3dScrollytelling/ThreeScrollytelling";
 import PanningGallery from "./examples/PanningGallery/PanningGallery";
 import HoverClippingNavigation from "./examples/HoverClippingNavigation/HoverClippingNavigation";
+import Studio from "./examples/studio/Studio";
 
 /**
  * Check if document is ready cross-browser
@@ -112,4 +113,11 @@ ready(() => {
      */
     const hoverClippingNavigation = new HoverClippingNavigation();
     hoverClippingNavigation.init();
+
+    /**
+     * Studio component
+     * @type {Studio}
+     */
+    const studio = new Studio();
+    studio.init();
 });
