@@ -1617,6 +1617,15 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
       -ms-flex-align: start;
           align-items: flex-start; }
 
+.c-studio-wrapper--trailing-alt {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  background-color: #fafafa; }
+
+.c-studio-wrapper--trailing-alt:before {
+  display: none; }
+
 @-webkit-keyframes noise {
   0% {
     -webkit-transform: translate3d(0, 9rem, 0);
@@ -1750,6 +1759,11 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
           transform: translate(-50%, -50%);
   -o-object-fit: cover;
      object-fit: cover; }
+
+.c-trailing--alt i {
+  width: 78.33333vw;
+  height: 45.83333vw;
+  mix-blend-mode: normal; }
 
 /**
  * Components

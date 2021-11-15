@@ -24,6 +24,15 @@
     &--trailing {
         align-items: flex-start;
     }
+
+    &--trailing-alt {
+        align-items: flex-start;
+        background-color: #fafafa;
+
+        &:before {
+            display: none;
+        }
+    }
 }
 
 @keyframes noise {
@@ -149,5 +158,16 @@
         height: 100%;
         transform: translate(-50%, -50%);
         object-fit: cover;
+    }
+
+    &--alt {
+
+        $scale-decrease-index--alt: 4;
+
+        i {
+            width: get-vw(282px * $scale-decrease-index--alt);
+            height: get-vw(165px * $scale-decrease-index--alt);
+            mix-blend-mode: normal;
+        }
     }
 }
