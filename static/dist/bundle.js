@@ -6454,6 +6454,7 @@ var ImageSequence = /*#__PURE__*/function () {
       var _this5 = this;
 
       var starting;
+      var ending = "bottom bottom";
 
       if (i === 0) {
         starting = "top top";
@@ -6464,7 +6465,7 @@ var ImageSequence = /*#__PURE__*/function () {
       _ScrollTrigger.ScrollTrigger.create({
         trigger: step,
         start: starting,
-        end: "bottom bottom",
+        end: ending,
         onUpdate: function onUpdate(self) {
           var progress = 0;
 

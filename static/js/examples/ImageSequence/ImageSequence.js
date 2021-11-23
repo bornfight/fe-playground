@@ -185,6 +185,7 @@ export default class ImageSequence {
 
     scrollInteractions(inc, scrollDirection, i, step) {
         let starting;
+        let ending = "bottom bottom";
 
         if (i === 0) {
             starting = "top top";
@@ -195,7 +196,7 @@ export default class ImageSequence {
         ScrollTrigger.create({
             trigger: step,
             start: starting,
-            end: "bottom bottom",
+            end: ending,
             onUpdate: (self) => {
                 let progress = 0;
                 if (this.bgVideoSegments[this.sections.length] != null) {
@@ -206,7 +207,6 @@ export default class ImageSequence {
                 }
 
                 this.frameIndex = Math.floor(progress * this.frameCount);
-
                 this.updateImage(this.frameIndex);
             },
         });
