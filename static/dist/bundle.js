@@ -6443,8 +6443,7 @@ var ImageSequence = /*#__PURE__*/function () {
       var scrollDirection = 1;
       this.sections.forEach(function (step, i) {
         var segmentLength = _this4.bgVideoSegments[i + 1] - _this4.bgVideoSegments[i];
-        var inc = segmentLength / _this4.bgVideoSegments[_this4.sections.length];
-        step.style.height = segmentLength * 100 + "vh";
+        var inc = segmentLength / _this4.bgVideoSegments[_this4.sections.length]; // step.style.height = segmentLength * 100 + "vh";
 
         _this4.scrollInteractions(inc, scrollDirection, i, step);
       });

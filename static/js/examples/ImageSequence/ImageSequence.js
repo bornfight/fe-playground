@@ -177,7 +177,7 @@ export default class ImageSequence {
             const inc =
                 segmentLength / this.bgVideoSegments[this.sections.length];
 
-            step.style.height = segmentLength * 100 + "vh";
+            // step.style.height = segmentLength * 100 + "vh";
 
             this.scrollInteractions(inc, scrollDirection, i, step);
         });
