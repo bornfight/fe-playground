@@ -1,0 +1,60 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FE Playground - Image Sequence</title>
+    <link rel="stylesheet" href="../../static/dist/style.css">
+</head>
+<body>
+
+<script>
+    window.sequence = "sequence/";
+
+    window.imgArray = [];
+
+    for (let i = 1; i < 500; i++) {
+        const number = (i < 10 ? '00' : i < 100 ? '0' : '') + i;
+        window.imgArray.push({url: `sequence/${number}.jpg`});
+    }
+</script>
+
+<div class="c-image-sequence js-image-sequence-wrapper">
+    <div class="c-image-sequence__background">
+        <!-- data-desktop-images & data-mobile-images - images path -->
+        <canvas data-page="<?= $page ?>"
+                data-desktop-images="sequence/"
+                data-mobile-images="sequence/"
+                class="js-image-sequence"></canvas>
+    </div>
+
+    <section class="c-image-sequence__section js-sequence-step" data-frame-second="0">
+        <h3>
+            section 1
+        </h3>
+    </section>
+
+    <section class="c-image-sequence__section js-sequence-step" data-frame-second="8">
+        <h3>
+            section 2
+        </h3>
+    </section>
+
+    <section class="c-image-sequence__section js-sequence-step" data-frame-second="16">
+        <h3>
+            section 3
+        </h3>
+    </section>
+
+    <section class="c-image-sequence__section js-sequence-step" data-frame-second="20">
+        <h3>
+            section 4
+        </h3>
+    </section>
+</div>
+
+<script type="text/javascript" src="../../static/dist/vendor.js"></script>
+<script type="text/javascript" src="../../static/dist/bundle.js"></script>
+</body>
+</html>

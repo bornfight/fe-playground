@@ -29,6 +29,7 @@
     "dependencies": {
         "@bornfight/b-reset": "^1.0.8",
         "gsap": "npm:@gsap/shockingly@^3.8.0",
+        "is_js": "^0.9.0",
         "poly-fluid-sizing": "^1.1.0",
         "three": "0.120.1"
     },

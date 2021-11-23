@@ -1583,6 +1583,49 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   color: #ffffff; }
 
 /**
+ * 3d Scrollytelling
+ */
+.c-image-sequence {
+  position: relative; }
+
+.c-image-sequence__background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: red; }
+
+.c-image-sequence__background canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%; }
+
+.c-image-sequence__section {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  z-index: 1;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-size: 3rem; }
+
+/**
  * Components
  */
 .c-footer .o-container {

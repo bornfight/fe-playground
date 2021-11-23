@@ -2729,10 +2729,10 @@ exports.default = exports.ScrollTrigger = void 0;
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 /*!
- * ScrollTrigger 3.5.1
+ * ScrollTrigger 3.8.0
  * https://greensock.com
  *
- * @license Copyright 2008-2020, GreenSock. All rights reserved.
+ * @license Copyright 2008-2021, GreenSock. All rights reserved.
  * Subject to the terms at https://greensock.com/standard-license or for
  * Club GreenSock members, the agreement issued with that membership.
  * @author: Jack Doyle, jack@greensock.com
@@ -2761,6 +2761,8 @@ var gsap,
     _prevHeight,
     _autoRefresh,
     _sort,
+    _suppressOverwrites,
+    _ignoreResize,
     _limitCallbacks,
     // if true, we'll only trigger callbacks if the active state toggles, so if you scroll immediately past both the start and end positions of a ScrollTrigger (thus inactive to inactive), neither its onEnter nor onLeave will be called. This is useful during startup.
 _startup = 1,
@@ -2772,6 +2774,12 @@ _startup = 1,
     _enabled = 1,
     _passThrough = function _passThrough(v) {
   return v;
+},
+    _getTarget = function _getTarget(t) {
+  return _toArray(t)[0] || (_isString(t) ? console.warn("Element not found:", t) : null);
+},
+    _round = function _round(value) {
+  return Math.round(value * 100000) / 100000 || 0;
 },
     _windowExists = function _windowExists() {
   return typeof window !== "undefined";
@@ -2787,7 +2795,7 @@ _startup = 1,
 },
     _getScrollFunc = function _getScrollFunc(element, _ref) {
   var s = _ref.s,
-      sc = _ref.sc;
+      sc = _ref.sc; // we store the scroller functions in a alternating sequenced Array like [element, verticalScrollFunc, horizontalScrollFunc, ...] so that we can minimize memory, maximize performance, and we also record the last position as a ".rec" property in order to revert to that after refreshing to ensure things don't shift around.
 
   var i = _scrollers.indexOf(element),
       offset = sc === _vertical.sc ? 1 : 2;
@@ -2826,7 +2834,7 @@ _startup = 1,
       d2 = _ref3.d2,
       d = _ref3.d,
       a = _ref3.a;
-  return (s = "scroll" + d2) && (a = _getProxyProp(element, s)) ? a() - _getBoundsFunc(element)()[d] : _isViewport(element) ? Math.max(_docEl[s], _body[s]) - (_win["inner" + d2] || _docEl["client" + d2] || _body["client" + d2]) : element[s] - element["offset" + d2];
+  return (s = "scroll" + d2) && (a = _getProxyProp(element, s)) ? a() - _getBoundsFunc(element)()[d] : _isViewport(element) ? (_body[s] || _docEl[s]) - (_win["inner" + d2] || _docEl["client" + d2] || _body["client" + d2]) : element[s] - element["offset" + d2];
 },
     _iterateAutoRefresh = function _iterateAutoRefresh(func, events) {
   for (var i = 0; i < _autoRefresh.length; i += 3) {
@@ -2859,6 +2867,13 @@ _startup = 1,
       _callIfFunc(result2);
     };
   };
+},
+    _endAnimation = function _endAnimation(animation, reversed, pause) {
+  return animation && animation.progress(reversed ? 0 : 1) && pause && animation.pause();
+},
+    _callback = function _callback(self, func) {
+  var result = func(self);
+  result && result.totalTime && (self.callbackAnimation = result);
 },
     _abs = Math.abs,
     _scrollLeft = "scrollLeft",
@@ -2909,18 +2924,19 @@ _startup = 1,
   return _win.getComputedStyle(element);
 },
     _makePositionable = function _makePositionable(element) {
-  return element.style.position = _getComputedStyle(element).position === "absolute" ? "absolute" : "relative";
+  // if the element already has position: absolute or fixed, leave that, otherwise make it position: relative
+  var position = _getComputedStyle(element).position;
+
+  element.style.position = position === "absolute" || position === "fixed" ? position : "relative";
 },
-    // if the element already has position: absolute, leave that, otherwise make it position: relative
-_setDefaults = function _setDefaults(obj, defaults) {
+    _setDefaults = function _setDefaults(obj, defaults) {
   for (var p in defaults) {
     p in obj || (obj[p] = defaults[p]);
   }
 
   return obj;
 },
-    //_isInViewport = element => (element = _getBounds(element)) && !(element.top > (_win.innerHeight || _docEl.clientHeight) || element.bottom < 0 || element.left > (_win.innerWidth || _docEl.clientWidth) || element.right < 0) && element,
-_getBounds = function _getBounds(element, withoutTransforms) {
+    _getBounds = function _getBounds(element, withoutTransforms) {
   var tween = withoutTransforms && _getComputedStyle(element)[_transformProp] !== "matrix(1, 0, 0, 1, 0, 0)" && gsap.to(element, {
     x: 0,
     y: 0,
@@ -2941,18 +2957,65 @@ _getBounds = function _getBounds(element, withoutTransforms) {
   var d2 = _ref4.d2;
   return element["offset" + d2] || element["client" + d2] || 0;
 },
-    _getLabels = function _getLabels(animation) {
-  return function (value) {
-    var a = [],
-        labels = animation.labels,
-        duration = animation.duration(),
-        p;
+    _getLabelRatioArray = function _getLabelRatioArray(timeline) {
+  var a = [],
+      labels = timeline.labels,
+      duration = timeline.duration(),
+      p;
 
-    for (p in labels) {
-      a.push(labels[p] / duration);
+  for (p in labels) {
+    a.push(labels[p] / duration);
+  }
+
+  return a;
+},
+    _getClosestLabel = function _getClosestLabel(animation) {
+  return function (value) {
+    return gsap.utils.snap(_getLabelRatioArray(animation), value);
+  };
+},
+    _snapDirectional = function _snapDirectional(snapIncrementOrArray) {
+  var snap = gsap.utils.snap(snapIncrementOrArray),
+      a = Array.isArray(snapIncrementOrArray) && snapIncrementOrArray.slice(0).sort(function (a, b) {
+    return a - b;
+  });
+  return a ? function (value, direction) {
+    var i;
+
+    if (!direction) {
+      return snap(value);
     }
 
-    return gsap.utils.snap(a, value);
+    if (direction > 0) {
+      value -= 1e-4; // to avoid rounding errors. If we're too strict, it might snap forward, then immediately again, and again.
+
+      for (i = 0; i < a.length; i++) {
+        if (a[i] >= value) {
+          return a[i];
+        }
+      }
+
+      return a[i - 1];
+    } else {
+      i = a.length;
+      value += 1e-4;
+
+      while (i--) {
+        if (a[i] <= value) {
+          return a[i];
+        }
+      }
+    }
+
+    return a[0];
+  } : function (value, direction) {
+    var snapped = snap(value);
+    return !direction || Math.abs(snapped - value) < 0.001 || snapped - value < 0 === direction < 0 ? snapped : snap(direction < 0 ? value - snapIncrementOrArray : value + snapIncrementOrArray);
+  };
+},
+    _getLabelAtDirection = function _getLabelAtDirection(timeline) {
+  return function (value, st) {
+    return _snapDirectional(_getLabelRatioArray(timeline))(value, st.direction);
   };
 },
     _multiListener = function _multiListener(func, element, types, callback) {
@@ -2991,7 +3054,7 @@ _getBounds = function _getBounds(element, withoutTransforms) {
     var eqIndex = value.indexOf("="),
         relative = ~eqIndex ? +(value.charAt(eqIndex - 1) + 1) * parseFloat(value.substr(eqIndex + 1)) : 0;
 
-    if (relative) {
+    if (~eqIndex) {
       value.indexOf("%") > eqIndex && (relative *= size / 100);
       value = value.substr(0, eqIndex - 1);
     }
@@ -3001,7 +3064,7 @@ _getBounds = function _getBounds(element, withoutTransforms) {
 
   return value;
 },
-    _createMarker = function _createMarker(type, name, container, direction, _ref5, offset, matchWidthEl) {
+    _createMarker = function _createMarker(type, name, container, direction, _ref5, offset, matchWidthEl, containerAnimation) {
   var startColor = _ref5.startColor,
       endColor = _ref5.endColor,
       fontSize = _ref5.fontSize,
@@ -3016,14 +3079,14 @@ _getBounds = function _getBounds(element, withoutTransforms) {
       color = isStart ? startColor : endColor,
       css = "border-color:" + color + ";font-size:" + fontSize + ";color:" + color + ";font-weight:" + fontWeight + ";pointer-events:none;white-space:nowrap;font-family:sans-serif,Arial;z-index:1000;padding:4px 8px;border-width:0;border-style:solid;";
 
-  css += "position:" + (isScroller && useFixedPosition ? "fixed;" : "absolute;");
-  (isScroller || !useFixedPosition) && (css += (direction === _vertical ? _right : _bottom) + ":" + (offset + parseFloat(indent)) + "px;");
+  css += "position:" + ((isScroller || containerAnimation) && useFixedPosition ? "fixed;" : "absolute;");
+  (isScroller || containerAnimation || !useFixedPosition) && (css += (direction === _vertical ? _right : _bottom) + ":" + (offset + parseFloat(indent)) + "px;");
   matchWidthEl && (css += "box-sizing:border-box;text-align:left;width:" + matchWidthEl.offsetWidth + "px;");
   e._isStart = isStart;
-  e.setAttribute("class", "gsap-marker-" + type);
+  e.setAttribute("class", "gsap-marker-" + type + (name ? " marker-" + name : ""));
   e.style.cssText = css;
   e.innerText = name || name === 0 ? type + "-" + name : type;
-  parent.insertBefore(e, parent.children[0]);
+  parent.children[0] ? parent.insertBefore(e, parent.children[0]) : parent.appendChild(e);
   e._offset = e["offset" + direction.op.d2];
 
   _positionMarker(e, 0, direction, isStart);
@@ -3038,26 +3101,31 @@ _getBounds = function _getBounds(element, withoutTransforms) {
       oppositeSide = direction[flipped ? "p2" : "os2"];
   marker._isFlipped = flipped;
   vars[direction.a + "Percent"] = flipped ? -100 : 0;
-  vars[direction.a] = flipped ? 1 : 0;
+  vars[direction.a] = flipped ? "1px" : 0;
   vars["border" + side + _Width] = 1;
   vars["border" + oppositeSide + _Width] = 0;
-  vars[direction.p] = start;
+  vars[direction.p] = start + "px";
   gsap.set(marker, vars);
 },
     _triggers = [],
     _ids = {},
     _sync = function _sync() {
-  return _request || (_request = _raf(_updateAll));
+  return _getTime() - _lastScrollTime > 20 && _updateAll();
 },
     _onScroll = function _onScroll() {
-  if (!_request) {
-    _request = _raf(_updateAll);
+  var time = _getTime();
+
+  if (_lastScrollTime !== time) {
+    _updateAll();
+
     _lastScrollTime || _dispatch("scrollStart");
-    _lastScrollTime = _getTime();
+    _lastScrollTime = time;
+  } else if (!_request) {
+    _request = _raf(_updateAll);
   }
 },
     _onResize = function _onResize() {
-  return !_refreshing && _resizeDelay.restart(true);
+  return !_refreshing && !_ignoreResize && !_doc.fullscreenElement && _resizeDelay.restart(true);
 },
     // ignore resizes triggered by refresh()
 _listeners = {},
@@ -3095,9 +3163,7 @@ _lastMediaTick,
     }
 
     _creatingMedia = 0;
-
-    _refreshAll(0, 1);
-
+    _coreInitted && _refreshAll(0, 1);
     _lastMediaTick = tick;
 
     _dispatch("matchMedia");
@@ -3114,10 +3180,11 @@ _lastMediaTick,
     _savedStyles = [],
     // when ScrollTrigger.saveStyles() is called, the inline styles are recorded in this Array in a sequential format like [element, cssText, gsCache, media]. This keeps it very memory-efficient and fast to iterate through.
 _revertRecorded = function _revertRecorded(media) {
-  for (var i = 0; i < _savedStyles.length; i += 4) {
-    if (!media || _savedStyles[i + 3] === media) {
+  for (var i = 0; i < _savedStyles.length; i += 5) {
+    if (!media || _savedStyles[i + 4] === media) {
       _savedStyles[i].style.cssText = _savedStyles[i + 1];
-      _savedStyles[i + 2].uncache = 1;
+      _savedStyles[i].getBBox && _savedStyles[i].setAttribute("transform", _savedStyles[i + 2] || "");
+      _savedStyles[i + 3].uncache = 1;
     }
   }
 },
@@ -3131,17 +3198,21 @@ _revertRecorded = function _revertRecorded(media) {
       if (kill) {
         trigger.kill(1);
       } else {
-        trigger.scroll.rec || (trigger.scroll.rec = trigger.scroll()); // record the scroll positions so that in each refresh() we can ensure that it doesn't shift. Remember, pinning can make things change around, especially if the same element is pinned multiple times. If one was already recorded, don't re-record because unpinning may have occurred and made it shorter.
-
         trigger.revert();
       }
     }
   }
 
-  _revertRecorded(media);
-
+  media && _revertRecorded(media);
   media || _dispatch("revert");
 },
+    _clearScrollMemory = function _clearScrollMemory() {
+  return _scrollers.forEach(function (obj) {
+    return typeof obj === "function" && (obj.rec = 0);
+  });
+},
+    // zero-out all the recorded scroll positions. Don't use _triggers because if, for example, .matchMedia() is used to create some ScrollTriggers and then the user resizes and it removes ALL ScrollTriggers, and then go back to a size where there are ScrollTriggers, it would have kept the position(s) saved from the initial state.
+_refreshingAll,
     _refreshAll = function _refreshAll(force, skipRevert) {
   if (_lastScrollTime && !force) {
     _addListener(ScrollTrigger, "scrollEnd", _softRefresh);
@@ -3149,73 +3220,80 @@ _revertRecorded = function _revertRecorded(media) {
     return;
   }
 
+  _refreshingAll = true;
+
   var refreshInits = _dispatch("refreshInit");
 
   _sort && ScrollTrigger.sort();
   skipRevert || _revertAll();
 
-  for (_i = 0; _i < _triggers.length; _i++) {
-    _triggers[_i].refresh();
-  }
+  _triggers.forEach(function (t) {
+    return t.refresh();
+  }); // don't loop with _i because during a refresh() someone could call ScrollTrigger.update() which would iterate through _i resulting in a skip.
+
 
   refreshInits.forEach(function (result) {
     return result && result.render && result.render(-1);
   }); // if the onRefreshInit() returns an animation (typically a gsap.set()), revert it. This makes it easy to put things in a certain spot before refreshing for measurement purposes, and then put things back.
 
-  _i = _triggers.length;
-
-  while (_i--) {
-    _triggers[_i].scroll.rec = 0;
-  }
+  _clearScrollMemory();
 
   _resizeDelay.pause();
+
+  _refreshingAll = false;
 
   _dispatch("refresh");
 },
     _lastScroll = 0,
     _direction = 1,
     _updateAll = function _updateAll() {
-  var l = _triggers.length,
-      time = _getTime(),
-      recordVelocity = time - _time1 >= 50,
-      scroll = l && _triggers[0].scroll();
+  if (!_refreshingAll) {
+    var l = _triggers.length,
+        time = _getTime(),
+        recordVelocity = time - _time1 >= 50,
+        scroll = l && _triggers[0].scroll();
 
-  _direction = _lastScroll > scroll ? -1 : 1;
-  _lastScroll = scroll;
+    _direction = _lastScroll > scroll ? -1 : 1;
+    _lastScroll = scroll;
 
-  if (recordVelocity) {
-    if (_lastScrollTime && !_pointerIsDown && time - _lastScrollTime > 200) {
-      _lastScrollTime = 0;
+    if (recordVelocity) {
+      if (_lastScrollTime && !_pointerIsDown && time - _lastScrollTime > 200) {
+        _lastScrollTime = 0;
 
-      _dispatch("scrollEnd");
+        _dispatch("scrollEnd");
+      }
+
+      _time2 = _time1;
+      _time1 = time;
     }
 
-    _time2 = _time1;
-    _time1 = time;
+    if (_direction < 0) {
+      _i = l;
+
+      while (_i-- > 0) {
+        _triggers[_i] && _triggers[_i].update(0, recordVelocity);
+      }
+
+      _direction = 1;
+    } else {
+      for (_i = 0; _i < l; _i++) {
+        _triggers[_i] && _triggers[_i].update(0, recordVelocity);
+      }
+    }
+
+    _request = 0;
   }
-
-  if (_direction < 0) {
-    _i = l;
-
-    while (_i--) {
-      _triggers[_i] && _triggers[_i].update(0, recordVelocity);
-    }
-
-    _direction = 1;
-  } else {
-    for (_i = 0; _i < l; _i++) {
-      _triggers[_i] && _triggers[_i].update(0, recordVelocity);
-    }
-  }
-
-  _request = 0;
 },
-    _propNamesToCopy = [_left, _top, _bottom, _right, _margin + _Bottom, _margin + _Right, _margin + _Top, _margin + _Left, "display", "flexShrink", "float"],
+    _propNamesToCopy = [_left, _top, _bottom, _right, _margin + _Bottom, _margin + _Right, _margin + _Top, _margin + _Left, "display", "flexShrink", "float", "zIndex", "grid-column-start", "grid-column-end", "grid-row-start", "grid-row-end", "grid-area", "justify-self", "align-self", "place-self"],
     _stateProps = _propNamesToCopy.concat([_width, _height, "boxSizing", "max" + _Width, "max" + _Height, "position", _margin, _padding, _padding + _Top, _padding + _Right, _padding + _Bottom, _padding + _Left]),
     _swapPinOut = function _swapPinOut(pin, spacer, state) {
   _setState(state);
 
-  if (pin.parentNode === spacer) {
+  var cache = pin._gsap;
+
+  if (cache.spacerIsNative) {
+    _setState(cache.spacerState);
+  } else if (pin.parentNode === spacer) {
     var parent = spacer.parentNode;
 
     if (parent) {
@@ -3262,6 +3340,7 @@ _revertRecorded = function _revertRecorded(media) {
         i = 0,
         p,
         value;
+    (state.t._gsap || gsap.core.getCache(state.t)).uncache = 1; // otherwise transforms may be off
 
     for (; i < l; i += 2) {
       value = state[i + 1];
@@ -3276,7 +3355,7 @@ _revertRecorded = function _revertRecorded(media) {
   }
 },
     _getState = function _getState(element) {
-  // returns an array with alternating values like [property, value, property, value] and a "t" property pointing to the target (element). Makes it fast and cheap.
+  // returns an Array with alternating values like [property, value, property, value] and a "t" property pointing to the target (element). Makes it fast and cheap.
   var l = _stateProps.length,
       style = element.style,
       state = [],
@@ -3308,22 +3387,36 @@ _revertRecorded = function _revertRecorded(media) {
   left: 0,
   top: 0
 },
-    _parsePosition = function _parsePosition(value, trigger, scrollerSize, direction, scroll, marker, markerScroller, self, scrollerBounds, borderWidth, useFixedPosition, scrollerMax) {
+    // // potential future feature (?) Allow users to calculate where a trigger hits (scroll position) like getScrollPosition("#id", "top bottom")
+// _getScrollPosition = (trigger, position, {scroller, containerAnimation, horizontal}) => {
+// 	scroller = _getTarget(scroller || _win);
+// 	let direction = horizontal ? _horizontal : _vertical,
+// 		isViewport = _isViewport(scroller);
+// 	_getSizeFunc(scroller, isViewport, direction);
+// 	return _parsePosition(position, _getTarget(trigger), _getSizeFunc(scroller, isViewport, direction)(), direction, _getScrollFunc(scroller, direction)(), 0, 0, 0, _getOffsetsFunc(scroller, isViewport)(), isViewport ? 0 : parseFloat(_getComputedStyle(scroller)["border" + direction.p2 + _Width]) || 0, 0, containerAnimation ? containerAnimation.duration() : _maxScroll(scroller), containerAnimation);
+// },
+_parsePosition = function _parsePosition(value, trigger, scrollerSize, direction, scroll, marker, markerScroller, self, scrollerBounds, borderWidth, useFixedPosition, scrollerMax, containerAnimation) {
   _isFunction(value) && (value = value(self));
 
   if (_isString(value) && value.substr(0, 3) === "max") {
     value = scrollerMax + (value.charAt(4) === "=" ? _offsetToPx("0" + value.substr(3), scrollerSize) : 0);
   }
 
+  var time = containerAnimation ? containerAnimation.time() : 0,
+      p1,
+      p2,
+      element;
+  containerAnimation && containerAnimation.seek(0);
+
   if (!_isNumber(value)) {
     _isFunction(trigger) && (trigger = trigger(self));
-
-    var element = _toArray(trigger)[0] || _body,
-        bounds = _getBounds(element) || {},
-        offsets = value.split(" "),
+    var offsets = value.split(" "),
+        bounds,
         localOffset,
         globalOffset,
         display;
+    element = _getTarget(trigger) || _body;
+    bounds = _getBounds(element) || {};
 
     if ((!bounds || !bounds.left && !bounds.top) && _getComputedStyle(element).display === "none") {
       // if display is "none", it won't report getBoundingClientRect() properly
@@ -3345,9 +3438,9 @@ _revertRecorded = function _revertRecorded(media) {
   if (marker) {
     var position = value + scrollerSize,
         isStart = marker._isStart;
-    scrollerMax = "scroll" + direction.d2;
+    p1 = "scroll" + direction.d2;
 
-    _positionMarker(marker, position, direction, isStart && position > 20 || !isStart && (useFixedPosition ? Math.max(_body[scrollerMax], _docEl[scrollerMax]) : marker.parentNode[scrollerMax]) <= position + 1);
+    _positionMarker(marker, position, direction, isStart && position > 20 || !isStart && (useFixedPosition ? Math.max(_body[p1], _docEl[p1]) : marker.parentNode[p1]) <= position + 1);
 
     if (useFixedPosition) {
       scrollerBounds = _getBounds(markerScroller);
@@ -3355,9 +3448,18 @@ _revertRecorded = function _revertRecorded(media) {
     }
   }
 
-  return Math.round(value);
+  if (containerAnimation && element) {
+    p1 = _getBounds(element);
+    containerAnimation.seek(scrollerMax);
+    p2 = _getBounds(element);
+    containerAnimation._caScrollDist = p1[direction.p] - p2[direction.p];
+    value = value / containerAnimation._caScrollDist * scrollerMax;
+  }
+
+  containerAnimation && containerAnimation.seek(time);
+  return containerAnimation ? value : Math.round(value);
 },
-    _prefixExp = /(?:webkit|moz|length|cssText)/i,
+    _prefixExp = /(?:webkit|moz|length|cssText|inset)/i,
     _reparent = function _reparent(element, parent, top, left) {
   if (element.parentNode !== parent) {
     var style = element.style,
@@ -3386,7 +3488,13 @@ _revertRecorded = function _revertRecorded(media) {
     parent.appendChild(element);
   }
 },
-    // returns a function that can be used to tween the scroll position in the direction provided, and when doing so it'll add a .tween property to the FUNCTION itself, and remove it when the tween completes or gets killed. This gives us a way to have multiple ScrollTriggers use a central function for any given scroller and see if there's a scroll tween running (which would affect if/how things get updated)
+    // _mergeAnimations = animations => {
+// 	let tl = gsap.timeline({smoothChildTiming: true}).startTime(Math.min(...animations.map(a => a.globalTime(0))));
+// 	animations.forEach(a => {let time = a.totalTime(); tl.add(a); a.totalTime(time); });
+// 	tl.smoothChildTiming = false;
+// 	return tl;
+// },
+// returns a function that can be used to tween the scroll position in the direction provided, and when doing so it'll add a .tween property to the FUNCTION itself, and remove it when the tween completes or gets killed. This gives us a way to have multiple ScrollTriggers use a central function for any given scroller and see if there's a scroll tween running (which would affect if/how things get updated)
 _getTweenCreator = function _getTweenCreator(scroller, direction) {
   var getScroll = _getScrollFunc(scroller, direction),
       prop = "_scroll" + direction.p2,
@@ -3403,10 +3511,10 @@ _getTweenCreator = function _getTweenCreator(scroller, direction) {
     vars.modifiers = modifiers;
 
     modifiers[prop] = function (value) {
-      value = Math.round(getScroll()); // round because in some [very uncommon] Windows environments, it can get reported with decimals even though it was set without.
+      value = _round(getScroll()); // round because in some [very uncommon] Windows environments, it can get reported with decimals even though it was set without.
 
-      if (value !== lastScroll1 && value !== lastScroll2) {
-        // if the user scrolls, kill the tween. iOS Safari intermittently misreports the scroll position, it may be the most recently-set one or the one before that!
+      if (value !== lastScroll1 && value !== lastScroll2 && Math.abs(value - lastScroll1) > 2) {
+        // if the user scrolls, kill the tween. iOS Safari intermittently misreports the scroll position, it may be the most recently-set one or the one before that! When Safari is zoomed (CMD-+), it often misreports as 1 pixel off too! So if we set the scroll position to 125, for example, it'll actually report it as 124.
         tween.kill();
         getTween.tween = 0;
       } else {
@@ -3414,7 +3522,7 @@ _getTweenCreator = function _getTweenCreator(scroller, direction) {
       }
 
       lastScroll2 = lastScroll1;
-      return lastScroll1 = Math.round(value);
+      return lastScroll1 = _round(value);
     };
 
     vars.onComplete = function () {
@@ -3427,6 +3535,12 @@ _getTweenCreator = function _getTweenCreator(scroller, direction) {
   };
 
   scroller[prop] = getScroll;
+  scroller.addEventListener("wheel", function () {
+    return getTween.tween && getTween.tween.kill() && (getTween.tween = 0);
+  }, {
+    passive: true
+  }); // Windows machines handle mousewheel scrolling in chunks (like "3 lines per scroll") meaning the typical strategy for cancelling the scroll isn't as sensitive. It's much more likely to match one of the previous 2 scroll event positions. So we kill any snapping as soon as there's a wheel event.
+
   return getTween;
 };
 
@@ -3441,7 +3555,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
   var _proto = ScrollTrigger.prototype;
 
   _proto.init = function init(vars, animation) {
-    this.progress = 0;
+    this.progress = this.start = 0;
     this.vars && this.kill(1); // in case it's being initted again
 
     if (!_enabled) {
@@ -3453,8 +3567,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
       trigger: vars
     } : vars, _defaults);
 
-    var direction = vars.horizontal ? _horizontal : _vertical,
-        _vars = vars,
+    var _vars = vars,
         onUpdate = _vars.onUpdate,
         toggleClass = _vars.toggleClass,
         id = _vars.id,
@@ -3471,11 +3584,16 @@ var ScrollTrigger = /*#__PURE__*/function () {
         once = _vars.once,
         snap = _vars.snap,
         pinReparent = _vars.pinReparent,
+        pinSpacer = _vars.pinSpacer,
+        containerAnimation = _vars.containerAnimation,
+        fastScrollEnd = _vars.fastScrollEnd,
+        preventOverlaps = _vars.preventOverlaps,
+        direction = vars.horizontal || vars.containerAnimation && vars.horizontal !== false ? _horizontal : _vertical,
         isToggle = !scrub && scrub !== 0,
-        scroller = _toArray(vars.scroller || _win)[0],
+        scroller = _getTarget(vars.scroller || _win),
         scrollerCache = gsap.core.getCache(scroller),
         isViewport = _isViewport(scroller),
-        useFixedPosition = "pinType" in vars ? vars.pinType === "fixed" : isViewport || _getProxyProp(scroller, "pinType") === "fixed",
+        useFixedPosition = ("pinType" in vars ? vars.pinType : _getProxyProp(scroller, "pinType") || isViewport && "fixed") === "fixed",
         callbacks = [vars.onEnter, vars.onLeave, vars.onEnterBack, vars.onLeaveBack],
         toggleActions = isToggle && vars.toggleActions.split(" "),
         markers = "markers" in vars ? vars.markers : _defaults.markers,
@@ -3486,10 +3604,11 @@ var ScrollTrigger = /*#__PURE__*/function () {
     },
         getScrollerSize = _getSizeFunc(scroller, isViewport, direction),
         getScrollerOffsets = _getOffsetsFunc(scroller, isViewport),
+        lastSnap = 0,
+        scrollFunc = _getScrollFunc(scroller, direction),
         tweenTo,
         pinCache,
         snapFunc,
-        isReverted,
         scroll1,
         scroll2,
         start,
@@ -3522,16 +3641,14 @@ var ScrollTrigger = /*#__PURE__*/function () {
         snapDelayedCall,
         prevProgress,
         prevScroll,
-        prevAnimProgress;
+        prevAnimProgress,
+        caMarkerSetter;
 
     self.media = _creatingMedia;
     anticipatePin *= 45;
-
-    _triggers.push(self);
-
     self.scroller = scroller;
-    self.scroll = _getScrollFunc(scroller, direction);
-    scroll1 = self.scroll();
+    self.scroll = containerAnimation ? containerAnimation.time.bind(containerAnimation) : scrollFunc;
+    scroll1 = scrollFunc();
     self.vars = vars;
     animation = animation || vars.animation;
     "refreshPriority" in vars && (_sort = 1);
@@ -3558,47 +3675,68 @@ var ScrollTrigger = /*#__PURE__*/function () {
       id || (id = animation.vars.id);
     }
 
+    _triggers.push(self);
+
     if (snap) {
-      _isObject(snap) || (snap = {
-        snapTo: snap
-      });
-      gsap.set(isViewport ? [_body, _docEl] : scroller, {
+      if (!_isObject(snap) || snap.push) {
+        snap = {
+          snapTo: snap
+        };
+      }
+
+      "scrollBehavior" in _body.style && gsap.set(isViewport ? [_body, _docEl] : scroller, {
         scrollBehavior: "auto"
       }); // smooth scrolling doesn't work with snap.
 
-      snapFunc = _isFunction(snap.snapTo) ? snap.snapTo : snap.snapTo === "labels" ? _getLabels(animation) : gsap.utils.snap(snap.snapTo);
+      snapFunc = _isFunction(snap.snapTo) ? snap.snapTo : snap.snapTo === "labels" ? _getClosestLabel(animation) : snap.snapTo === "labelsDirectional" ? _getLabelAtDirection(animation) : snap.directional !== false ? function (value, st) {
+        return _snapDirectional(snap.snapTo)(value, st.direction);
+      } : gsap.utils.snap(snap.snapTo);
       snapDurClamp = snap.duration || {
         min: 0.1,
         max: 2
       };
       snapDurClamp = _isObject(snapDurClamp) ? _clamp(snapDurClamp.min, snapDurClamp.max) : _clamp(snapDurClamp, snapDurClamp);
       snapDelayedCall = gsap.delayedCall(snap.delay || scrubSmooth / 2 || 0.1, function () {
-        if (Math.abs(self.getVelocity()) < 10 && !_pointerIsDown) {
+        if (Math.abs(self.getVelocity()) < 10 && !_pointerIsDown && lastSnap !== scrollFunc()) {
           var totalProgress = animation && !isToggle ? animation.totalProgress() : self.progress,
               velocity = (totalProgress - snap2) / (_getTime() - _time2) * 1000 || 0,
-              change1 = _abs(velocity / 2) * velocity / 0.185,
-              naturalEnd = totalProgress + change1,
+              change1 = gsap.utils.clamp(-self.progress, 1 - self.progress, _abs(velocity / 2) * velocity / 0.185),
+              naturalEnd = self.progress + (snap.inertia === false ? 0 : change1),
               endValue = _clamp(0, 1, snapFunc(naturalEnd, self)),
-              scroll = self.scroll(),
+              scroll = scrollFunc(),
               endScroll = Math.round(start + endValue * change),
+              _snap = snap,
+              onStart = _snap.onStart,
+              _onInterrupt = _snap.onInterrupt,
+              _onComplete = _snap.onComplete,
               tween = tweenTo.tween;
 
           if (scroll <= end && scroll >= start && endScroll !== scroll) {
-            if (tween && !tween._initted && tween.data <= Math.abs(endScroll - scroll)) {
+            if (tween && !tween._initted && tween.data <= _abs(endScroll - scroll)) {
               // there's an overlapping snap! So we must figure out which one is closer and let that tween live.
               return;
+            }
+
+            if (snap.inertia === false) {
+              change1 = endValue - self.progress;
             }
 
             tweenTo(endScroll, {
               duration: snapDurClamp(_abs(Math.max(_abs(naturalEnd - totalProgress), _abs(endValue - totalProgress)) * 0.185 / velocity / 0.05 || 0)),
               ease: snap.ease || "power3",
-              data: Math.abs(endScroll - scroll),
+              data: _abs(endScroll - scroll),
               // record the distance so that if another snap tween occurs (conflict) we can prioritize the closest snap.
+              onInterrupt: function onInterrupt() {
+                return snapDelayedCall.restart(true) && _onInterrupt && _onInterrupt(self);
+              },
               onComplete: function onComplete() {
+                lastSnap = scrollFunc();
                 snap1 = snap2 = animation && !isToggle ? animation.totalProgress() : self.progress;
                 onSnapComplete && onSnapComplete(self);
+                _onComplete && _onComplete(self);
               }
             }, scroll, change1 * change, endScroll - scroll - change1 * change);
+            onStart && onStart(self, tweenTo.tween);
           }
         } else if (self.isActive) {
           snapDelayedCall.restart(true);
@@ -3607,8 +3745,8 @@ var ScrollTrigger = /*#__PURE__*/function () {
     }
 
     id && (_ids[id] = self);
-    trigger = self.trigger = _toArray(trigger || pin)[0];
-    pin = pin === true ? trigger : _toArray(pin)[0];
+    trigger = self.trigger = _getTarget(trigger || pin);
+    pin = pin === true ? trigger : _getTarget(pin);
     _isString(toggleClass) && (toggleClass = {
       targets: trigger,
       className: toggleClass
@@ -3625,8 +3763,17 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
       if (!pinCache.spacer) {
         // record the spacer and pinOriginalState on the cache in case someone tries pinning the same element with MULTIPLE ScrollTriggers - we don't want to have multiple spacers or record the "original" pin state after it has already been affected by another ScrollTrigger.
-        pinCache.spacer = spacer = _doc.createElement("div");
-        spacer.setAttribute("class", "pin-spacer" + (id ? " pin-spacer-" + id : ""));
+        if (pinSpacer) {
+          pinSpacer = _getTarget(pinSpacer);
+          pinSpacer && !pinSpacer.nodeType && (pinSpacer = pinSpacer.current || pinSpacer.nativeElement); // for React & Angular
+
+          pinCache.spacerIsNative = !!pinSpacer;
+          pinSpacer && (pinCache.spacerState = _getState(pinSpacer));
+        }
+
+        pinCache.spacer = spacer = pinSpacer || _doc.createElement("div");
+        spacer.classList.add("pin-spacer");
+        id && spacer.classList.add("pin-spacer-" + id);
         pinCache.pinState = pinOriginalState = _getState(pin);
       } else {
         pinOriginalState = pinCache.pinState;
@@ -3648,11 +3795,12 @@ var ScrollTrigger = /*#__PURE__*/function () {
       markerStartTrigger = _createMarker("scroller-start", id, scroller, direction, markerVars, 0);
       markerEndTrigger = _createMarker("scroller-end", id, scroller, direction, markerVars, 0, markerStartTrigger);
       offset = markerStartTrigger["offset" + direction.op.d2];
-      markerStart = _createMarker("start", id, scroller, direction, markerVars, offset);
-      markerEnd = _createMarker("end", id, scroller, direction, markerVars, offset);
+      markerStart = _createMarker("start", id, scroller, direction, markerVars, offset, 0, containerAnimation);
+      markerEnd = _createMarker("end", id, scroller, direction, markerVars, offset, 0, containerAnimation);
+      containerAnimation && (caMarkerSetter = gsap.quickSetter([markerStart, markerEnd], direction.a, _px));
 
-      if (!useFixedPosition) {
-        _makePositionable(scroller);
+      if (!useFixedPosition && !(_proxies.length && _getProxyProp(scroller, "fixedMarkers") === true)) {
+        _makePositionable(isViewport ? _body : scroller);
 
         gsap.set([markerStartTrigger, markerEndTrigger], {
           force3D: true
@@ -3662,13 +3810,31 @@ var ScrollTrigger = /*#__PURE__*/function () {
       }
     }
 
+    if (containerAnimation) {
+      var oldOnUpdate = containerAnimation.vars.onUpdate,
+          oldParams = containerAnimation.vars.onUpdateParams;
+      containerAnimation.eventCallback("onUpdate", function () {
+        self.update(0, 0, 1);
+        oldOnUpdate && oldOnUpdate.apply(oldParams || []);
+      });
+    }
+
+    self.previous = function () {
+      return _triggers[_triggers.indexOf(self) - 1];
+    };
+
+    self.next = function () {
+      return _triggers[_triggers.indexOf(self) + 1];
+    };
+
     self.revert = function (revert) {
       var r = revert !== false || !self.enabled,
           prevRefreshing = _refreshing;
 
-      if (r !== isReverted) {
+      if (r !== self.isReverted) {
         if (r) {
-          prevScroll = Math.max(self.scroll(), self.scroll.rec || 0); // record the scroll so we can revert later (repositioning/pinning things can affect scroll position). In the static refresh() method, we first record all the scroll positions as a reference.
+          self.scroll.rec || (self.scroll.rec = scrollFunc());
+          prevScroll = Math.max(scrollFunc(), self.scroll.rec || 0); // record the scroll so we can revert later (repositioning/pinning things can affect scroll position). In the static refresh() method, we first record all the scroll positions as a reference.
 
           prevProgress = self.progress;
           prevAnimProgress = animation && animation.progress();
@@ -3682,12 +3848,12 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
         _refreshing = prevRefreshing;
         pin && (r ? _swapPinOut(pin, spacer, pinOriginalState) : (!pinReparent || !self.isActive) && _swapPinIn(pin, spacer, _getComputedStyle(pin), spacerState));
-        isReverted = r;
+        self.isReverted = r;
       }
     };
 
-    self.refresh = function (soft) {
-      if (_refreshing || !self.enabled) {
+    self.refresh = function (soft, force) {
+      if ((_refreshing || !self.enabled) && !force) {
         return;
       }
 
@@ -3698,18 +3864,19 @@ var ScrollTrigger = /*#__PURE__*/function () {
       }
 
       _refreshing = 1;
-      scrubTween && scrubTween.kill();
+      scrubTween && scrubTween.pause();
       invalidateOnRefresh && animation && animation.progress(0).invalidate();
-      isReverted || self.revert();
+      self.isReverted || self.revert();
 
       var size = getScrollerSize(),
           scrollerBounds = getScrollerOffsets(),
-          max = _maxScroll(scroller, direction),
+          max = containerAnimation ? containerAnimation.duration() : _maxScroll(scroller, direction),
           offset = 0,
           otherPinOffset = 0,
           parsedEnd = vars.end,
           parsedEndTrigger = vars.endTrigger || trigger,
-          parsedStart = vars.start || (vars.start === 0 ? 0 : pin || !trigger ? "0 0" : "0 100%"),
+          parsedStart = vars.start || (vars.start === 0 || !trigger ? 0 : pin ? "0 0" : "0 100%"),
+          pinnedContainer = vars.pinnedContainer && _getTarget(vars.pinnedContainer),
           triggerIndex = trigger && Math.max(0, _triggers.indexOf(self)) || 0,
           i = triggerIndex,
           cs,
@@ -3719,15 +3886,27 @@ var ScrollTrigger = /*#__PURE__*/function () {
           override,
           curTrigger,
           curPin,
-          oppositeScroll;
+          oppositeScroll,
+          initted,
+          revertedPins;
 
       while (i--) {
         // user might try to pin the same element more than once, so we must find any prior triggers with the same pin, revert them, and determine how long they're pinning so that we can offset things appropriately. Make sure we revert from last to first so that things "rewind" properly.
-        curPin = _triggers[i].pin;
-        curPin && (curPin === trigger || curPin === pin) && _triggers[i].revert();
+        curTrigger = _triggers[i];
+        curTrigger.end || curTrigger.refresh(0, 1) || (_refreshing = 1); // if it's a timeline-based trigger that hasn't been fully initialized yet because it's waiting for 1 tick, just force the refresh() here, otherwise if it contains a pin that's supposed to affect other ScrollTriggers further down the page, they won't be adjusted properly.
+
+        curPin = curTrigger.pin;
+
+        if (curPin && (curPin === trigger || curPin === pin) && !curTrigger.isReverted) {
+          revertedPins || (revertedPins = []);
+          revertedPins.unshift(curTrigger); // we'll revert from first to last to make sure things reach their end state properly
+
+          curTrigger.revert();
+        }
       }
 
-      start = _parsePosition(parsedStart, trigger, size, direction, self.scroll(), markerStart, markerStartTrigger, self, scrollerBounds, borderWidth, useFixedPosition, max) || (pin ? -0.001 : 0);
+      _isFunction(parsedStart) && (parsedStart = parsedStart(self));
+      start = _parsePosition(parsedStart, trigger, size, direction, scrollFunc(), markerStart, markerStartTrigger, self, scrollerBounds, borderWidth, useFixedPosition, max, containerAnimation) || (pin ? -0.001 : 0);
       _isFunction(parsedEnd) && (parsedEnd = parsedEnd(self));
 
       if (_isString(parsedEnd) && !parsedEnd.indexOf("+=")) {
@@ -3741,7 +3920,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
         }
       }
 
-      end = Math.max(start, _parsePosition(parsedEnd || (parsedEndTrigger ? "100% 0" : max), parsedEndTrigger, size, direction, self.scroll() + offset, markerEnd, markerEndTrigger, self, scrollerBounds, borderWidth, useFixedPosition, max)) || -0.001;
+      end = Math.max(start, _parsePosition(parsedEnd || (parsedEndTrigger ? "100% 0" : max), parsedEndTrigger, size, direction, scrollFunc() + offset, markerEnd, markerEndTrigger, self, scrollerBounds, borderWidth, useFixedPosition, max, containerAnimation)) || -0.001;
       change = end - start || (start -= 0.01) && 0.001;
       offset = 0;
       i = triggerIndex;
@@ -3750,9 +3929,10 @@ var ScrollTrigger = /*#__PURE__*/function () {
         curTrigger = _triggers[i];
         curPin = curTrigger.pin;
 
-        if (curPin && curTrigger.start - curTrigger._pinPush < start) {
+        if (curPin && curTrigger.start - curTrigger._pinPush < start && !containerAnimation) {
           cs = curTrigger.end - curTrigger.start;
-          curPin === trigger && (offset += cs);
+          (curPin === trigger || curPin === pinnedContainer) && !_isNumber(parsedStart) && (offset += cs); // numeric start values shouldn't be offset at all - treat them as absolute
+
           curPin === pin && (otherPinOffset += cs);
         }
       }
@@ -3765,13 +3945,14 @@ var ScrollTrigger = /*#__PURE__*/function () {
         // offset the markers if necessary
         cs = {};
         cs[direction.a] = "+=" + offset;
+        pinnedContainer && (cs[direction.p] = "-=" + scrollFunc());
         gsap.set([markerStart, markerEnd], cs);
       }
 
       if (pin) {
         cs = _getComputedStyle(pin);
         isVertical = direction === _vertical;
-        scroll = self.scroll(); // recalculate because the triggers can affect the scroll
+        scroll = scrollFunc(); // recalculate because the triggers can affect the scroll
 
         pinStart = parseFloat(pinGetter(direction.a)) + otherPinOffset;
         !max && end > 1 && ((isViewport ? _body : scroller).style["overflow-" + direction.a] = "scroll"); // makes sure the scroller has a scrollbar, otherwise if something has width: 100%, for example, it would be too big (exclude the scrollbar). See https://greensock.com/forums/topic/25182-scrolltrigger-width-of-page-increase-where-markers-are-set-to-false/
@@ -3791,7 +3972,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
           _setState(spacerState);
 
-          useFixedPosition && self.scroll(prevScroll);
+          useFixedPosition && scrollFunc(prevScroll);
         }
 
         if (useFixedPosition) {
@@ -3814,15 +3995,22 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
         if (animation) {
           // the animation might be affecting the transform, so we must jump to the end, check the value, and compensate accordingly. Otherwise, when it becomes unpinned, the pinSetter() will get set to a value that doesn't include whatever the animation did.
-          animation.progress(1, true);
+          initted = animation._initted; // if not, we must invalidate() after this step, otherwise it could lock in starting values prematurely.
+
+          _suppressOverwrites(1);
+
+          animation.render(animation.duration(), true, true);
           pinChange = pinGetter(direction.a) - pinStart + change + otherPinOffset;
           change !== pinChange && pinActiveState.splice(pinActiveState.length - 2, 2); // transform is the last property/value set in the state Array. Since the animation is controlling that, we should omit it.
 
-          animation.progress(0, true);
+          animation.render(0, true, true);
+          initted || animation.invalidate();
+
+          _suppressOverwrites(0);
         } else {
           pinChange = change;
         }
-      } else if (trigger && self.scroll()) {
+      } else if (trigger && scrollFunc() && !containerAnimation) {
         // it may be INSIDE a pinned element, so walk up the tree and look for any elements with _pinOffset to compensate because anything with pinSpacing that's already scrolled would throw off the measurements in getBoundingClientRect()
         bounds = trigger.parentNode;
 
@@ -3836,27 +4024,28 @@ var ScrollTrigger = /*#__PURE__*/function () {
         }
       }
 
-      for (i = 0; i < triggerIndex; i++) {
-        // make sure we revert from first to last to make sure things reach their end state properly
-        curTrigger = _triggers[i].pin;
-        curTrigger && (curTrigger === trigger || curTrigger === pin) && _triggers[i].revert(false);
-      }
-
+      revertedPins && revertedPins.forEach(function (t) {
+        return t.revert(false);
+      });
       self.start = start;
       self.end = end;
-      scroll1 = scroll2 = self.scroll(); // reset velocity
+      scroll1 = scroll2 = scrollFunc(); // reset velocity
 
-      scroll1 < prevScroll && self.scroll(prevScroll);
+      if (!containerAnimation) {
+        scroll1 < prevScroll && scrollFunc(prevScroll);
+        self.scroll.rec = 0;
+      }
+
       self.revert(false);
       _refreshing = 0;
-      prevAnimProgress && isToggle && animation.progress(prevAnimProgress, true);
+      animation && isToggle && animation._initted && animation.progress() !== prevAnimProgress && animation.progress(prevAnimProgress, true).render(animation.time(), true, true); // must force a re-render because if saveStyles() was used on the target(s), the styles could have been wiped out during the refresh().
 
       if (prevProgress !== self.progress) {
         // ensures that the direction is set properly (when refreshing, progress is set back to 0 initially, then back again to wherever it needs to be) and that callbacks are triggered.
-        scrubTween && animation.totalProgress(prevProgress, true); // to avoid issues where animation callbacks like onStart aren't triggered.
+        animation && !isToggle && animation.totalProgress(prevProgress, true); // to avoid issues where animation callbacks like onStart aren't triggered.
 
         self.progress = prevProgress;
-        self.update();
+        self.update(0, 0, 1);
       }
 
       pin && pinSpacing && (spacer._pinOffset = Math.round(self.progress * pinChange));
@@ -3864,10 +4053,31 @@ var ScrollTrigger = /*#__PURE__*/function () {
     };
 
     self.getVelocity = function () {
-      return (self.scroll() - scroll2) / (_getTime() - _time2) * 1000 || 0;
+      return (scrollFunc() - scroll2) / (_getTime() - _time2) * 1000 || 0;
     };
 
-    self.update = function (reset, recordVelocity) {
+    self.endAnimation = function () {
+      _endAnimation(self.callbackAnimation);
+
+      if (animation) {
+        scrubTween ? scrubTween.progress(1) : !animation.paused() ? _endAnimation(animation, animation.reversed()) : isToggle || _endAnimation(animation, self.direction < 0, 1);
+      }
+    };
+
+    self.getTrailing = function (name) {
+      var i = _triggers.indexOf(self),
+          a = self.direction > 0 ? _triggers.slice(0, i).reverse() : _triggers.slice(i + 1);
+
+      return _isString(name) ? a.filter(function (t) {
+        return t.vars.preventOverlaps === name;
+      }) : a;
+    };
+
+    self.update = function (reset, recordVelocity, forceFake) {
+      if (containerAnimation && !forceFake && !reset) {
+        return;
+      }
+
       var scroll = self.scroll(),
           p = reset ? 0 : (scroll - start) / change,
           clipped = p < 0 ? 0 : p > 1 ? 1 : p || 0,
@@ -3877,11 +4087,13 @@ var ScrollTrigger = /*#__PURE__*/function () {
           toggleState,
           action,
           stateChanged,
-          toggled;
+          toggled,
+          isAtMax,
+          isTakingAction;
 
       if (recordVelocity) {
         scroll2 = scroll1;
-        scroll1 = scroll;
+        scroll1 = containerAnimation ? scrollFunc() : scroll;
 
         if (snap) {
           snap2 = snap1;
@@ -3901,6 +4113,20 @@ var ScrollTrigger = /*#__PURE__*/function () {
         self.direction = clipped > prevProgress ? 1 : -1;
         self.progress = clipped;
 
+        if (stateChanged && !_refreshing) {
+          toggleState = clipped && !prevProgress ? 0 : clipped === 1 ? 1 : prevProgress === 1 ? 2 : 3; // 0 = enter, 1 = leave, 2 = enterBack, 3 = leaveBack (we prioritize the FIRST encounter, thus if you scroll really fast past the onEnter and onLeave in one tick, it'd prioritize onEnter.
+
+          if (isToggle) {
+            action = !toggled && toggleActions[toggleState + 1] !== "none" && toggleActions[toggleState + 1] || toggleActions[toggleState]; // if it didn't toggle, that means it shot right past and since we prioritize the "enter" action, we should switch to the "leave" in this case (but only if one is defined)
+
+            isTakingAction = animation && (action === "complete" || action === "reset" || action in animation);
+          }
+        }
+
+        preventOverlaps && toggled && (isTakingAction || scrub || !animation) && (_isFunction(preventOverlaps) ? preventOverlaps(self) : self.getTrailing(preventOverlaps).forEach(function (t) {
+          return t.endAnimation();
+        }));
+
         if (!isToggle) {
           if (scrubTween && !_refreshing && !_startup) {
             scrubTween.vars.totalProgress = clipped;
@@ -3916,10 +4142,10 @@ var ScrollTrigger = /*#__PURE__*/function () {
           if (!useFixedPosition) {
             pinSetter(pinStart + pinChange * clipped);
           } else if (stateChanged) {
-            action = !reset && clipped > prevProgress && end + 1 > scroll && scroll + 1 >= _maxScroll(scroller, direction); // if it's at the VERY end of the page, don't switch away from position: fixed because it's pointless and it could cause a brief flash when the user scrolls back up (when it gets pinned again)
+            isAtMax = !reset && clipped > prevProgress && end + 1 > scroll && scroll + 1 >= _maxScroll(scroller, direction); // if it's at the VERY end of the page, don't switch away from position: fixed because it's pointless and it could cause a brief flash when the user scrolls back up (when it gets pinned again)
 
             if (pinReparent) {
-              if (!reset && (isActive || action)) {
+              if (!reset && (isActive || isAtMax)) {
                 var bounds = _getBounds(pin, true),
                     _offset = scroll - start;
 
@@ -3929,9 +4155,9 @@ var ScrollTrigger = /*#__PURE__*/function () {
               }
             }
 
-            _setState(isActive || action ? pinActiveState : pinState);
+            _setState(isActive || isAtMax ? pinActiveState : pinState);
 
-            pinChange !== change && clipped < 1 && isActive || pinSetter(pinStart + (clipped === 1 && !action ? pinChange : 0));
+            pinChange !== change && clipped < 1 && isActive || pinSetter(pinStart + (clipped === 1 && !isAtMax ? pinChange : 0));
           }
         }
 
@@ -3943,16 +4169,14 @@ var ScrollTrigger = /*#__PURE__*/function () {
         onUpdate && !isToggle && !reset && onUpdate(self);
 
         if (stateChanged && !_refreshing) {
-          toggleState = clipped && !prevProgress ? 0 : clipped === 1 ? 1 : prevProgress === 1 ? 2 : 3; // 0 = enter, 1 = leave, 2 = enterBack, 3 = leaveBack (we prioritize the FIRST encounter, thus if you scroll really fast past the onEnter and onLeave in one tick, it'd prioritize onEnter.
-
           if (isToggle) {
-            action = !toggled && toggleActions[toggleState + 1] !== "none" && toggleActions[toggleState + 1] || toggleActions[toggleState]; // if it didn't toggle, that means it shot right past and since we prioritize the "enter" action, we should switch to the "leave" in this case (but only if one is defined)
-
-            if (animation && (action === "complete" || action === "reset" || action in animation)) {
+            if (isTakingAction) {
               if (action === "complete") {
                 animation.pause().totalProgress(1);
               } else if (action === "reset") {
                 animation.restart(true).pause();
+              } else if (action === "restart") {
+                animation.restart(true);
               } else {
                 animation[action]();
               }
@@ -3963,15 +4187,21 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
           if (toggled || !_limitCallbacks) {
             // on startup, the page could be scrolled and we don't want to fire callbacks that didn't toggle. For example onEnter shouldn't fire if the ScrollTrigger isn't actually entered.
-            onToggle && toggled && onToggle(self);
-            callbacks[toggleState] && callbacks[toggleState](self);
+            onToggle && toggled && _callback(self, onToggle);
+            callbacks[toggleState] && _callback(self, callbacks[toggleState]);
             once && (clipped === 1 ? self.kill(false, 1) : callbacks[toggleState] = 0); // a callback shouldn't be called again if once is true.
 
             if (!toggled) {
               // it's possible to go completely past, like from before the start to after the end (or vice-versa) in which case BOTH callbacks should be fired in that order
               toggleState = clipped === 1 ? 1 : 3;
-              callbacks[toggleState] && callbacks[toggleState](self);
+              callbacks[toggleState] && _callback(self, callbacks[toggleState]);
             }
+          }
+
+          if (fastScrollEnd && !isActive && Math.abs(self.getVelocity()) > (_isNumber(fastScrollEnd) ? fastScrollEnd : 2500)) {
+            _endAnimation(self.callbackAnimation);
+
+            scrubTween ? scrubTween.progress(1) : _endAnimation(animation, !clipped, 1);
           }
         } else if (isToggle && onUpdate && !_refreshing) {
           onUpdate(self);
@@ -3980,12 +4210,15 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
 
       if (markerEndSetter) {
-        markerStartSetter(scroll + (markerStartTrigger._isFlipped ? 1 : 0));
-        markerEndSetter(scroll);
+        var n = containerAnimation ? scroll / containerAnimation.duration() * (containerAnimation._caScrollDist || 0) : scroll;
+        markerStartSetter(n + (markerStartTrigger._isFlipped ? 1 : 0));
+        markerEndSetter(n);
       }
+
+      caMarkerSetter && caMarkerSetter(-scroll / containerAnimation.duration() * (containerAnimation._caScrollDist || 0));
     };
 
-    self.enable = function () {
+    self.enable = function (reset, refresh) {
       if (!self.enabled) {
         self.enabled = true;
 
@@ -3994,10 +4227,18 @@ var ScrollTrigger = /*#__PURE__*/function () {
         _addListener(scroller, "scroll", _onScroll);
 
         onRefreshInit && _addListener(ScrollTrigger, "refreshInit", onRefreshInit);
-        !animation || !animation.add ? self.refresh() : gsap.delayedCall(0.01, function () {
-          return start || end || self.refresh();
-        }) && (change = 0.01) && (start = end = 0); // if the animation is a timeline, it may not have been populated yet, so it wouldn't render at the proper place on the first refresh(), thus we should schedule one for the next tick.
+
+        if (reset !== false) {
+          self.progress = prevProgress = 0;
+          scroll1 = scroll2 = lastSnap = scrollFunc();
+        }
+
+        refresh !== false && self.refresh();
       }
+    };
+
+    self.getTween = function (snap) {
+      return snap && tweenTo ? tweenTo.tween : scrubTween;
     };
 
     self.disable = function (reset, allowAnimation) {
@@ -4032,6 +4273,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
     self.kill = function (revert, allowAnimation) {
       self.disable(revert, allowAnimation);
+      scrubTween && scrubTween.kill();
       id && delete _ids[id];
 
       var i = _triggers.indexOf(self);
@@ -4039,6 +4281,15 @@ var ScrollTrigger = /*#__PURE__*/function () {
       _triggers.splice(i, 1);
 
       i === _i && _direction > 0 && _i--; // if we're in the middle of a refresh() or update(), splicing would cause skips in the index, so adjust...
+      // if no other ScrollTrigger instances of the same scroller are found, wipe out any recorded scroll position. Otherwise, in a single page application, for example, it could maintain scroll position when it really shouldn't.
+
+      i = 0;
+
+      _triggers.forEach(function (t) {
+        return t.scroller === self.scroller && (i = 1);
+      });
+
+      i || (self.scroll.rec = 0);
 
       if (animation) {
         animation.scrollTrigger = null;
@@ -4047,12 +4298,25 @@ var ScrollTrigger = /*#__PURE__*/function () {
       }
 
       markerStart && [markerStart, markerEnd, markerStartTrigger, markerEndTrigger].forEach(function (m) {
-        return m.parentNode.removeChild(m);
+        return m.parentNode && m.parentNode.removeChild(m);
       });
-      pinCache && (pinCache.uncache = 1);
+
+      if (pin) {
+        pinCache && (pinCache.uncache = 1);
+        i = 0;
+
+        _triggers.forEach(function (t) {
+          return t.pin === pin && i++;
+        });
+
+        i || (pinCache.spacer = 0); // if there aren't any more ScrollTriggers with the same pin, remove the spacer, otherwise it could be contaminated with old/stale values if the user re-creates a ScrollTrigger for the same element.
+      }
     };
 
-    self.enable();
+    self.enable(false, false);
+    !animation || !animation.add || change ? self.refresh() : gsap.delayedCall(0.01, function () {
+      return start || end || self.refresh();
+    }) && (change = 0.01) && (start = end = 0); // if the animation is a timeline, it may not have been populated yet, so it wouldn't render at the proper place on the first refresh(), thus we should schedule one for the next tick. If "change" is defined, we know it must be re-enabling, thus we can refresh() right away.
   };
 
   ScrollTrigger.register = function register(core) {
@@ -4069,6 +4333,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
       if (gsap) {
         _toArray = gsap.utils.toArray;
         _clamp = gsap.utils.clamp;
+        _suppressOverwrites = gsap.core.suppressOverwrites || _passThrough;
         gsap.core.globals("ScrollTrigger", ScrollTrigger); // must register the global manually because in Internet Explorer, functions (classes) don't have a "name" property.
 
         if (_body) {
@@ -4076,7 +4341,7 @@ var ScrollTrigger = /*#__PURE__*/function () {
             return setTimeout(f, 16);
           };
 
-          _addListener(_win, "mousewheel", _onScroll);
+          _addListener(_win, "wheel", _onScroll);
 
           _root = [_win, _doc, _docEl, _body];
 
@@ -4084,15 +4349,15 @@ var ScrollTrigger = /*#__PURE__*/function () {
 
 
           var bodyStyle = _body.style,
-              border = bodyStyle.borderTop,
+              border = bodyStyle.borderTopStyle,
               bounds;
-          bodyStyle.borderTop = "1px solid #000"; // works around an issue where a margin of a child element could throw off the bounds of the _body, making it seem like there's a margin when there actually isn't. The border ensures that the bounds are accurate.
+          bodyStyle.borderTopStyle = "solid"; // works around an issue where a margin of a child element could throw off the bounds of the _body, making it seem like there's a margin when there actually isn't. The border ensures that the bounds are accurate.
 
           bounds = _getBounds(_body);
           _vertical.m = Math.round(bounds.top + _vertical.sc()) || 0; // accommodate the offset of the <body> caused by margins and/or padding
 
           _horizontal.m = Math.round(bounds.left + _horizontal.sc()) || 0;
-          border ? bodyStyle.borderTop = border : bodyStyle.removeProperty("border-top");
+          border ? bodyStyle.borderTopStyle = border : bodyStyle.removeProperty("border-top-style");
           _syncInterval = setInterval(_sync, 200);
           gsap.delayedCall(0.5, function () {
             return _startup = 0;
@@ -4158,13 +4423,23 @@ var ScrollTrigger = /*#__PURE__*/function () {
     "limitCallbacks" in vars && (_limitCallbacks = !!vars.limitCallbacks);
     var ms = vars.syncInterval;
     ms && clearInterval(_syncInterval) || (_syncInterval = ms) && setInterval(_sync, ms);
-    "autoRefreshEvents" in vars && (_iterateAutoRefresh(_removeListener) || _iterateAutoRefresh(_addListener, vars.autoRefreshEvents || "none"));
+
+    if ("autoRefreshEvents" in vars) {
+      _iterateAutoRefresh(_removeListener) || _iterateAutoRefresh(_addListener, vars.autoRefreshEvents || "none");
+      _ignoreResize = (vars.autoRefreshEvents + "").indexOf("resize") === -1;
+    }
   };
 
   ScrollTrigger.scrollerProxy = function scrollerProxy(target, vars) {
-    var t = _toArray(target)[0];
+    var t = _getTarget(target),
+        i = _scrollers.indexOf(t),
+        isViewport = _isViewport(t);
 
-    _isViewport(t) ? _proxies.unshift(_win, vars, _body, vars, _docEl, vars) : _proxies.unshift(t, vars);
+    if (~i) {
+      _scrollers.splice(i, isViewport ? 6 : 2);
+    }
+
+    isViewport ? _proxies.unshift(_win, vars, _body, vars, _docEl, vars) : _proxies.unshift(t, vars);
   };
 
   ScrollTrigger.matchMedia = function matchMedia(vars) {
@@ -4211,19 +4486,36 @@ var ScrollTrigger = /*#__PURE__*/function () {
     query >= 0 && _media.splice(query, 4);
   };
 
+  ScrollTrigger.isInViewport = function isInViewport(element, ratio, horizontal) {
+    var bounds = (_isString(element) ? _getTarget(element) : element).getBoundingClientRect(),
+        offset = bounds[horizontal ? _width : _height] * ratio || 0;
+    return horizontal ? bounds.right - offset > 0 && bounds.left + offset < _win.innerWidth : bounds.bottom - offset > 0 && bounds.top + offset < _win.innerHeight;
+  };
+
+  ScrollTrigger.positionInViewport = function positionInViewport(element, referencePoint, horizontal) {
+    _isString(element) && (element = _getTarget(element));
+    var bounds = element.getBoundingClientRect(),
+        size = bounds[horizontal ? _width : _height],
+        offset = referencePoint == null ? size / 2 : referencePoint in _keywords ? _keywords[referencePoint] * size : ~referencePoint.indexOf("%") ? parseFloat(referencePoint) * size / 100 : parseFloat(referencePoint) || 0;
+    return horizontal ? (bounds.left + offset) / _win.innerWidth : (bounds.top + offset) / _win.innerHeight;
+  };
+
   return ScrollTrigger;
 }();
 
 exports.default = exports.ScrollTrigger = ScrollTrigger;
-ScrollTrigger.version = "3.5.1";
+ScrollTrigger.version = "3.8.0";
 
 ScrollTrigger.saveStyles = function (targets) {
   return targets ? _toArray(targets).forEach(function (target) {
-    var i = _savedStyles.indexOf(target);
+    // saved styles are recorded in a consecutive alternating Array, like [element, cssText, transform attribute, cache, matchMedia, ...]
+    if (target && target.style) {
+      var i = _savedStyles.indexOf(target);
 
-    i >= 0 && _savedStyles.splice(i, 4);
+      i >= 0 && _savedStyles.splice(i, 5);
 
-    _savedStyles.push(target, target.style.cssText, gsap.core.getCache(target), _creatingMedia);
+      _savedStyles.push(target, target.style.cssText, target.getBBox && target.getAttribute("transform"), gsap.core.getCache(target), _creatingMedia);
+    }
   }) : _savedStyles;
 };
 
@@ -4236,17 +4528,18 @@ ScrollTrigger.create = function (vars, animation) {
 };
 
 ScrollTrigger.refresh = function (safe) {
-  return safe ? _onResize() : _refreshAll(true);
+  return safe ? _onResize() : (_coreInitted || ScrollTrigger.register()) && _refreshAll(true);
 };
 
 ScrollTrigger.update = _updateAll;
+ScrollTrigger.clearScrollMemory = _clearScrollMemory;
 
 ScrollTrigger.maxScroll = function (element, horizontal) {
   return _maxScroll(element, horizontal ? _horizontal : _vertical);
 };
 
 ScrollTrigger.getScrollFunc = function (element, horizontal) {
-  return _getScrollFunc(_toArray(element)[0], horizontal ? _horizontal : _vertical);
+  return _getScrollFunc(_getTarget(element), horizontal ? _horizontal : _vertical);
 };
 
 ScrollTrigger.getById = function (id) {
@@ -4260,6 +4553,8 @@ ScrollTrigger.getAll = function () {
 ScrollTrigger.isScrolling = function () {
   return !!_lastScrollTime;
 };
+
+ScrollTrigger.snapDirectional = _snapDirectional;
 
 ScrollTrigger.addEventListener = function (type, callback) {
   var a = _listeners[type] || (_listeners[type] = []);
@@ -4352,10 +4647,10 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     return self;
   }
   /*!
-   * GSAP 3.5.1
+   * GSAP 3.8.0
    * https://greensock.com
    *
-   * @license Copyright 2008-2020, GreenSock. All rights reserved.
+   * @license Copyright 2008-2021, GreenSock. All rights reserved.
    * Subject to the terms at https://greensock.com/standard-license or for
    * Club GreenSock members, the agreement issued with that membership.
    * @author: Jack Doyle, jack@greensock.com
@@ -4375,6 +4670,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     overwrite: false,
     delay: 0
   },
+      _suppressOverwrites,
       _bigNum = 1e8,
       _tinyNum = 1 / _bigNum,
       _2PI = Math.PI * 2,
@@ -4410,11 +4706,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       _isTypedArray = typeof ArrayBuffer === "function" && ArrayBuffer.isView || function () {},
       _isArray = Array.isArray,
       _strictNumExp = /(?:-?\.?\d|\.)+/gi,
-      _numExp = /[-+=.]*\d+[.e\-+]*\d*[e\-\+]*\d*/g,
+      _numExp = /[-+=.]*\d+[.e\-+]*\d*[e\-+]*\d*/g,
       _numWithUnitExp = /[-+=.]*\d+[.e-]*\d*[a-z%]*/g,
-      _complexStringNumExp = /[-+=.]*\d+(?:\.|e-|e)*\d*/gi,
-      _relExp = /[+-]=-?[\.\d]+/,
-      _delimitedValueExp = /[#\-+.]*\b[a-z\d-=+%.]+/gi,
+      _complexStringNumExp = /[-+=.]*\d+\.?\d*(?:e-|e\+)?\d*/gi,
+      _relExp = /[+-]=-?[.\d]+/,
+      _delimitedValueExp = /[^,'"\[\]\s]+/gi,
+      _unitExp = /[\d.+\-=]+(?:e[-+]\d*)*/i,
       _globalTimeline,
       _win,
       _coreInitted,
@@ -4480,6 +4777,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       _round = function _round(value) {
     return Math.round(value * 100000) / 100000 || 0;
   },
+      _roundPrecise = function _roundPrecise(value) {
+    return Math.round(value * 10000000) / 10000000 || 0;
+  },
       _arrayContainsAny = function _arrayContainsAny(toSearch, toFind) {
     var l = toFind.length,
         i = 0;
@@ -4487,29 +4787,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     for (; toSearch.indexOf(toFind[i]) < 0 && ++i < l;) {}
 
     return i < l;
-  },
-      _parseVars = function _parseVars(params, type, parent) {
-    var isLegacy = _isNumber(params[1]),
-        varsIndex = (isLegacy ? 2 : 1) + (type < 2 ? 0 : 1),
-        vars = params[varsIndex],
-        irVars;
-
-    isLegacy && (vars.duration = params[1]);
-    vars.parent = parent;
-
-    if (type) {
-      irVars = vars;
-
-      while (parent && !("immediateRender" in irVars)) {
-        irVars = parent.vars.defaults || {};
-        parent = _isNotFalse(parent.vars.inherit) && parent.parent;
-      }
-
-      vars.immediateRender = _isNotFalse(irVars.immediateRender);
-      type < 2 ? vars.runBackwards = 1 : vars.startAt = params[varsIndex - 1];
-    }
-
-    return vars;
   },
       _lazyRender = function _lazyRender() {
     var l = _lazyTweens.length,
@@ -4558,7 +4835,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   },
       _mergeDeep = function _mergeDeep(base, toMerge) {
     for (var p in toMerge) {
-      base[p] = _isObject(toMerge[p]) ? _mergeDeep(base[p] || (base[p] = {}), toMerge[p]) : toMerge[p];
+      p !== "__proto__" && p !== "constructor" && p !== "prototype" && (base[p] = _isObject(toMerge[p]) ? _mergeDeep(base[p] || (base[p] = {}), toMerge[p]) : toMerge[p]);
     }
 
     return base;
@@ -4692,19 +4969,20 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     return animation._repeat ? _animationCycle(animation._tTime, animation = animation.duration() + animation._rDelay) * animation : 0;
   },
       _animationCycle = function _animationCycle(tTime, cycleDuration) {
-    return (tTime /= cycleDuration) && ~~tTime === tTime ? ~~tTime - 1 : ~~tTime;
+    var whole = Math.floor(tTime /= cycleDuration);
+    return tTime && whole === tTime ? whole - 1 : whole;
   },
       _parentToChildTotalTime = function _parentToChildTotalTime(parentTime, child) {
     return (parentTime - child._start) * child._ts + (child._ts >= 0 ? 0 : child._dirty ? child.totalDuration() : child._tDur);
   },
       _setEnd = function _setEnd(animation) {
-    return animation._end = _round(animation._start + (animation._tDur / Math.abs(animation._ts || animation._rts || _tinyNum) || 0));
+    return animation._end = _roundPrecise(animation._start + (animation._tDur / Math.abs(animation._ts || animation._rts || _tinyNum) || 0));
   },
       _alignPlayhead = function _alignPlayhead(animation, totalTime) {
     var parent = animation._dp;
 
     if (parent && parent.smoothChildTiming && animation._ts) {
-      animation._start = _round(animation._dp._time - (animation._ts > 0 ? totalTime / animation._ts : ((animation._dirty ? animation.totalDuration() : animation._tDur) - totalTime) / -animation._ts));
+      animation._start = _roundPrecise(parent._time - (animation._ts > 0 ? totalTime / animation._ts : ((animation._dirty ? animation.totalDuration() : animation._tDur) - totalTime) / -animation._ts));
 
       _setEnd(animation);
 
@@ -4739,12 +5017,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   },
       _addToTimeline = function _addToTimeline(timeline, child, position, skipChecks) {
     child.parent && _removeFromParent(child);
-    child._start = _round(position + child._delay);
-    child._end = _round(child._start + (child.totalDuration() / Math.abs(child.timeScale()) || 0));
+    child._start = _roundPrecise((_isNumber(position) ? position : position || timeline !== _globalTimeline ? _parsePosition(timeline, position, child) : timeline._time) + child._delay);
+    child._end = _roundPrecise(child._start + (child.totalDuration() / Math.abs(child.timeScale()) || 0));
 
     _addLinkedListItem(timeline, child, "_first", "_last", timeline._sort ? "_start" : 0);
 
-    timeline._recent = child;
+    _isFromOrFromStart(child) || (timeline._recent = child);
     skipChecks || _postAddChecks(timeline, child);
     return timeline;
   },
@@ -4765,9 +5043,17 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       return 1;
     }
   },
+      _parentPlayheadIsBeforeStart = function _parentPlayheadIsBeforeStart(_ref) {
+    var parent = _ref.parent;
+    return parent && parent._ts && parent._initted && !parent._lock && (parent.rawTime() < 0 || _parentPlayheadIsBeforeStart(parent));
+  },
+      _isFromOrFromStart = function _isFromOrFromStart(_ref2) {
+    var data = _ref2.data;
+    return data === "isFromStart" || data === "isStart";
+  },
       _renderZeroDurationTween = function _renderZeroDurationTween(tween, totalTime, suppressEvents, force) {
     var prevRatio = tween.ratio,
-        ratio = totalTime < 0 || !totalTime && prevRatio && !tween._start && tween._zTime > _tinyNum && !tween._dp._lock || (tween._ts < 0 || tween._dp._ts < 0) && tween.data !== "isFromStart" && tween.data !== "isStart" ? 0 : 1,
+        ratio = totalTime < 0 || !totalTime && (!tween._start && _parentPlayheadIsBeforeStart(tween) && !(!tween._initted && _isFromOrFromStart(tween)) || (tween._ts < 0 || tween._dp._ts < 0) && !_isFromOrFromStart(tween)) ? 0 : 1,
         repeatDelay = tween._rDelay,
         tTime = 0,
         pt,
@@ -4778,6 +5064,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       tTime = _clamp(0, tween._tDur, totalTime);
       iteration = _animationCycle(tTime, repeatDelay);
       prevIteration = _animationCycle(tween._tTime, repeatDelay);
+      tween._yoyo && iteration & 1 && (ratio = 1 - ratio);
 
       if (iteration !== prevIteration) {
         prevRatio = 1 - ratio;
@@ -4797,7 +5084,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       tween._from && (ratio = 1 - ratio);
       tween._time = 0;
       tween._tTime = tTime;
-      suppressEvents || _callback(tween, "onStart");
       pt = tween._pt;
 
       while (pt) {
@@ -4849,11 +5135,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   },
       _setDuration = function _setDuration(animation, duration, skipUncache, leavePlayhead) {
     var repeat = animation._repeat,
-        dur = _round(duration) || 0,
+        dur = _roundPrecise(duration) || 0,
         totalProgress = animation._tTime / animation._tDur;
     totalProgress && !leavePlayhead && (animation._time *= dur / animation._dur);
     animation._dur = dur;
-    animation._tDur = !repeat ? dur : repeat < 0 ? 1e10 : _round(dur * (repeat + 1) + animation._rDelay * repeat);
+    animation._tDur = !repeat ? dur : repeat < 0 ? 1e10 : _roundPrecise(dur * (repeat + 1) + animation._rDelay * repeat);
     totalProgress && !leavePlayhead ? _alignPlayhead(animation, animation._tTime = animation._tDur * totalProgress) : animation.parent && _setEnd(animation);
     skipUncache || _uncache(animation.parent, animation);
     return animation;
@@ -4863,34 +5149,67 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   },
       _zeroPosition = {
     _start: 0,
-    endTime: _emptyFunc
+    endTime: _emptyFunc,
+    totalDuration: _emptyFunc
   },
-      _parsePosition = function _parsePosition(animation, position) {
+      _parsePosition = function _parsePosition(animation, position, percentAnimation) {
     var labels = animation.labels,
         recent = animation._recent || _zeroPosition,
         clippedDuration = animation.duration() >= _bigNum ? recent.endTime(false) : animation._dur,
         i,
-        offset;
+        offset,
+        isPercent;
 
     if (_isString(position) && (isNaN(position) || position in labels)) {
-      i = position.charAt(0);
-
-      if (i === "<" || i === ">") {
-        return (i === "<" ? recent._start : recent.endTime(recent._repeat >= 0)) + (parseFloat(position.substr(1)) || 0);
-      }
-
+      offset = position.charAt(0);
+      isPercent = position.substr(-1) === "%";
       i = position.indexOf("=");
+
+      if (offset === "<" || offset === ">") {
+        i >= 0 && (position = position.replace(/=/, ""));
+        return (offset === "<" ? recent._start : recent.endTime(recent._repeat >= 0)) + (parseFloat(position.substr(1)) || 0) * (isPercent ? (i < 0 ? recent : percentAnimation).totalDuration() / 100 : 1);
+      }
 
       if (i < 0) {
         position in labels || (labels[position] = clippedDuration);
         return labels[position];
       }
 
-      offset = +(position.charAt(i - 1) + position.substr(i + 1));
-      return i > 1 ? _parsePosition(animation, position.substr(0, i - 1)) + offset : clippedDuration + offset;
+      offset = parseFloat(position.charAt(i - 1) + position.substr(i + 1));
+
+      if (isPercent && percentAnimation) {
+        offset = offset / 100 * (_isArray(percentAnimation) ? percentAnimation[0] : percentAnimation).totalDuration();
+      }
+
+      return i > 1 ? _parsePosition(animation, position.substr(0, i - 1), percentAnimation) + offset : clippedDuration + offset;
     }
 
     return position == null ? clippedDuration : +position;
+  },
+      _createTweenType = function _createTweenType(type, params, timeline) {
+    var isLegacy = _isNumber(params[1]),
+        varsIndex = (isLegacy ? 2 : 1) + (type < 2 ? 0 : 1),
+        vars = params[varsIndex],
+        irVars,
+        parent;
+
+    isLegacy && (vars.duration = params[1]);
+    vars.parent = timeline;
+
+    if (type) {
+      irVars = vars;
+      parent = timeline;
+
+      while (parent && !("immediateRender" in irVars)) {
+        irVars = parent.vars.defaults || {};
+        parent = _isNotFalse(parent.vars.inherit) && parent.parent;
+      }
+
+      vars.immediateRender = _isNotFalse(irVars.immediateRender);
+      type < 2 ? vars.runBackwards = 1 : vars.startAt = params[varsIndex - 1];
+    }
+
+    return new Tween(params[0], vars, params[varsIndex + 1]);
   },
       _conditionalReturn = function _conditionalReturn(value, func) {
     return value || value === 0 ? func(value) : func;
@@ -4899,7 +5218,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     return value < min ? min : value > max ? max : value;
   },
       getUnit = function getUnit(value) {
-    return (value = (value + "").substr((parseFloat(value) + "").length)) && isNaN(value) ? value : "";
+    if (typeof value !== "string") {
+      return "";
+    }
+
+    var v = _unitExp.exec(value);
+
+    return v ? value.substr(v.index + v[0].length) : "";
   },
       clamp = function clamp(min, max, value) {
     return _conditionalReturn(value, function (v) {
@@ -4921,8 +5246,15 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       return _isString(value) && !leaveStrings || _isArrayLike(value, 1) ? (_accumulator = accumulator).push.apply(_accumulator, toArray(value)) : accumulator.push(value);
     }) || accumulator;
   },
-      toArray = function toArray(value, leaveStrings) {
-    return _isString(value) && !leaveStrings && (_coreInitted || !_wake()) ? _slice.call(_doc.querySelectorAll(value), 0) : _isArray(value) ? _flatten(value, leaveStrings) : _isArrayLike(value) ? _slice.call(value, 0) : value ? [value] : [];
+      toArray = function toArray(value, scope, leaveStrings) {
+    return _isString(value) && !leaveStrings && (_coreInitted || !_wake()) ? _slice.call((scope || _doc).querySelectorAll(value), 0) : _isArray(value) ? _flatten(value, leaveStrings) : _isArrayLike(value) ? _slice.call(value, 0) : value ? [value] : [];
+  },
+      selector = function selector(value) {
+    value = toArray(value)[0] || _warn("Invalid scope") || {};
+    return function (v) {
+      var el = value.current || value.nativeElement || value;
+      return toArray(v, el.querySelectorAll ? el : el === value ? _warn("Invalid scope") || _doc.createElement("div") : value);
+    };
   },
       shuffle = function shuffle(a) {
     return a.sort(function () {
@@ -5006,13 +5338,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       }
 
       l = (distances[i] - distances.min) / distances.max || 0;
-      return _round(distances.b + (ease ? ease(l) : l) * distances.v) + distances.u;
+      return _roundPrecise(distances.b + (ease ? ease(l) : l) * distances.v) + distances.u;
     };
   },
       _roundModifier = function _roundModifier(v) {
-    var p = v < 1 ? Math.pow(10, (v + "").length - 2) : 1;
+    var p = Math.pow(10, ((v + "").split(".")[1] || "").length);
     return function (raw) {
-      return Math.floor(Math.round(parseFloat(raw) / v) * v * p) / p + (_isNumber(raw) ? 0 : getUnit(raw));
+      var n = Math.round(parseFloat(raw) / v) * v * p;
+      return (n - n % 1) / p + (_isNumber(raw) ? 0 : getUnit(raw));
     };
   },
       snap = function snap(snapTo, value) {
@@ -5067,7 +5400,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   },
       random = function random(min, max, roundingIncrement, returnFunction) {
     return _conditionalReturn(_isArray(min) ? !max : roundingIncrement === true ? !!(roundingIncrement = 0) : !returnFunction, function () {
-      return _isArray(min) ? min[~~(Math.random() * min.length)] : (roundingIncrement = roundingIncrement || 1e-5) && (returnFunction = roundingIncrement < 1 ? Math.pow(10, (roundingIncrement + "").length - 2) : 1) && Math.floor(Math.round((min + Math.random() * (max - min)) / roundingIncrement) * roundingIncrement * returnFunction) / returnFunction;
+      return _isArray(min) ? min[~~(Math.random() * min.length)] : (roundingIncrement = roundingIncrement || 1e-5) && (returnFunction = roundingIncrement < 1 ? Math.pow(10, (roundingIncrement + "").length - 2) : 1) && Math.floor(Math.round((min - roundingIncrement / 2 + Math.random() * (max - min + roundingIncrement * .99)) / roundingIncrement) * roundingIncrement * returnFunction) / returnFunction;
     });
   },
       pipe = function pipe() {
@@ -5227,6 +5560,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       _interrupt = function _interrupt(animation) {
     _removeFromParent(animation);
 
+    animation.scrollTrigger && animation.scrollTrigger.kill(false);
     animation.progress() < 1 && _callback(animation, "onInterrupt");
     return animation;
   },
@@ -5328,11 +5662,16 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       if (_colorLookup[v]) {
         a = _colorLookup[v];
       } else if (v.charAt(0) === "#") {
-        if (v.length === 4) {
+        if (v.length < 6) {
           r = v.charAt(1);
           g = v.charAt(2);
           b = v.charAt(3);
-          v = "#" + r + r + g + g + b + b;
+          v = "#" + r + r + g + g + b + b + (v.length === 5 ? v.charAt(4) + v.charAt(4) : "");
+        }
+
+        if (v.length === 9) {
+          a = parseInt(v.substr(1, 6), 16);
+          return [a >> 16, a >> 8 & _255, a & _255, parseInt(v.substr(7), 16) / 255];
         }
 
         v = parseInt(v.substr(1), 16);
@@ -5443,7 +5782,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     return result + shell[l];
   },
       _colorExp = function () {
-    var s = "(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#(?:[0-9a-f]{3}){1,2}\\b",
+    var s = "(?:\\b(?:(?:rgb|rgba|hsl|hsla)\\(.+?\\))|\\B#(?:[0-9a-f]{3,4}){1,2}\\b",
         p;
 
     for (p in _colorLookup) {
@@ -5786,12 +6125,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   };
 
   var Animation = function () {
-    function Animation(vars, time) {
-      var parent = vars.parent || _globalTimeline;
+    function Animation(vars) {
       this.vars = vars;
       this._delay = +vars.delay || 0;
 
-      if (this._repeat = vars.repeat || 0) {
+      if (this._repeat = vars.repeat === Infinity ? -2 : vars.repeat || 0) {
         this._rDelay = vars.repeatDelay || 0;
         this._yoyo = !!vars.yoyo || !!vars.yoyoEase;
       }
@@ -5802,9 +6140,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
       this.data = vars.data;
       _tickerActive || _ticker.wake();
-      parent && _addToTimeline(parent, this, time || time === 0 ? time : parent._time, 1);
-      vars.reversed && this.reverse();
-      vars.paused && this.paused(true);
     }
 
     var _proto = Animation.prototype;
@@ -5844,7 +6179,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       if (parent && parent.smoothChildTiming && this._ts) {
         _alignPlayhead(this, _totalTime);
 
-        while (parent.parent) {
+        !parent._dp || parent.parent || _postAddChecks(parent, this);
+
+        while (parent && parent.parent) {
           if (parent.parent._time !== parent._start + (parent._ts >= 0 ? parent._tTime / parent._ts : (parent.totalDuration() - parent._tTime) / -parent._ts)) {
             parent.totalTime(parent._tTime, true);
           }
@@ -5867,7 +6204,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     _proto.time = function time(value, suppressEvents) {
-      return arguments.length ? this.totalTime(Math.min(this.totalDuration(), value + _elapsedCycleDuration(this)) % this._dur || (value ? this._dur : 0), suppressEvents) : this._time;
+      return arguments.length ? this.totalTime(Math.min(this.totalDuration(), value + _elapsedCycleDuration(this)) % (this._dur + this._rDelay) || (value ? this._dur : 0), suppressEvents) : this._time;
     };
 
     _proto.totalProgress = function totalProgress(value, suppressEvents) {
@@ -5896,7 +6233,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       var tTime = this.parent && this._ts ? _parentToChildTotalTime(this.parent._time, this) : this._tTime;
       this._rts = +value || 0;
       this._ts = this._ps || value === -_tinyNum ? 0 : this._rts;
-      return _recacheAncestors(this.totalTime(_clamp(-this._delay, this._tDur, tTime), true));
+
+      _recacheAncestors(this.totalTime(_clamp(-this._delay, this._tDur, tTime), true));
+
+      _setEnd(this);
+
+      return this;
     };
 
     _proto.paused = function paused(value) {
@@ -5914,7 +6256,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           _wake();
 
           this._ts = this._rts;
-          this.totalTime(this.parent && !this.parent.smoothChildTiming ? this.rawTime() : this._tTime || this._pTime, this.progress() === 1 && (this._tTime -= _tinyNum) && Math.abs(this._zTime) !== _tinyNum);
+          this.totalTime(this.parent && !this.parent.smoothChildTiming ? this.rawTime() : this._tTime || this._pTime, this.progress() === 1 && Math.abs(this._zTime) !== _tinyNum && (this._tTime -= _tinyNum));
         }
       }
 
@@ -5933,7 +6275,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     _proto.endTime = function endTime(includeRepeats) {
-      return this._start + (_isNotFalse(includeRepeats) ? this.totalDuration() : this.duration()) / Math.abs(this._ts);
+      return this._start + (_isNotFalse(includeRepeats) ? this.totalDuration() : this.duration()) / Math.abs(this._ts || 1);
     };
 
     _proto.rawTime = function rawTime(wrapRepeats) {
@@ -5955,17 +6297,21 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     _proto.repeat = function repeat(value) {
       if (arguments.length) {
-        this._repeat = value;
+        this._repeat = value === Infinity ? -2 : value;
         return _onUpdateTotalDuration(this);
       }
 
-      return this._repeat;
+      return this._repeat === -2 ? Infinity : this._repeat;
     };
 
     _proto.repeatDelay = function repeatDelay(value) {
       if (arguments.length) {
+        var time = this._time;
         this._rDelay = value;
-        return _onUpdateTotalDuration(this);
+
+        _onUpdateTotalDuration(this);
+
+        return time ? this.time(time) : this;
       }
 
       return this._rDelay;
@@ -6017,7 +6363,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     _proto.invalidate = function invalidate() {
-      this._initted = 0;
+      this._initted = this._act = 0;
       this._zTime = -_tinyNum;
       return this;
     };
@@ -6098,19 +6444,21 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   var Timeline = function (_Animation) {
     _inheritsLoose(Timeline, _Animation);
 
-    function Timeline(vars, time) {
+    function Timeline(vars, position) {
       var _this;
 
       if (vars === void 0) {
         vars = {};
       }
 
-      _this = _Animation.call(this, vars, time) || this;
+      _this = _Animation.call(this, vars) || this;
       _this.labels = {};
       _this.smoothChildTiming = !!vars.smoothChildTiming;
       _this.autoRemoveChildren = !!vars.autoRemoveChildren;
       _this._sort = _isNotFalse(vars.sortChildren);
-      _this.parent && _postAddChecks(_this.parent, _assertThisInitialized(_this));
+      _globalTimeline && _addToTimeline(vars.parent || _globalTimeline, _assertThisInitialized(_this), position);
+      vars.reversed && _this.reverse();
+      vars.paused && _this.paused(true);
       vars.scrollTrigger && _scrollTrigger(_assertThisInitialized(_this), vars.scrollTrigger);
       return _this;
     }
@@ -6118,17 +6466,20 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     var _proto2 = Timeline.prototype;
 
     _proto2.to = function to(targets, vars, position) {
-      new Tween(targets, _parseVars(arguments, 0, this), _parsePosition(this, _isNumber(vars) ? arguments[3] : position));
+      _createTweenType(0, arguments, this);
+
       return this;
     };
 
     _proto2.from = function from(targets, vars, position) {
-      new Tween(targets, _parseVars(arguments, 1, this), _parsePosition(this, _isNumber(vars) ? arguments[3] : position));
+      _createTweenType(1, arguments, this);
+
       return this;
     };
 
     _proto2.fromTo = function fromTo(targets, fromVars, toVars, position) {
-      new Tween(targets, _parseVars(arguments, 2, this), _parsePosition(this, _isNumber(fromVars) ? arguments[4] : position));
+      _createTweenType(2, arguments, this);
+
       return this;
     };
 
@@ -6142,7 +6493,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     _proto2.call = function call(callback, params, position) {
-      return _addToTimeline(this, Tween.delayedCall(0, callback, params), _parsePosition(this, position));
+      return _addToTimeline(this, Tween.delayedCall(0, callback, params), position);
     };
 
     _proto2.staggerTo = function staggerTo(targets, duration, vars, stagger, position, onCompleteAll, onCompleteAllParams) {
@@ -6171,7 +6522,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       var prevTime = this._time,
           tDur = this._dirty ? this.totalDuration() : this._tDur,
           dur = this._dur,
-          tTime = this !== _globalTimeline && totalTime > tDur - _tinyNum && totalTime >= 0 ? tDur : totalTime < _tinyNum ? 0 : totalTime,
+          tTime = totalTime <= 0 ? 0 : _roundPrecise(totalTime),
           crossingStart = this._zTime < 0 !== totalTime < 0 && (this._initted || !dur),
           time,
           child,
@@ -6185,6 +6536,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           prevIteration,
           yoyo,
           isYoyo;
+      this !== _globalTimeline && tTime > tDur && totalTime >= 0 && (tTime = tDur);
 
       if (tTime !== this._tTime || force || crossingStart) {
         if (prevTime !== this._time && dur) {
@@ -6205,7 +6557,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         if (this._repeat) {
           yoyo = this._yoyo;
           cycleDuration = dur + this._rDelay;
-          time = _round(tTime % cycleDuration);
+
+          if (this._repeat < -1 && totalTime < 0) {
+            return this.totalTime(cycleDuration * 100 + totalTime, suppressEvents, force);
+          }
+
+          time = _roundPrecise(tTime % cycleDuration);
 
           if (tTime === tDur) {
             iteration = this._repeat;
@@ -6235,11 +6592,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             iteration < prevIteration && (rewinding = !rewinding);
             prevTime = rewinding ? 0 : dur;
             this._lock = 1;
-            this.render(prevTime || (isYoyo ? 0 : _round(iteration * cycleDuration)), suppressEvents, !dur)._lock = 0;
+            this.render(prevTime || (isYoyo ? 0 : _roundPrecise(iteration * cycleDuration)), suppressEvents, !dur)._lock = 0;
+            this._tTime = tTime;
             !suppressEvents && this.parent && _callback(this, "onRepeat");
             this.vars.repeatRefresh && !isYoyo && (this.invalidate()._lock = 1);
 
-            if (prevTime !== this._time || prevPaused !== !this._ts) {
+            if (prevTime && prevTime !== this._time || prevPaused !== !this._ts || this.vars.onRepeat && !this.parent && !this._act) {
               return this;
             }
 
@@ -6264,7 +6622,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         }
 
         if (this._hasPause && !this._forcing && this._lock < 2) {
-          pauseTween = _findNextPauseTween(this, _round(prevTime), _round(time));
+          pauseTween = _findNextPauseTween(this, _roundPrecise(prevTime), _roundPrecise(time));
 
           if (pauseTween) {
             tTime -= time - (time = pauseTween._start);
@@ -6279,9 +6637,16 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           this._onUpdate = this.vars.onUpdate;
           this._initted = 1;
           this._zTime = totalTime;
+          prevTime = 0;
         }
 
-        !prevTime && time && !suppressEvents && _callback(this, "onStart");
+        if (!prevTime && time && !suppressEvents) {
+          _callback(this, "onStart");
+
+          if (this._tTime !== tTime) {
+            return this;
+          }
+        }
 
         if (time >= prevTime && totalTime >= 0) {
           child = this._first;
@@ -6347,8 +6712,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         if (tTime === tDur && tDur >= this.totalDuration() || !tTime && prevTime) if (prevStart === this._start || Math.abs(timeScale) !== Math.abs(this._ts)) if (!this._lock) {
           (totalTime || !dur) && (tTime === tDur && this._ts > 0 || !tTime && this._ts < 0) && _removeFromParent(this, 1);
 
-          if (!suppressEvents && !(totalTime < 0 && !prevTime) && (tTime || prevTime)) {
-            _callback(this, tTime === tDur ? "onComplete" : "onReverseComplete", true);
+          if (!suppressEvents && !(totalTime < 0 && !prevTime) && (tTime || prevTime || !tDur)) {
+            _callback(this, tTime === tDur && totalTime >= 0 ? "onComplete" : "onReverseComplete", true);
 
             this._prom && !(tTime < tDur && this.timeScale() > 0) && this._prom();
           }
@@ -6361,9 +6726,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     _proto2.add = function add(child, position) {
       var _this2 = this;
 
-      if (!_isNumber(position)) {
-        position = _parsePosition(this, position);
-      }
+      _isNumber(position) || (position = _parsePosition(this, position, child));
 
       if (!(child instanceof Animation)) {
         if (_isArray(child)) {
@@ -6460,7 +6823,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       this._forcing = 1;
 
       if (!this._dp && this._ts) {
-        this._start = _round(_ticker.time - (this._ts > 0 ? _totalTime2 / this._ts : (this.totalDuration() - _totalTime2) / -this._ts));
+        this._start = _roundPrecise(_ticker.time - (this._ts > 0 ? _totalTime2 / this._ts : (this.totalDuration() - _totalTime2) / -this._ts));
       }
 
       _Animation.prototype.totalTime.call(this, _totalTime2, suppressEvents);
@@ -6541,21 +6904,29 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           startAt = _vars.startAt,
           _onStart = _vars.onStart,
           onStartParams = _vars.onStartParams,
-          tween = Tween.to(tl, _setDefaults(vars, {
-        ease: "none",
+          immediateRender = _vars.immediateRender,
+          initted,
+          tween = Tween.to(tl, _setDefaults({
+        ease: vars.ease || "none",
         lazy: false,
+        immediateRender: false,
         time: endTime,
         overwrite: "auto",
         duration: vars.duration || Math.abs((endTime - (startAt && "time" in startAt ? startAt.time : tl._time)) / tl.timeScale()) || _tinyNum,
         onStart: function onStart() {
           tl.pause();
-          var duration = vars.duration || Math.abs((endTime - tl._time) / tl.timeScale());
-          tween._dur !== duration && _setDuration(tween, duration, 0, 1).render(tween._time, true, true);
+
+          if (!initted) {
+            var duration = vars.duration || Math.abs((endTime - (startAt && "time" in startAt ? startAt.time : tl._time)) / tl.timeScale());
+            tween._dur !== duration && _setDuration(tween, duration, 0, 1).render(tween._time, true, true);
+            initted = 1;
+          }
+
           _onStart && _onStart.apply(tween, onStartParams || []);
         }
-      }));
+      }, vars));
 
-      return tween;
+      return immediateRender ? tween.render(0) : tween;
     };
 
     _proto2.tweenFromTo = function tweenFromTo(fromPosition, toPosition, vars) {
@@ -6645,7 +7016,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         child = next;
       }
 
-      this._time = this._tTime = this._pTime = 0;
+      this._dp && (this._time = this._tTime = this._pTime = 0);
       includeLabels && (this.labels = {});
       return _uncache(this);
     };
@@ -6808,12 +7179,16 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       }
 
       if (end.charAt(1) === "=") {
-        end = parseFloat(parsedStart) + parseFloat(end.substr(2)) * (end.charAt(0) === "-" ? -1 : 1) + (getUnit(parsedStart) || 0);
+        pt = parseFloat(parsedStart) + parseFloat(end.substr(2)) * (end.charAt(0) === "-" ? -1 : 1) + (getUnit(parsedStart) || 0);
+
+        if (pt || pt === 0) {
+          end = pt;
+        }
       }
     }
 
     if (parsedStart !== end) {
-      if (!isNaN(parsedStart * end)) {
+      if (!isNaN(parsedStart * end) && end !== "") {
         pt = new PropTween(this._pt, target, prop, +parsedStart || 0, end - (parsedStart || 0), typeof currentValue === "boolean" ? _renderBoolean : _renderPlain, 0, setter);
         funcParam && (pt.fp = funcParam);
         modifier && pt.modifier(modifier, this, target);
@@ -6877,7 +7252,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         targets = tween._targets,
         parent = tween.parent,
         fullTargets = parent && parent.data === "nested" ? parent.parent._targets : targets,
-        autoOverwrite = tween._overwrite === "auto",
+        autoOverwrite = tween._overwrite === "auto" && !_suppressOverwrites,
         tl = tween.timeline,
         cleanVars,
         i,
@@ -6902,6 +7277,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       tween._ease = yoyoEase;
     }
 
+    tween._from = !tl && !!vars.runBackwards;
+
     if (!tl) {
       harness = targets[0] ? _getCache(targets[0]).harness : 0;
       harnessVars = harness && vars[harness.prop];
@@ -6923,13 +7300,17 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           stagger: 0
         }, startAt)));
 
+        time < 0 && !immediateRender && !autoRevert && tween._startAt.render(-1, true);
+
         if (immediateRender) {
-          if (time > 0) {
-            autoRevert || (tween._startAt = 0);
-          } else if (dur && !(time < 0 && prevStartAt)) {
+          time > 0 && !autoRevert && (tween._startAt = 0);
+
+          if (dur && time <= 0) {
             time && (tween._zTime = time);
             return;
           }
+        } else if (autoRevert === false) {
+          tween._startAt = 0;
         }
       } else if (runBackwards && dur) {
         if (prevStartAt) {
@@ -6947,6 +7328,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           harnessVars && (p[harness.prop] = harnessVars);
 
           _removeFromParent(tween._startAt = Tween.set(targets, p));
+
+          time < 0 && tween._startAt.render(-1, true);
 
           if (!immediateRender) {
             _initTween(tween._startAt, _tinyNum);
@@ -6991,7 +7374,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         if (autoOverwrite && tween._pt) {
           _overwritingTween = tween;
 
-          _globalTimeline.killTweensOf(target, ptLookup, tween.globalTime(0));
+          _globalTimeline.killTweensOf(target, ptLookup, tween.globalTime(time));
 
           overwritten = !tween.parent;
           _overwritingTween = 0;
@@ -7004,7 +7387,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       tween._onInit && tween._onInit(tween);
     }
 
-    tween._from = !tl && !!vars.runBackwards;
     tween._onUpdate = onUpdate;
     tween._initted = (!tween._op || tween._pt) && !overwritten;
   },
@@ -7044,16 +7426,16 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   var Tween = function (_Animation2) {
     _inheritsLoose(Tween, _Animation2);
 
-    function Tween(targets, vars, time, skipInherit) {
+    function Tween(targets, vars, position, skipInherit) {
       var _this3;
 
       if (typeof vars === "number") {
-        time.duration = vars;
-        vars = time;
-        time = null;
+        position.duration = vars;
+        vars = position;
+        position = null;
       }
 
-      _this3 = _Animation2.call(this, skipInherit ? vars : _inheritDefaults(vars), time) || this;
+      _this3 = _Animation2.call(this, skipInherit ? vars : _inheritDefaults(vars)) || this;
       var _this3$vars = _this3.vars,
           duration = _this3$vars.duration,
           delay = _this3$vars.delay,
@@ -7064,7 +7446,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           defaults = _this3$vars.defaults,
           scrollTrigger = _this3$vars.scrollTrigger,
           yoyoEase = _this3$vars.yoyoEase,
-          parent = _this3.parent,
+          parent = vars.parent || _globalTimeline,
           parsedTargets = (_isArray(targets) || _isTypedArray(targets) ? _isNumber(targets[0]) : "length" in vars) ? [targets] : toArray(targets),
           tl,
           i,
@@ -7085,14 +7467,19 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           defaults: defaults || {}
         });
         tl.kill();
-        tl.parent = _assertThisInitialized(_this3);
+        tl.parent = tl._dp = _assertThisInitialized(_this3);
+        tl._start = 0;
 
         if (keyframes) {
-          _setDefaults(tl.vars.defaults, {
+          _inheritDefaults(_setDefaults(tl.vars.defaults, {
             ease: "none"
-          });
+          }));
 
-          keyframes.forEach(function (frame) {
+          stagger ? parsedTargets.forEach(function (t, i) {
+            return keyframes.forEach(function (frame, j) {
+              return tl.to(t, frame, j ? ">" : i * stagger);
+            });
+          }) : keyframes.forEach(function (frame) {
             return tl.to(parsedTargets, frame, ">");
           });
         } else {
@@ -7141,7 +7528,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         _this3.timeline = 0;
       }
 
-      if (overwrite === true) {
+      if (overwrite === true && !_suppressOverwrites) {
         _overwritingTween = _assertThisInitialized(_this3);
 
         _globalTimeline.killTweensOf(parsedTargets);
@@ -7149,9 +7536,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         _overwritingTween = 0;
       }
 
-      parent && _postAddChecks(parent, _assertThisInitialized(_this3));
+      _addToTimeline(parent, _assertThisInitialized(_this3), position);
 
-      if (immediateRender || !duration && !keyframes && _this3._start === _round(parent._time) && _isNotFalse(immediateRender) && _hasNoPausedAncestors(_assertThisInitialized(_this3)) && parent.data !== "nested") {
+      vars.reversed && _this3.reverse();
+      vars.paused && _this3.paused(true);
+
+      if (immediateRender || !duration && !keyframes && _this3._start === _roundPrecise(parent._time) && _isNotFalse(immediateRender) && _hasNoPausedAncestors(_assertThisInitialized(_this3)) && parent.data !== "nested") {
         _this3._tTime = -_tinyNum;
 
         _this3.render(Math.max(0, -delay));
@@ -7180,13 +7570,18 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
       if (!dur) {
         _renderZeroDurationTween(this, totalTime, suppressEvents, force);
-      } else if (tTime !== this._tTime || !totalTime || force || this._startAt && this._zTime < 0 !== totalTime < 0) {
+      } else if (tTime !== this._tTime || !totalTime || force || !this._initted && this._tTime || this._startAt && this._zTime < 0 !== totalTime < 0) {
         time = tTime;
         timeline = this.timeline;
 
         if (this._repeat) {
           cycleDuration = dur + this._rDelay;
-          time = _round(tTime % cycleDuration);
+
+          if (this._repeat < -1 && totalTime < 0) {
+            return this.totalTime(cycleDuration * 100 + totalTime, suppressEvents, force);
+          }
+
+          time = _roundPrecise(tTime % cycleDuration);
 
           if (tTime === tDur) {
             iteration = this._repeat;
@@ -7220,7 +7615,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
             if (this.vars.repeatRefresh && !isYoyo && !this._lock) {
               this._lock = force = 1;
-              this.render(_round(cycleDuration * iteration), true).invalidate()._lock = 0;
+              this.render(_roundPrecise(cycleDuration * iteration), true).invalidate()._lock = 0;
             }
           }
         }
@@ -7250,7 +7645,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           this.ratio = ratio = 1 - ratio;
         }
 
-        time && !prevTime && !suppressEvents && _callback(this, "onStart");
+        if (time && !prevTime && !suppressEvents) {
+          _callback(this, "onStart");
+
+          if (this._tTime !== tTime) {
+            return this;
+          }
+        }
+
         pt = this._pt;
 
         while (pt) {
@@ -7288,7 +7690,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     _proto3.invalidate = function invalidate() {
-      this._pt = this._op = this._startAt = this._onUpdate = this._act = this._lazy = 0;
+      this._pt = this._op = this._startAt = this._onUpdate = this._lazy = this.ratio = 0;
       this._ptLookup = [];
       this.timeline && this.timeline.invalidate();
       return _Animation2.prototype.invalidate.call(this);
@@ -7300,11 +7702,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       }
 
       if (!targets && (!vars || vars === "all")) {
-        this._lazy = 0;
-
-        if (this.parent) {
-          return _interrupt(this);
-        }
+        this._lazy = this._pt = 0;
+        return this.parent ? _interrupt(this) : this;
       }
 
       if (this.timeline) {
@@ -7389,7 +7788,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     Tween.from = function from(targets, vars) {
-      return new Tween(targets, _parseVars(arguments, 1));
+      return _createTweenType(1, arguments);
     };
 
     Tween.delayedCall = function delayedCall(delay, callback, params, scope) {
@@ -7407,7 +7806,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     };
 
     Tween.fromTo = function fromTo(targets, fromVars, toVars) {
-      return new Tween(targets, _parseVars(arguments, 2));
+      return _createTweenType(2, arguments);
     };
 
     Tween.set = function set(targets, vars) {
@@ -7457,7 +7856,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     return _isFunction(target[property]) ? _setterFunc : _isUndefined(target[property]) && target.setAttribute ? _setterAttribute : _setterPlain;
   },
       _renderPlain = function _renderPlain(ratio, data) {
-    return data.set(data.t, data.p, Math.round((data.s + data.c * ratio) * 10000) / 10000, data);
+    return data.set(data.t, data.p, Math.round((data.s + data.c * ratio) * 1000000) / 1000000, data);
   },
       _renderBoolean = function _renderBoolean(ratio, data) {
     return data.set(data.t, data.p, !!(data.s + data.c * ratio), data);
@@ -7669,12 +8068,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     config: function config(value) {
       return _mergeDeep(_config, value || {});
     },
-    registerEffect: function registerEffect(_ref) {
-      var name = _ref.name,
-          effect = _ref.effect,
-          plugins = _ref.plugins,
-          defaults = _ref.defaults,
-          extendTimeline = _ref.extendTimeline;
+    registerEffect: function registerEffect(_ref3) {
+      var name = _ref3.name,
+          effect = _ref3.effect,
+          plugins = _ref3.plugins,
+          defaults = _ref3.defaults,
+          extendTimeline = _ref3.extendTimeline;
       (plugins || "").split(",").forEach(function (pluginName) {
         return pluginName && !_plugins[pluginName] && !_globals[pluginName] && _warn(name + " effect requires " + pluginName + " plugin.");
       });
@@ -7739,6 +8138,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       clamp: clamp,
       splitColor: splitColor,
       toArray: toArray,
+      selector: selector,
       mapRange: mapRange,
       pipe: pipe,
       unitize: unitize,
@@ -7758,7 +8158,10 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       Timeline: Timeline,
       Animation: Animation,
       getCache: _getCache,
-      _removeLinkedListItem: _removeLinkedListItem
+      _removeLinkedListItem: _removeLinkedListItem,
+      suppressOverwrites: function suppressOverwrites(value) {
+        return _suppressOverwrites = value;
+      }
     }
   };
 
@@ -7860,13 +8263,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     }
   }, _buildModifierPlugin("roundProps", _roundModifier), _buildModifierPlugin("modifiers"), _buildModifierPlugin("snap", snap)) || _gsap;
 
-  Tween.version = Timeline.version = gsap.version = "3.5.1";
+  Tween.version = Timeline.version = gsap.version = "3.8.0";
   _coreReady = 1;
-
-  if (_windowExists()) {
-    _wake();
-  }
-
+  _windowExists() && _wake();
   var Power0 = _easeMap.Power0,
       Power1 = _easeMap.Power1,
       Power2 = _easeMap.Power2,
@@ -8113,8 +8512,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     curUnit !== "px" && !toPixels && (curValue = _convertToUnit(target, property, value, "px"));
     isSVG = target.getCTM && _isSVG(target);
 
-    if (toPercent && (_transformProps[property] || ~property.indexOf("adius"))) {
-      return _round(curValue / (isSVG ? target.getBBox()[horizontal ? "width" : "height"] : target[measureProperty]) * amount);
+    if ((toPercent || curUnit === "%") && (_transformProps[property] || ~property.indexOf("adius"))) {
+      px = isSVG ? target.getBBox()[horizontal ? "width" : "height"] : target[measureProperty];
+      return _round(toPercent ? curValue / px * amount : curValue / 100 * px);
     }
 
     style[horizontal ? "width" : "height"] = amount + (toPixels ? curUnit : unit);
@@ -8163,7 +8563,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     if (_transformProps[property] && property !== "transform") {
       value = _parseTransform(target, uncache);
-      value = property !== "transformOrigin" ? value[property] : _firstTwoOnly(_getComputedProperty(target, _transformOriginProp)) + " " + value.zOrigin + "px";
+      value = property !== "transformOrigin" ? value[property] : value.svg ? value.origin : _firstTwoOnly(_getComputedProperty(target, _transformOriginProp)) + " " + value.zOrigin + "px";
     } else {
       value = target.style[property];
 
@@ -8172,7 +8572,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       }
     }
 
-    return unit && !~(value + "").indexOf(" ") ? _convertToUnit(target, property, value, unit) + unit : value;
+    return unit && !~(value + "").trim().indexOf(" ") ? _convertToUnit(target, property, value, unit) + unit : value;
   },
       _tweenComplexCSSString = function _tweenComplexCSSString(target, prop, start, end) {
     if (!start || start === "none") {
@@ -8265,7 +8665,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             p: chunk || matchIndex === 1 ? chunk : ",",
             s: startNum,
             c: relative ? relative * endNum : endNum - startNum,
-            m: color && color < 4 ? Math.round : 0
+            m: color && color < 4 || prop === "zIndex" ? Math.round : 0
           };
         }
       }
@@ -8275,10 +8675,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       pt.r = prop === "display" && end === "none" ? _renderNonTweeningValueOnlyAtEnd : _renderNonTweeningValue;
     }
 
-    if (_relExp.test(end)) {
-      pt.e = 0;
-    }
-
+    _relExp.test(end) && (pt.e = 0);
     this._pt = pt;
     return pt;
   },
@@ -8515,7 +8912,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     matrix = _getMatrix(target, cache.svg);
 
     if (cache.svg) {
-      t1 = !cache.uncache && target.getAttribute("data-svg-origin");
+      t1 = (!cache.uncache || origin === "0px 0px") && !uncache && target.getAttribute("data-svg-origin");
 
       _applySVGOrigin(target, t1 || origin, !!t1 || cache.originIsAbsolute, cache.smooth !== false, matrix);
     }
@@ -8536,7 +8933,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         scaleY = Math.sqrt(d * d + c * c);
         rotation = a || b ? _atan2(b, a) * _RAD2DEG : 0;
         skewX = c || d ? _atan2(c, d) * _RAD2DEG + rotation : 0;
-        skewX && (scaleY *= Math.cos(skewX * _DEG2RAD));
+        skewX && (scaleY *= Math.abs(Math.cos(skewX * _DEG2RAD)));
 
         if (cache.svg) {
           x -= xOrigin - (xOrigin * a + yOrigin * c);
@@ -8629,8 +9026,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       }
     }
 
-    cache.x = ((cache.xPercent = x && Math.round(target.offsetWidth / 2) === Math.round(-x) ? -50 : 0) ? 0 : x) + px;
-    cache.y = ((cache.yPercent = y && Math.round(target.offsetHeight / 2) === Math.round(-y) ? -50 : 0) ? 0 : y) + px;
+    cache.x = x - ((cache.xPercent = x && (cache.xPercent || (Math.round(target.offsetWidth / 2) === Math.round(-x) ? -50 : 0))) ? target.offsetWidth * cache.xPercent / 100 : 0) + px;
+    cache.y = y - ((cache.yPercent = y && (cache.yPercent || (Math.round(target.offsetHeight / 2) === Math.round(-y) ? -50 : 0))) ? target.offsetHeight * cache.yPercent / 100 : 0) + px;
     cache.z = z + px;
     cache.scaleX = _round(scaleX);
     cache.scaleY = _round(scaleY);
@@ -8822,10 +9219,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     temp = "matrix(" + a11 + "," + a21 + "," + a12 + "," + a22 + "," + tx + "," + ty + ")";
     target.setAttribute("transform", temp);
-
-    if (forceCSS) {
-      target.style[_transformProp] = temp;
-    }
+    forceCSS && (target.style[_transformProp] = temp);
   },
       _addRotationalPropTween = function _addRotationalPropTween(plugin, target, property, startNum, endValue, relative) {
     var cap = 360,
@@ -8862,10 +9256,17 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     return pt;
   },
+      _assign = function _assign(target, source) {
+    for (var p in source) {
+      target[p] = source[p];
+    }
+
+    return target;
+  },
       _addRawTransformPTs = function _addRawTransformPTs(plugin, transforms, target) {
-    var style = _tempDivStyler.style,
-        startCache = target._gsap,
+    var startCache = _assign({}, target._gsap),
         exclude = "perspective,force3D,transformOrigin,svgOrigin",
+        style = target.style,
         endCache,
         p,
         startValue,
@@ -8874,12 +9275,22 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         endNum,
         startUnit,
         endUnit;
-    style.cssText = getComputedStyle(target).cssText + ";position:absolute;display:block;";
-    style[_transformProp] = transforms;
 
-    _doc$1.body.appendChild(_tempDivStyler);
+    if (startCache.svg) {
+      startValue = target.getAttribute("transform");
+      target.setAttribute("transform", "");
+      style[_transformProp] = transforms;
+      endCache = _parseTransform(target, 1);
 
-    endCache = _parseTransform(_tempDivStyler, 1);
+      _removeProperty(target, _transformProp);
+
+      target.setAttribute("transform", startValue);
+    } else {
+      startValue = getComputedStyle(target)[_transformProp];
+      style[_transformProp] = transforms;
+      endCache = _parseTransform(target, 1);
+      style[_transformProp] = startValue;
+    }
 
     for (p in _transformProps) {
       startValue = startCache[p];
@@ -8890,14 +9301,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         endUnit = getUnit(endValue);
         startNum = startUnit !== endUnit ? _convertToUnit(target, p, startValue, endUnit) : parseFloat(startValue);
         endNum = parseFloat(endValue);
-        plugin._pt = new PropTween(plugin._pt, startCache, p, startNum, endNum - startNum, _renderCSSProp);
+        plugin._pt = new PropTween(plugin._pt, endCache, p, startNum, endNum - startNum, _renderCSSProp);
         plugin._pt.u = endUnit || 0;
 
         plugin._props.push(p);
       }
     }
 
-    _doc$1.body.removeChild(_tempDivStyler);
+    _assign(endCache, startCache);
   };
 
   _forEachName("padding,margin,Width,Radius", function (name, index) {
@@ -8938,6 +9349,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     init: function init(target, vars, tween, index, targets) {
       var props = this._props,
           style = target.style,
+          startAt = tween.vars.startAt,
           startValue,
           endValue,
           endNum,
@@ -8979,20 +9391,33 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         }
 
         if (specialProp) {
-          if (specialProp(this, target, p, endValue, tween)) {
-            hasPriority = 1;
-          }
+          specialProp(this, target, p, endValue, tween) && (hasPriority = 1);
         } else if (p.substr(0, 2) === "--") {
-          this.add(style, "setProperty", getComputedStyle(target).getPropertyValue(p) + "", endValue + "", index, targets, 0, 0, p);
+          startValue = (getComputedStyle(target).getPropertyValue(p) + "").trim();
+          endValue += "";
+          _colorExp.lastIndex = 0;
+
+          if (!_colorExp.test(startValue)) {
+            startUnit = getUnit(startValue);
+            endUnit = getUnit(endValue);
+          }
+
+          endUnit ? startUnit !== endUnit && (startValue = _convertToUnit(target, p, startValue, endUnit) + endUnit) : startUnit && (endValue += startUnit);
+          this.add(style, "setProperty", startValue, endValue, index, targets, 0, 0, p);
+          props.push(p);
         } else if (type !== "undefined") {
-          startValue = _get(target, p);
+          if (startAt && p in startAt) {
+            startValue = typeof startAt[p] === "function" ? startAt[p].call(tween, index, target, targets) : startAt[p];
+            p in _config.units && !getUnit(startValue) && (startValue += _config.units[p]);
+            _isString(startValue) && ~startValue.indexOf("random(") && (startValue = _replaceRandom(startValue));
+            (startValue + "").charAt(1) === "=" && (startValue = _get(target, p));
+          } else {
+            startValue = _get(target, p);
+          }
+
           startNum = parseFloat(startValue);
           relative = type === "string" && endValue.charAt(1) === "=" ? +(endValue.charAt(0) + "1") : 0;
-
-          if (relative) {
-            endValue = endValue.substr(2);
-          }
-
+          relative && (endValue = endValue.substr(2));
           endNum = parseFloat(endValue);
 
           if (p in _propertyAliases) {
@@ -9015,14 +9440,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           if (isTransformRelated) {
             if (!transformPropTween) {
               cache = target._gsap;
-              cache.renderTransform || _parseTransform(target);
+              cache.renderTransform && !vars.parseTransform || _parseTransform(target, vars.parseTransform);
               smooth = vars.smoothOrigin !== false && cache.smooth;
               transformPropTween = this._pt = new PropTween(this._pt, style, _transformProp, 0, 1, cache.renderTransform, cache, 0, -1);
               transformPropTween.dep = 1;
             }
 
             if (p === "scale") {
-              this._pt = new PropTween(this._pt, cache, "scaleY", cache.scaleY, relative ? relative * endNum : endNum - cache.scaleY);
+              this._pt = new PropTween(this._pt, cache, "scaleY", cache.scaleY, (relative ? relative * endNum : endNum - cache.scaleY) || 0);
               props.push("scaleY", p);
               p += "X";
             } else if (p === "transformOrigin") {
@@ -9067,16 +9492,16 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             endNum || (endNum = 0);
             endUnit = getUnit(endValue) || (p in _config.units ? _config.units[p] : startUnit);
             startUnit !== endUnit && (startNum = _convertToUnit(target, p, startValue, endUnit));
-            this._pt = new PropTween(this._pt, isTransformRelated ? cache : style, p, startNum, relative ? relative * endNum : endNum - startNum, endUnit === "px" && vars.autoRound !== false && !isTransformRelated ? _renderRoundedCSSProp : _renderCSSProp);
+            this._pt = new PropTween(this._pt, isTransformRelated ? cache : style, p, startNum, relative ? relative * endNum : endNum - startNum, !isTransformRelated && (endUnit === "px" || p === "zIndex") && vars.autoRound !== false ? _renderRoundedCSSProp : _renderCSSProp);
             this._pt.u = endUnit || 0;
 
-            if (startUnit !== endUnit) {
+            if (startUnit !== endUnit && endUnit !== "%") {
               this._pt.b = startValue;
               this._pt.r = _renderCSSPropWithBeginning;
             }
           } else if (!(p in style)) {
             if (p in target) {
-              this.add(target, p, target[p], endValue, index, targets);
+              this.add(target, p, startValue || target[p], endValue, index, targets);
             } else {
               _missingPlugin(p, endValue);
 
@@ -9166,6 +9591,959 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   }
 });
 
+},{}],"is_js":[function(require,module,exports){
+(function (global){(function (){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+/*!
+ * is.js 0.8.0
+ * Author: Aras Atasaygin
+ */
+// AMD with global, Node, or global
+;
+
+(function (root, factory) {
+  // eslint-disable-line no-extra-semi
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(function () {
+      // Also create a global in case some scripts
+      // that are loaded still are looking for
+      // a global even when an AMD loader is in use.
+      return root.is = factory();
+    });
+  } else if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like enviroments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    // Browser globals (root is self)
+    root.is = factory();
+  }
+})(void 0, function () {
+  // Baseline
+
+  /* -------------------------------------------------------------------------- */
+  // define 'is' object and current version
+  var is = {};
+  is.VERSION = '0.8.0'; // define interfaces
+
+  is.not = {};
+  is.all = {};
+  is.any = {}; // cache some methods to call later on
+
+  var toString = Object.prototype.toString;
+  var slice = Array.prototype.slice;
+  var hasOwnProperty = Object.prototype.hasOwnProperty; // helper function which reverses the sense of predicate result
+
+  function not(func) {
+    return function () {
+      return !func.apply(null, slice.call(arguments));
+    };
+  } // helper function which call predicate function per parameter and return true if all pass
+
+
+  function all(func) {
+    return function () {
+      var params = getParams(arguments);
+      var length = params.length;
+
+      for (var i = 0; i < length; i++) {
+        if (!func.call(null, params[i])) {
+          return false;
+        }
+      }
+
+      return true;
+    };
+  } // helper function which call predicate function per parameter and return true if any pass
+
+
+  function any(func) {
+    return function () {
+      var params = getParams(arguments);
+      var length = params.length;
+
+      for (var i = 0; i < length; i++) {
+        if (func.call(null, params[i])) {
+          return true;
+        }
+      }
+
+      return false;
+    };
+  } // build a 'comparator' object for various comparison checks
+
+
+  var comparator = {
+    '<': function _(a, b) {
+      return a < b;
+    },
+    '<=': function _(a, b) {
+      return a <= b;
+    },
+    '>': function _(a, b) {
+      return a > b;
+    },
+    '>=': function _(a, b) {
+      return a >= b;
+    }
+  }; // helper function which compares a version to a range
+
+  function compareVersion(version, range) {
+    var string = range + '';
+    var n = +(string.match(/\d+/) || NaN);
+    var op = string.match(/^[<>]=?|/)[0];
+    return comparator[op] ? comparator[op](version, n) : version == n || n !== n;
+  } // helper function which extracts params from arguments
+
+
+  function getParams(args) {
+    var params = slice.call(args);
+    var length = params.length;
+
+    if (length === 1 && is.array(params[0])) {
+      // support array
+      params = params[0];
+    }
+
+    return params;
+  } // Type checks
+
+  /* -------------------------------------------------------------------------- */
+  // is a given value Arguments?
+
+
+  is.arguments = function (value) {
+    // fallback check is for IE
+    return toString.call(value) === '[object Arguments]' || value != null && _typeof(value) === 'object' && 'callee' in value;
+  }; // is a given value Array?
+
+
+  is.array = Array.isArray || function (value) {
+    // check native isArray first
+    return toString.call(value) === '[object Array]';
+  }; // is a given value Boolean?
+
+
+  is.boolean = function (value) {
+    return value === true || value === false || toString.call(value) === '[object Boolean]';
+  }; // is a given value Char?
+
+
+  is.char = function (value) {
+    return is.string(value) && value.length === 1;
+  }; // is a given value Date Object?
+
+
+  is.date = function (value) {
+    return toString.call(value) === '[object Date]';
+  }; // is a given object a DOM node?
+
+
+  is.domNode = function (object) {
+    return is.object(object) && object.nodeType > 0;
+  }; // is a given value Error object?
+
+
+  is.error = function (value) {
+    return toString.call(value) === '[object Error]';
+  }; // is a given value function?
+
+
+  is['function'] = function (value) {
+    // fallback check is for IE
+    return toString.call(value) === '[object Function]' || typeof value === 'function';
+  }; // is given value a pure JSON object?
+
+
+  is.json = function (value) {
+    return toString.call(value) === '[object Object]';
+  }; // is a given value NaN?
+
+
+  is.nan = function (value) {
+    // NaN is number :) Also it is the only value which does not equal itself
+    return value !== value;
+  }; // is a given value null?
+
+
+  is['null'] = function (value) {
+    return value === null;
+  }; // is a given value number?
+
+
+  is.number = function (value) {
+    return is.not.nan(value) && toString.call(value) === '[object Number]';
+  }; // is a given value object?
+
+
+  is.object = function (value) {
+    return Object(value) === value;
+  }; // is a given value RegExp?
+
+
+  is.regexp = function (value) {
+    return toString.call(value) === '[object RegExp]';
+  }; // are given values same type?
+  // prevent NaN, Number same type check
+
+
+  is.sameType = function (value, other) {
+    var tag = toString.call(value);
+
+    if (tag !== toString.call(other)) {
+      return false;
+    }
+
+    if (tag === '[object Number]') {
+      return !is.any.nan(value, other) || is.all.nan(value, other);
+    }
+
+    return true;
+  }; // sameType method does not support 'all' and 'any' interfaces
+
+
+  is.sameType.api = ['not']; // is a given value String?
+
+  is.string = function (value) {
+    return toString.call(value) === '[object String]';
+  }; // is a given value undefined?
+
+
+  is.undefined = function (value) {
+    return value === void 0;
+  }; // is a given value window?
+  // setInterval method is only available for window object
+
+
+  is.windowObject = function (value) {
+    return value != null && _typeof(value) === 'object' && 'setInterval' in value;
+  }; // Presence checks
+
+  /* -------------------------------------------------------------------------- */
+  //is a given value empty? Objects, arrays, strings
+
+
+  is.empty = function (value) {
+    if (is.object(value)) {
+      var length = Object.getOwnPropertyNames(value).length;
+
+      if (length === 0 || length === 1 && is.array(value) || length === 2 && is.arguments(value)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    return value === '';
+  }; // is a given value existy?
+
+
+  is.existy = function (value) {
+    return value != null;
+  }; // is a given value falsy?
+
+
+  is.falsy = function (value) {
+    return !value;
+  }; // is a given value truthy?
+
+
+  is.truthy = not(is.falsy); // Arithmetic checks
+
+  /* -------------------------------------------------------------------------- */
+  // is a given number above minimum parameter?
+
+  is.above = function (n, min) {
+    return is.all.number(n, min) && n > min;
+  }; // above method does not support 'all' and 'any' interfaces
+
+
+  is.above.api = ['not']; // is a given number decimal?
+
+  is.decimal = function (n) {
+    return is.number(n) && n % 1 !== 0;
+  }; // are given values equal? supports numbers, strings, regexes, booleans
+  // TODO: Add object and array support
+
+
+  is.equal = function (value, other) {
+    // check 0 and -0 equity with Infinity and -Infinity
+    if (is.all.number(value, other)) {
+      return value === other && 1 / value === 1 / other;
+    } // check regexes as strings too
+
+
+    if (is.all.string(value, other) || is.all.regexp(value, other)) {
+      return '' + value === '' + other;
+    }
+
+    if (is.all.boolean(value, other)) {
+      return value === other;
+    }
+
+    return false;
+  }; // equal method does not support 'all' and 'any' interfaces
+
+
+  is.equal.api = ['not']; // is a given number even?
+
+  is.even = function (n) {
+    return is.number(n) && n % 2 === 0;
+  }; // is a given number finite?
+
+
+  is.finite = isFinite || function (n) {
+    return is.not.infinite(n) && is.not.nan(n);
+  }; // is a given number infinite?
+
+
+  is.infinite = function (n) {
+    return n === Infinity || n === -Infinity;
+  }; // is a given number integer?
+
+
+  is.integer = function (n) {
+    return is.number(n) && n % 1 === 0;
+  }; // is a given number negative?
+
+
+  is.negative = function (n) {
+    return is.number(n) && n < 0;
+  }; // is a given number odd?
+
+
+  is.odd = function (n) {
+    return is.number(n) && n % 2 === 1;
+  }; // is a given number positive?
+
+
+  is.positive = function (n) {
+    return is.number(n) && n > 0;
+  }; // is a given number above maximum parameter?
+
+
+  is.under = function (n, max) {
+    return is.all.number(n, max) && n < max;
+  }; // least method does not support 'all' and 'any' interfaces
+
+
+  is.under.api = ['not']; // is a given number within minimum and maximum parameters?
+
+  is.within = function (n, min, max) {
+    return is.all.number(n, min, max) && n > min && n < max;
+  }; // within method does not support 'all' and 'any' interfaces
+
+
+  is.within.api = ['not']; // Regexp checks
+
+  /* -------------------------------------------------------------------------- */
+  // Steven Levithan, Jan Goyvaerts: Regular Expressions Cookbook
+  // Scott Gonzalez: Email address validation
+  // dateString match m/d/yy and mm/dd/yyyy, allowing any combination of one or two digits for the day and month, and two or four digits for the year
+  // eppPhone match extensible provisioning protocol format
+  // nanpPhone match north american number plan format
+  // time match hours, minutes, and seconds, 24-hour clock
+
+  var regexes = {
+    affirmative: /^(?:1|t(?:rue)?|y(?:es)?|ok(?:ay)?)$/,
+    alphaNumeric: /^[A-Za-z0-9]+$/,
+    caPostalCode: /^(?!.*[DFIOQU])[A-VXY][0-9][A-Z]\s?[0-9][A-Z][0-9]$/,
+    creditCard: /^(?:(4[0-9]{12}(?:[0-9]{3})?)|(5[1-5][0-9]{14})|(6(?:011|5[0-9]{2})[0-9]{12})|(3[47][0-9]{13})|(3(?:0[0-5]|[68][0-9])[0-9]{11})|((?:2131|1800|35[0-9]{3})[0-9]{11}))$/,
+    dateString: /^(1[0-2]|0?[1-9])([\/-])(3[01]|[12][0-9]|0?[1-9])(?:\2)(?:[0-9]{2})?[0-9]{2}$/,
+    email: /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
+    // eslint-disable-line no-control-regex
+    eppPhone: /^\+[0-9]{1,3}\.[0-9]{4,14}(?:x.+)?$/,
+    hexadecimal: /^(?:0x)?[0-9a-fA-F]+$/,
+    hexColor: /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+    ipv4: /^(?:(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])\.){3}(?:\d|[1-9]\d|1\d{2}|2[0-4]\d|25[0-5])$/,
+    ipv6: /^((?=.*::)(?!.*::.+::)(::)?([\dA-F]{1,4}:(:|\b)|){5}|([\dA-F]{1,4}:){6})((([\dA-F]{1,4}((?!\3)::|:\b|$))|(?!\2\3)){2}|(((2[0-4]|1\d|[1-9])?\d|25[0-5])\.?\b){4})$/i,
+    nanpPhone: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
+    socialSecurityNumber: /^(?!000|666)[0-8][0-9]{2}-?(?!00)[0-9]{2}-?(?!0000)[0-9]{4}$/,
+    timeString: /^(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$/,
+    ukPostCode: /^[A-Z]{1,2}[0-9RCHNQ][0-9A-Z]?\s?[0-9][ABD-HJLNP-UW-Z]{2}$|^[A-Z]{2}-?[0-9]{4}$/,
+    url: /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i,
+    usZipCode: /^[0-9]{5}(?:-[0-9]{4})?$/
+  };
+
+  function regexpCheck(regexp, regexes) {
+    is[regexp] = function (value) {
+      return regexes[regexp].test(value);
+    };
+  } // create regexp checks methods from 'regexes' object
+
+
+  for (var regexp in regexes) {
+    if (regexes.hasOwnProperty(regexp)) {
+      regexpCheck(regexp, regexes);
+    }
+  } // simplify IP checks by calling the regex helpers for IPv4 and IPv6
+
+
+  is.ip = function (value) {
+    return is.ipv4(value) || is.ipv6(value);
+  }; // String checks
+
+  /* -------------------------------------------------------------------------- */
+  // is a given string or sentence capitalized?
+
+
+  is.capitalized = function (string) {
+    if (is.not.string(string)) {
+      return false;
+    }
+
+    var words = string.split(' ');
+
+    for (var i = 0; i < words.length; i++) {
+      var word = words[i];
+
+      if (word.length) {
+        var chr = word.charAt(0);
+
+        if (chr !== chr.toUpperCase()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }; // is string end with a given target parameter?
+
+
+  is.endWith = function (string, target) {
+    if (is.not.string(string)) {
+      return false;
+    }
+
+    target += '';
+    var position = string.length - target.length;
+    return position >= 0 && string.indexOf(target, position) === position;
+  }; // endWith method does not support 'all' and 'any' interfaces
+
+
+  is.endWith.api = ['not']; // is a given string include parameter target?
+
+  is.include = function (string, target) {
+    return string.indexOf(target) > -1;
+  }; // include method does not support 'all' and 'any' interfaces
+
+
+  is.include.api = ['not']; // is a given string all lowercase?
+
+  is.lowerCase = function (string) {
+    return is.string(string) && string === string.toLowerCase();
+  }; // is a given string palindrome?
+
+
+  is.palindrome = function (string) {
+    if (is.not.string(string)) {
+      return false;
+    }
+
+    string = string.replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+    var length = string.length - 1;
+
+    for (var i = 0, half = Math.floor(length / 2); i <= half; i++) {
+      if (string.charAt(i) !== string.charAt(length - i)) {
+        return false;
+      }
+    }
+
+    return true;
+  }; // is a given value space?
+  // horizantal tab: 9, line feed: 10, vertical tab: 11, form feed: 12, carriage return: 13, space: 32
+
+
+  is.space = function (value) {
+    if (is.not.char(value)) {
+      return false;
+    }
+
+    var charCode = value.charCodeAt(0);
+    return charCode > 8 && charCode < 14 || charCode === 32;
+  }; // is string start with a given target parameter?
+
+
+  is.startWith = function (string, target) {
+    return is.string(string) && string.indexOf(target) === 0;
+  }; // startWith method does not support 'all' and 'any' interfaces
+
+
+  is.startWith.api = ['not']; // is a given string all uppercase?
+
+  is.upperCase = function (string) {
+    return is.string(string) && string === string.toUpperCase();
+  }; // Time checks
+
+  /* -------------------------------------------------------------------------- */
+
+
+  var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  var months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']; // is a given dates day equal given day parameter?
+
+  is.day = function (date, day) {
+    return is.date(date) && day.toLowerCase() === days[date.getDay()];
+  }; // day method does not support 'all' and 'any' interfaces
+
+
+  is.day.api = ['not']; // is a given date in daylight saving time?
+
+  is.dayLightSavingTime = function (date) {
+    var january = new Date(date.getFullYear(), 0, 1);
+    var july = new Date(date.getFullYear(), 6, 1);
+    var stdTimezoneOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
+    return date.getTimezoneOffset() < stdTimezoneOffset;
+  }; // is a given date future?
+
+
+  is.future = function (date) {
+    var now = new Date();
+    return is.date(date) && date.getTime() > now.getTime();
+  }; // is date within given range?
+
+
+  is.inDateRange = function (date, start, end) {
+    if (is.not.date(date) || is.not.date(start) || is.not.date(end)) {
+      return false;
+    }
+
+    var stamp = date.getTime();
+    return stamp > start.getTime() && stamp < end.getTime();
+  }; // inDateRange method does not support 'all' and 'any' interfaces
+
+
+  is.inDateRange.api = ['not']; // is a given date in last month range?
+
+  is.inLastMonth = function (date) {
+    return is.inDateRange(date, new Date(new Date().setMonth(new Date().getMonth() - 1)), new Date());
+  }; // is a given date in last week range?
+
+
+  is.inLastWeek = function (date) {
+    return is.inDateRange(date, new Date(new Date().setDate(new Date().getDate() - 7)), new Date());
+  }; // is a given date in last year range?
+
+
+  is.inLastYear = function (date) {
+    return is.inDateRange(date, new Date(new Date().setFullYear(new Date().getFullYear() - 1)), new Date());
+  }; // is a given date in next month range?
+
+
+  is.inNextMonth = function (date) {
+    return is.inDateRange(date, new Date(), new Date(new Date().setMonth(new Date().getMonth() + 1)));
+  }; // is a given date in next week range?
+
+
+  is.inNextWeek = function (date) {
+    return is.inDateRange(date, new Date(), new Date(new Date().setDate(new Date().getDate() + 7)));
+  }; // is a given date in next year range?
+
+
+  is.inNextYear = function (date) {
+    return is.inDateRange(date, new Date(), new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
+  }; // is the given year a leap year?
+
+
+  is.leapYear = function (year) {
+    return is.number(year) && (year % 4 === 0 && year % 100 !== 0 || year % 400 === 0);
+  }; // is a given dates month equal given month parameter?
+
+
+  is.month = function (date, month) {
+    return is.date(date) && month.toLowerCase() === months[date.getMonth()];
+  }; // month method does not support 'all' and 'any' interfaces
+
+
+  is.month.api = ['not']; // is a given date past?
+
+  is.past = function (date) {
+    var now = new Date();
+    return is.date(date) && date.getTime() < now.getTime();
+  }; // is a given date in the parameter quarter?
+
+
+  is.quarterOfYear = function (date, quarter) {
+    return is.date(date) && is.number(quarter) && quarter === Math.floor((date.getMonth() + 3) / 3);
+  }; // quarterOfYear method does not support 'all' and 'any' interfaces
+
+
+  is.quarterOfYear.api = ['not']; // is a given date indicate today?
+
+  is.today = function (date) {
+    var now = new Date();
+    var todayString = now.toDateString();
+    return is.date(date) && date.toDateString() === todayString;
+  }; // is a given date indicate tomorrow?
+
+
+  is.tomorrow = function (date) {
+    var now = new Date();
+    var tomorrowString = new Date(now.setDate(now.getDate() + 1)).toDateString();
+    return is.date(date) && date.toDateString() === tomorrowString;
+  }; // is a given date weekend?
+  // 6: Saturday, 0: Sunday
+
+
+  is.weekend = function (date) {
+    return is.date(date) && (date.getDay() === 6 || date.getDay() === 0);
+  }; // is a given date weekday?
+
+
+  is.weekday = not(is.weekend); // is a given dates year equal given year parameter?
+
+  is.year = function (date, year) {
+    return is.date(date) && is.number(year) && year === date.getFullYear();
+  }; // year method does not support 'all' and 'any' interfaces
+
+
+  is.year.api = ['not']; // is a given date indicate yesterday?
+
+  is.yesterday = function (date) {
+    var now = new Date();
+    var yesterdayString = new Date(now.setDate(now.getDate() - 1)).toDateString();
+    return is.date(date) && date.toDateString() === yesterdayString;
+  }; // Environment checks
+
+  /* -------------------------------------------------------------------------- */
+
+
+  var freeGlobal = is.windowObject((typeof global === "undefined" ? "undefined" : _typeof(global)) == 'object' && global) && global;
+  var freeSelf = is.windowObject((typeof self === "undefined" ? "undefined" : _typeof(self)) == 'object' && self) && self;
+  var thisGlobal = is.windowObject(_typeof(this) == 'object' && this) && this;
+  var root = freeGlobal || freeSelf || thisGlobal || Function('return this')();
+  var document = freeSelf && freeSelf.document;
+  var previousIs = root.is; // store navigator properties to use later
+
+  var navigator = freeSelf && freeSelf.navigator;
+  var appVersion = (navigator && navigator.appVersion || '').toLowerCase();
+  var userAgent = (navigator && navigator.userAgent || '').toLowerCase();
+  var vendor = (navigator && navigator.vendor || '').toLowerCase(); // is current device android?
+
+  is.android = function () {
+    return /android/.test(userAgent);
+  }; // android method does not support 'all' and 'any' interfaces
+
+
+  is.android.api = ['not']; // is current device android phone?
+
+  is.androidPhone = function () {
+    return /android/.test(userAgent) && /mobile/.test(userAgent);
+  }; // androidPhone method does not support 'all' and 'any' interfaces
+
+
+  is.androidPhone.api = ['not']; // is current device android tablet?
+
+  is.androidTablet = function () {
+    return /android/.test(userAgent) && !/mobile/.test(userAgent);
+  }; // androidTablet method does not support 'all' and 'any' interfaces
+
+
+  is.androidTablet.api = ['not']; // is current device blackberry?
+
+  is.blackberry = function () {
+    return /blackberry/.test(userAgent) || /bb10/.test(userAgent);
+  }; // blackberry method does not support 'all' and 'any' interfaces
+
+
+  is.blackberry.api = ['not']; // is current browser chrome?
+  // parameter is optional
+
+  is.chrome = function (range) {
+    var match = /google inc/.test(vendor) ? userAgent.match(/(?:chrome|crios)\/(\d+)/) : null;
+    return match !== null && compareVersion(match[1], range);
+  }; // chrome method does not support 'all' and 'any' interfaces
+
+
+  is.chrome.api = ['not']; // is current device desktop?
+
+  is.desktop = function () {
+    return is.not.mobile() && is.not.tablet();
+  }; // desktop method does not support 'all' and 'any' interfaces
+
+
+  is.desktop.api = ['not']; // is current browser edge?
+  // parameter is optional
+
+  is.edge = function (range) {
+    var match = userAgent.match(/edge\/(\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // edge method does not support 'all' and 'any' interfaces
+
+
+  is.edge.api = ['not']; // is current browser firefox?
+  // parameter is optional
+
+  is.firefox = function (range) {
+    var match = userAgent.match(/(?:firefox|fxios)\/(\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // firefox method does not support 'all' and 'any' interfaces
+
+
+  is.firefox.api = ['not']; // is current browser internet explorer?
+  // parameter is optional
+
+  is.ie = function (range) {
+    var match = userAgent.match(/(?:msie |trident.+?; rv:)(\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // ie method does not support 'all' and 'any' interfaces
+
+
+  is.ie.api = ['not']; // is current device ios?
+
+  is.ios = function () {
+    return is.iphone() || is.ipad() || is.ipod();
+  }; // ios method does not support 'all' and 'any' interfaces
+
+
+  is.ios.api = ['not']; // is current device ipad?
+  // parameter is optional
+
+  is.ipad = function (range) {
+    var match = userAgent.match(/ipad.+?os (\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // ipad method does not support 'all' and 'any' interfaces
+
+
+  is.ipad.api = ['not']; // is current device iphone?
+  // parameter is optional
+
+  is.iphone = function (range) {
+    // original iPhone doesn't have the os portion of the UA
+    var match = userAgent.match(/iphone(?:.+?os (\d+))?/);
+    return match !== null && compareVersion(match[1] || 1, range);
+  }; // iphone method does not support 'all' and 'any' interfaces
+
+
+  is.iphone.api = ['not']; // is current device ipod?
+  // parameter is optional
+
+  is.ipod = function (range) {
+    var match = userAgent.match(/ipod.+?os (\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // ipod method does not support 'all' and 'any' interfaces
+
+
+  is.ipod.api = ['not']; // is current operating system linux?
+
+  is.linux = function () {
+    return /linux/.test(appVersion);
+  }; // linux method does not support 'all' and 'any' interfaces
+
+
+  is.linux.api = ['not']; // is current operating system mac?
+
+  is.mac = function () {
+    return /mac/.test(appVersion);
+  }; // mac method does not support 'all' and 'any' interfaces
+
+
+  is.mac.api = ['not']; // is current device mobile?
+
+  is.mobile = function () {
+    return is.iphone() || is.ipod() || is.androidPhone() || is.blackberry() || is.windowsPhone();
+  }; // mobile method does not support 'all' and 'any' interfaces
+
+
+  is.mobile.api = ['not']; // is current state offline?
+
+  is.offline = not(is.online); // offline method does not support 'all' and 'any' interfaces
+
+  is.offline.api = ['not']; // is current state online?
+
+  is.online = function () {
+    return !navigator || navigator.onLine === true;
+  }; // online method does not support 'all' and 'any' interfaces
+
+
+  is.online.api = ['not']; // is current browser opera?
+  // parameter is optional
+
+  is.opera = function (range) {
+    var match = userAgent.match(/(?:^opera.+?version|opr)\/(\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // opera method does not support 'all' and 'any' interfaces
+
+
+  is.opera.api = ['not']; // is current browser phantomjs?
+  // parameter is optional
+
+  is.phantom = function (range) {
+    var match = userAgent.match(/phantomjs\/(\d+)/);
+    return match !== null && compareVersion(match[1], range);
+  }; // phantom method does not support 'all' and 'any' interfaces
+
+
+  is.phantom.api = ['not']; // is current browser safari?
+  // parameter is optional
+
+  is.safari = function (range) {
+    var match = userAgent.match(/version\/(\d+).+?safari/);
+    return match !== null && compareVersion(match[1], range);
+  }; // safari method does not support 'all' and 'any' interfaces
+
+
+  is.safari.api = ['not']; // is current device tablet?
+
+  is.tablet = function () {
+    return is.ipad() || is.androidTablet() || is.windowsTablet();
+  }; // tablet method does not support 'all' and 'any' interfaces
+
+
+  is.tablet.api = ['not']; // is current device supports touch?
+
+  is.touchDevice = function () {
+    return !!document && ('ontouchstart' in freeSelf || 'DocumentTouch' in freeSelf && document instanceof DocumentTouch);
+  }; // touchDevice method does not support 'all' and 'any' interfaces
+
+
+  is.touchDevice.api = ['not']; // is current operating system windows?
+
+  is.windows = function () {
+    return /win/.test(appVersion);
+  }; // windows method does not support 'all' and 'any' interfaces
+
+
+  is.windows.api = ['not']; // is current device windows phone?
+
+  is.windowsPhone = function () {
+    return is.windows() && /phone/.test(userAgent);
+  }; // windowsPhone method does not support 'all' and 'any' interfaces
+
+
+  is.windowsPhone.api = ['not']; // is current device windows tablet?
+
+  is.windowsTablet = function () {
+    return is.windows() && is.not.windowsPhone() && /touch/.test(userAgent);
+  }; // windowsTablet method does not support 'all' and 'any' interfaces
+
+
+  is.windowsTablet.api = ['not']; // Object checks
+
+  /* -------------------------------------------------------------------------- */
+  // has a given object got parameterized count property?
+
+  is.propertyCount = function (object, count) {
+    if (is.not.object(object) || is.not.number(count)) {
+      return false;
+    }
+
+    var n = 0;
+
+    for (var property in object) {
+      if (hasOwnProperty.call(object, property) && ++n > count) {
+        return false;
+      }
+    }
+
+    return n === count;
+  }; // propertyCount method does not support 'all' and 'any' interfaces
+
+
+  is.propertyCount.api = ['not']; // is given object has parameterized property?
+
+  is.propertyDefined = function (object, property) {
+    return is.object(object) && is.string(property) && property in object;
+  }; // propertyDefined method does not support 'all' and 'any' interfaces
+
+
+  is.propertyDefined.api = ['not']; // Array checks
+
+  /* -------------------------------------------------------------------------- */
+  // is a given item in an array?
+
+  is.inArray = function (value, array) {
+    if (is.not.array(array)) {
+      return false;
+    }
+
+    for (var i = 0; i < array.length; i++) {
+      if (array[i] === value) {
+        return true;
+      }
+    }
+
+    return false;
+  }; // inArray method does not support 'all' and 'any' interfaces
+
+
+  is.inArray.api = ['not']; // is a given array sorted?
+
+  is.sorted = function (array, sign) {
+    if (is.not.array(array)) {
+      return false;
+    }
+
+    var predicate = comparator[sign] || comparator['>='];
+
+    for (var i = 1; i < array.length; i++) {
+      if (!predicate(array[i], array[i - 1])) {
+        return false;
+      }
+    }
+
+    return true;
+  }; // API
+  // Set 'not', 'all' and 'any' interfaces to methods based on their api property
+
+  /* -------------------------------------------------------------------------- */
+
+
+  function setInterfaces() {
+    var options = is;
+
+    for (var option in options) {
+      if (hasOwnProperty.call(options, option) && is['function'](options[option])) {
+        var interfaces = options[option].api || ['not', 'all', 'any'];
+
+        for (var i = 0; i < interfaces.length; i++) {
+          if (interfaces[i] === 'not') {
+            is.not[option] = not(is[option]);
+          }
+
+          if (interfaces[i] === 'all') {
+            is.all[option] = all(is[option]);
+          }
+
+          if (interfaces[i] === 'any') {
+            is.any[option] = any(is[option]);
+          }
+        }
+      }
+    }
+  }
+
+  setInterfaces(); // Configuration methods
+  // Intentionally added after setInterfaces function
+
+  /* -------------------------------------------------------------------------- */
+  // change namespace of library to prevent name collisions
+  // var preferredName = is.setNamespace();
+  // preferredName.odd(3);
+  // => true
+
+  is.setNamespace = function () {
+    root.is = previousIs;
+    return this;
+  }; // set optional regexes to methods
+
+
+  is.setRegexp = function (regexp, name) {
+    for (var r in regexes) {
+      if (hasOwnProperty.call(regexes, r) && name === r) {
+        regexes[r] = regexp;
+      }
+    }
+  };
+
+  return is;
+});
+
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],"three/examples/jsm/loaders/DRACOLoader":[function(require,module,exports){
 "use strict";
 
