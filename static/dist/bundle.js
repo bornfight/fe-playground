@@ -6401,7 +6401,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
       if (!this.sequence) {
         return;
-      } // set scroll position to top
+      } // set scroll position to top of the document
 
 
       if ("scrollRestoration" in window.history) {
@@ -6414,7 +6414,7 @@ var ImageSequence = /*#__PURE__*/function () {
       this.frameIndex = 0;
       this.sequenceVisible = true;
       this.imagesArray = [];
-      this.imagesArray = window.imgArray; // is its string
+      this.imagesArray = window.imgArray; // if its string
       // this.imagesArray = JSON.parse(window.imgArray);
 
       if (_is_js.default.mobile()) {
@@ -6443,9 +6443,9 @@ var ImageSequence = /*#__PURE__*/function () {
 
       this.context = this.sequence.getContext("2d");
       this.context.imageSmoothingEnabled = true;
-      this.imageUrl = this.sequence.dataset.desktopUrl; // for retina screens
-      // this.retinaScale();
-      // num of images
+      this.imageUrl = ""; // for retina screens
+
+      this.retinaScale(); // num of images
 
       this.frameCount = this.imagesArray.length;
       this.framesLoaded = 0; // initial image load
@@ -6457,7 +6457,8 @@ var ImageSequence = /*#__PURE__*/function () {
 
       this.img.onload = function () {
         _this2.drawImage(_this2.img);
-      };
+      }; // num of images in single chunk - for preload sequence
+
 
       this.singleChunk = Math.floor(this.frameCount / this.timeSequenceSegments.length);
       this.images = [];
@@ -6490,11 +6491,22 @@ var ImageSequence = /*#__PURE__*/function () {
         }, 500);
       }
     }
+    /**
+     *
+     * @param {number} index
+     * @returns {string}
+     */
+
   }, {
     key: "currentFrame",
     value: function currentFrame(index) {
       return "".concat(this.imagesArray[index].url);
     }
+    /**
+     *
+     * @param {HTMLImageElement} img
+     */
+
   }, {
     key: "drawImage",
     value: function drawImage(img) {
@@ -6502,6 +6514,11 @@ var ImageSequence = /*#__PURE__*/function () {
         this.context.drawImage(img, 0, 0, this.sequence.width, this.sequence.height);
       }
     }
+    /**
+     *
+     * @param {number} index
+     */
+
   }, {
     key: "updateImage",
     value: function updateImage(index) {
@@ -6522,12 +6539,20 @@ var ImageSequence = /*#__PURE__*/function () {
         _this4.scrollInteractions(inc, scrollDirection, i, step);
       });
     }
+    /**
+     *
+     * @param {number} inc
+     * @param {number} scrollDirection
+     * @param {number} i
+     * @param {HTMLElement} step
+     */
+
   }, {
     key: "scrollInteractions",
     value: function scrollInteractions(inc, scrollDirection, i, step) {
       var _this5 = this;
 
-      var trigger = step;
+      var trigger = step; // if the step is pinned inside ScrollTrigger
 
       if (step.parentNode.classList.contains("pin-spacer")) {
         trigger = step.parentNode;
@@ -6560,23 +6585,6 @@ var ImageSequence = /*#__PURE__*/function () {
       });
     }
   }, {
-    key: "fadeVideo",
-    value: function fadeVideo() {
-      if (this.sequenceVisible === true) {
-        this.sequenceVisible = false;
-
-        _gsap.gsap.to(this.sequence, {
-          autoAlpha: 0
-        });
-      } else if (this.sequenceVisible === false) {
-        this.sequenceVisible = true;
-
-        _gsap.gsap.to(this.sequence, {
-          autoAlpha: 1
-        });
-      }
-    }
-  }, {
     key: "progressController",
     value: function progressController() {
       var frameCount = parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond) * this.frameCount;
@@ -6584,7 +6592,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
       if (progress < 100) {// console.log(progress);
       } else if (progress >= 100 && !this.loaded) {
-        console.log("Images for first section loaded!");
+        console.log("Images for first section are loaded!");
         this.loaded = true;
 
         _gsap.gsap.to(this.sequenceWrapper, {
@@ -6596,8 +6604,8 @@ var ImageSequence = /*#__PURE__*/function () {
     key: "resize",
     value: function resize() {
       this.sequence.width = this.canvasWrapper.clientWidth;
-      this.sequence.height = this.canvasWrapper.clientHeight; // this.retinaScale();
-
+      this.sequence.height = this.canvasWrapper.clientHeight;
+      this.retinaScale();
       this.updateImage(this.frameIndex);
     }
   }, {
@@ -6608,8 +6616,8 @@ var ImageSequence = /*#__PURE__*/function () {
         var width = this.canvasWrapper.clientWidth;
         var height = this.canvasWrapper.clientHeight; // scale the canvas by window.devicePixelRatio
 
-        this.sequence.setAttribute('width', width * window.devicePixelRatio);
-        this.sequence.setAttribute('height', height * window.devicePixelRatio); // use css to bring it back to regular size
+        this.sequence.setAttribute('width', "".concat(width * window.devicePixelRatio));
+        this.sequence.setAttribute('height', "".concat(height * window.devicePixelRatio)); // use css to bring it back to regular size
 
         this.sequence.setAttribute('style', 'width="' + width + '"; height="' + height + '";'); // set the scale of the context
 

@@ -21,7 +21,7 @@ export default class ImageSequence {
             return;
         }
 
-        // set scroll position to top
+        // set scroll position to top of the document
         if ("scrollRestoration" in window.history) {
             window.history.scrollRestoration = "manual";
         }
@@ -39,7 +39,7 @@ export default class ImageSequence {
 
         this.imagesArray = window.imgArray;
 
-        // is its string
+        // if its string
         // this.imagesArray = JSON.parse(window.imgArray);
 
         if (is.mobile()) {
@@ -69,10 +69,10 @@ export default class ImageSequence {
     canvasLoad() {
         this.context = this.sequence.getContext("2d");
         this.context.imageSmoothingEnabled = true;
-        this.imageUrl = this.sequence.dataset.desktopUrl;
+        this.imageUrl = "";
 
         // for retina screens
-        // this.retinaScale();
+        this.retinaScale();
 
         // num of images
         this.frameCount = this.imagesArray.length;
@@ -89,6 +89,7 @@ export default class ImageSequence {
             this.drawImage(this.img);
         };
 
+        // num of images in single chunk - for preload sequence
         this.singleChunk = Math.floor(
             this.frameCount / this.timeSequenceSegments.length,
         );
@@ -125,16 +126,29 @@ export default class ImageSequence {
         }
     }
 
+    /**
+     *
+     * @param {number} index
+     * @returns {string}
+     */
     currentFrame(index) {
         return `${this.imagesArray[index].url}`;
     }
 
+    /**
+     *
+     * @param {HTMLImageElement} img
+     */
     drawImage(img) {
         if (img != null) {
             this.context.drawImage(img, 0, 0, this.sequence.width, this.sequence.height);
         }
     }
 
+    /**
+     *
+     * @param {number} index
+     */
     updateImage(index) {
         if (this.images[index] != null) {
             this.drawImage(this.images[index][0]);
@@ -154,9 +168,17 @@ export default class ImageSequence {
         });
     }
 
+    /**
+     *
+     * @param {number} inc
+     * @param {number} scrollDirection
+     * @param {number} i
+     * @param {HTMLElement} step
+     */
     scrollInteractions(inc, scrollDirection, i, step) {
         let trigger = step;
 
+        // if the step is pinned inside ScrollTrigger
         if (step.parentNode.classList.contains("pin-spacer")) {
             trigger = step.parentNode;
         }
@@ -190,20 +212,6 @@ export default class ImageSequence {
         });
     }
 
-    fadeVideo() {
-        if (this.sequenceVisible === true) {
-            this.sequenceVisible = false;
-            gsap.to(this.sequence, {
-                autoAlpha: 0,
-            });
-        } else if (this.sequenceVisible === false) {
-            this.sequenceVisible = true;
-            gsap.to(this.sequence, {
-                autoAlpha: 1,
-            });
-        }
-    }
-
     progressController() {
         const frameCount = parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond) * this.frameCount;
         const progress = Math.floor((100 / (frameCount)) * this.framesLoaded);
@@ -211,8 +219,9 @@ export default class ImageSequence {
         if (progress < 100) {
             // console.log(progress);
         } else if (progress >= 100 && !this.loaded) {
-            console.log("Images for first section loaded!");
+            console.log("Images for first section are loaded!");
             this.loaded = true;
+
             gsap.to(this.sequenceWrapper, {
                 autoAlpha: 1,
             });
@@ -223,7 +232,7 @@ export default class ImageSequence {
         this.sequence.width = this.canvasWrapper.clientWidth;
         this.sequence.height = this.canvasWrapper.clientHeight;
 
-        // this.retinaScale();
+        this.retinaScale();
         this.updateImage(this.frameIndex);
     }
 
@@ -234,8 +243,8 @@ export default class ImageSequence {
             const height = this.canvasWrapper.clientHeight;
 
             // scale the canvas by window.devicePixelRatio
-            this.sequence.setAttribute('width', width * window.devicePixelRatio);
-            this.sequence.setAttribute('height', height * window.devicePixelRatio);
+            this.sequence.setAttribute('width', `${width * window.devicePixelRatio}`);
+            this.sequence.setAttribute('height', `${height * window.devicePixelRatio}`);
 
             // use css to bring it back to regular size
             this.sequence.setAttribute('style', 'width="' + width + '"; height="' + height + '";')
