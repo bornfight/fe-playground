@@ -27,6 +27,10 @@ export default class ContentAnimation {
         this.resolve();
     }
 
+    /**
+     *
+     * @param {HTMLElement} step
+     */
     singleStep(step) {
         const content = step.querySelector(this.DOM.content);
 

@@ -6313,6 +6313,11 @@ var ContentAnimation = /*#__PURE__*/function () {
       });
       this.resolve();
     }
+    /**
+     *
+     * @param {HTMLElement} step
+     */
+
   }, {
     key: "singleStep",
     value: function singleStep(step) {
