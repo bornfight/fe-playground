@@ -15,20 +15,18 @@ export default class ImageSequence {
     }
 
     init() {
-        this.sequence = document.querySelector(this.DOM.sequence);
+        this.sequenceWrapper = document.querySelector(this.DOM.sequenceWrapper);
 
-        if (!this.sequence) {
+        if (!this.sequenceWrapper) {
             return;
         }
+        this.sequence = document.querySelector(this.DOM.sequence);
+        this.canvasWrapper = document.querySelector(this.DOM.canvasWrapper);
 
         // set scroll position to top of the document
         if ("scrollRestoration" in window.history) {
             window.history.scrollRestoration = "manual";
         }
-
-        this.sequenceWrapper = document.querySelector(this.DOM.sequenceWrapper);
-        this.canvasWrapper = document.querySelector(this.DOM.canvasWrapper);
-
 
         this.loaded = false;
 
