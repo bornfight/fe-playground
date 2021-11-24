@@ -13,16 +13,16 @@
 
     window.imgArray = [];
 
-    // for (let i = 1; i < 128; i++) {
-    //     const number = (i < 10 ? "00" : i < 100 ? "0" : "") + i;
-    //     window.imgArray.push({url: `sequence/${number}.jpg`});
-    // }
+    for (let i = 1; i < 128; i++) {
+        const number = (i < 10 ? "00" : i < 100 ? "0" : "") + i;
+        window.imgArray.push({url: `sequence/${number}.jpg`});
+    }
 
     // apple example
-    for (let i = 1; i < 148; i++) {
-        const number = (i < 10 ? '000' : i < 100 ? '00' : i < 1000 ? '0' : '') + i;
-        window.imgArray.push({url: `https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/${number}.jpg`});
-    }
+    // for (let i = 1; i < 148; i++) {
+    //     const number = (i < 10 ? '000' : i < 100 ? '00' : i < 1000 ? '0' : '') + i;
+    //     window.imgArray.push({url: `https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/${number}.jpg`});
+    // }
 </script>
 
 <div class="c-image-sequence js-image-sequence-wrapper">
@@ -39,7 +39,7 @@
     </div>
 
     <section class="c-image-sequence__section js-sequence-step" data-frame-second="0">
-        <h1 class="u-a6 js-sequence-step-content">Fire</h1>
+        <h1 class="u-a6">Fire</h1>
     </section>
 
     <section class="c-image-sequence__section js-sequence-step" data-frame-second="5">

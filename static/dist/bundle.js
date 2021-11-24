@@ -6311,17 +6311,20 @@ var ContentAnimation = /*#__PURE__*/function () {
       this.steps.forEach(function (step) {
         _this.singleStep(step);
       });
+      this.resolve();
     }
   }, {
     key: "singleStep",
     value: function singleStep(step) {
-      var _this2 = this;
-
       var content = step.querySelector(this.DOM.content);
+
+      if (content == null) {
+        return;
+      }
 
       _gsap.gsap.set(content, {
         autoAlpha: 0,
-        y: "100%"
+        y: "5vh"
       });
 
       var tl = _gsap.gsap.timeline({
@@ -6331,16 +6334,13 @@ var ContentAnimation = /*#__PURE__*/function () {
           end: "bottom top",
           scrub: true,
           pin: true
-        },
-        onStart: function onStart() {
-          _this2.resolve();
         }
       }).to(content, {
         duration: 1,
-        y: "0%",
+        y: "0vh",
         autoAlpha: 1
       }).to(content, {
-        // y: "-100%",
+        y: "-2.5vh",
         autoAlpha: 0
       });
     }

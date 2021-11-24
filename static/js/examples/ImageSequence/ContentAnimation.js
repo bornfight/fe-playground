@@ -23,14 +23,20 @@ export default class ContentAnimation {
         this.steps.forEach((step) => {
             this.singleStep(step);
         });
+
+        this.resolve();
     }
 
     singleStep(step) {
         const content = step.querySelector(this.DOM.content);
 
+        if (content == null) {
+            return;
+        }
+
         gsap.set(content, {
             autoAlpha: 0,
-            y: "100%"
+            y: "5vh"
         });
 
         let tl = gsap
@@ -42,17 +48,14 @@ export default class ContentAnimation {
                     scrub: true,
                     pin: true,
                 },
-                onStart: () => {
-                    this.resolve();
-                }
             })
             .to(content, {
                 duration: 1,
-                y: "0%",
+                y: "0vh",
                 autoAlpha: 1,
             })
             .to(content, {
-                // y: "-100%",
+                y: "-2.5vh",
                 autoAlpha: 0,
             });
     }
