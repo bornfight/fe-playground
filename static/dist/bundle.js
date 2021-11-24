@@ -6297,6 +6297,7 @@ var ImageSequence = /*#__PURE__*/function () {
     this.DOM = {
       sequence: ".js-image-sequence",
       sequenceWrapper: ".js-image-sequence-wrapper",
+      canvasWrapper: ".js-image-sequence-canvas-wrapper",
       step: ".js-sequence-step"
     };
   }
@@ -6310,14 +6311,18 @@ var ImageSequence = /*#__PURE__*/function () {
 
       if (!this.sequence) {
         return;
+      } // set scroll position to top
+
+
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
       }
 
+      this.sequenceWrapper = document.querySelector(this.DOM.sequenceWrapper);
+      this.canvasWrapper = document.querySelector(this.DOM.canvasWrapper);
+      this.loaded = false;
       this.frameIndex = 0;
       this.sequenceVisible = true;
-      this.win = {
-        w: window.innerWidth,
-        h: window.innerHeight
-      };
       this.imagesArray = [];
       this.imagesArray = window.imgArray; // is its string
       // this.imagesArray = JSON.parse(window.imgArray);
@@ -6332,7 +6337,7 @@ var ImageSequence = /*#__PURE__*/function () {
         this.steps.forEach(function (step) {
           _this.timeSequenceSegments.push(parseFloat(step.dataset.frameSecond));
         });
-        this.loaded = 0; // don't squish img when resized
+        this.segmentsLoaded = 0; // don't squish img when resized
 
         window.addEventListener("resize", function () {
           return _this.resize();
@@ -6349,16 +6354,16 @@ var ImageSequence = /*#__PURE__*/function () {
       this.context = this.sequence.getContext("2d");
       this.context.imageSmoothingEnabled = true;
       this.imageUrl = this.sequence.dataset.desktopUrl; // for retina screens
-
-      this.retinaScale(); // num of images
+      // this.retinaScale();
+      // num of images
 
       this.frameCount = this.imagesArray.length;
       this.framesLoaded = 0; // initial image load
 
       this.img = new Image();
-      this.img.src = this.currentFrame(1);
-      this.sequence.width = this.sequence.offsetWidth;
-      this.sequence.height = this.sequence.offsetHeight;
+      this.img.src = this.currentFrame(0);
+      this.sequence.width = this.canvasWrapper.offsetWidth;
+      this.sequence.height = this.canvasWrapper.offsetHeight;
 
       this.img.onload = function () {
         _this2.drawImage(_this2.img);
@@ -6373,8 +6378,8 @@ var ImageSequence = /*#__PURE__*/function () {
     value: function preloadImages() {
       var _this3 = this;
 
-      if (this.loaded < this.timeSequenceSegments.length) {
-        for (var i = this.singleChunk * this.loaded; i < this.singleChunk * (this.loaded + 1); i++) {
+      if (this.segmentsLoaded < this.timeSequenceSegments.length) {
+        for (var i = this.singleChunk * this.segmentsLoaded; i < this.singleChunk * (this.segmentsLoaded + 1); i++) {
           var img = new Image();
           img.src = this.currentFrame(i);
           var imageProps = [img, i];
@@ -6389,7 +6394,7 @@ var ImageSequence = /*#__PURE__*/function () {
           };
         }
 
-        this.loaded++;
+        this.segmentsLoaded++;
         setTimeout(function () {
           _this3.preloadImages();
         }, 500);
@@ -6482,10 +6487,11 @@ var ImageSequence = /*#__PURE__*/function () {
       var progress = Math.floor(100 / frameCount * this.framesLoaded);
 
       if (progress < 100) {// console.log(progress);
-      } else if (progress === 100) {
+      } else if (progress >= 100 && !this.loaded) {
         console.log("Images for first section loaded!");
+        this.loaded = true;
 
-        _gsap.gsap.to(this.DOM.sequenceWrapper, {
+        _gsap.gsap.to(this.sequenceWrapper, {
           autoAlpha: 1
         });
       }
@@ -6493,15 +6499,9 @@ var ImageSequence = /*#__PURE__*/function () {
   }, {
     key: "resize",
     value: function resize() {
-      this.win = {
-        w: window.innerWidth,
-        h: window.innerHeight
-      };
-      this.sequence.width = this.win.w;
-      this.sequence.height = this.win.h; // this.sequence.width = this.sequence.offsetWidth;
-      // this.sequence.height = this.sequence.offsetHeight;
+      this.sequence.width = this.canvasWrapper.clientWidth;
+      this.sequence.height = this.canvasWrapper.clientHeight; // this.retinaScale();
 
-      this.retinaScale();
       this.updateImage(this.frameIndex);
     }
   }, {
@@ -6509,15 +6509,15 @@ var ImageSequence = /*#__PURE__*/function () {
     value: function retinaScale() {
       // for retina screens
       if (window.devicePixelRatio !== 1) {
-        var width = c.width;
-        var height = c.height; // scale the canvas by window.devicePixelRatio
+        var width = this.canvasWrapper.clientWidth;
+        var height = this.canvasWrapper.clientHeight; // scale the canvas by window.devicePixelRatio
 
-        this.context.setAttribute('width', width * window.devicePixelRatio);
-        this.context.setAttribute('height', height * window.devicePixelRatio); // use css to bring it back to regular size
+        this.sequence.setAttribute('width', width * window.devicePixelRatio);
+        this.sequence.setAttribute('height', height * window.devicePixelRatio); // use css to bring it back to regular size
 
-        this.context.setAttribute('style', 'width="' + width + '"; height="' + height + '";'); // set the scale of the context
+        this.sequence.setAttribute('style', 'width="' + width + '"; height="' + height + '";'); // set the scale of the context
 
-        this.context.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
+        this.sequence.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
       }
     }
   }]);

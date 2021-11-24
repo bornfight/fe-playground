@@ -14,15 +14,23 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
+    }
+
+    &__canvas {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 100%;
+        // 16:9 AR
+        width: 177vh;
 
         canvas {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
             height: 100%;
-            // 16:9 AR
-            width: 177vh;
+            width: 100%;
         }
     }
 

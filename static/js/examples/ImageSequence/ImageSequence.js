@@ -9,6 +9,7 @@ export default class ImageSequence {
         this.DOM = {
             sequence: ".js-image-sequence",
             sequenceWrapper: ".js-image-sequence-wrapper",
+            canvasWrapper: ".js-image-sequence-canvas-wrapper",
             step: ".js-sequence-step",
         };
     }
@@ -20,13 +21,19 @@ export default class ImageSequence {
             return;
         }
 
+        // set scroll position to top
+        if ("scrollRestoration" in window.history) {
+            window.history.scrollRestoration = "manual";
+        }
+
+        this.sequenceWrapper = document.querySelector(this.DOM.sequenceWrapper);
+        this.canvasWrapper = document.querySelector(this.DOM.canvasWrapper);
+
+
+        this.loaded = false;
+
         this.frameIndex = 0;
         this.sequenceVisible = true;
-
-        this.win = {
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
 
         this.imagesArray = [];
 
@@ -49,7 +56,7 @@ export default class ImageSequence {
                 this.timeSequenceSegments.push(parseFloat(step.dataset.frameSecond));
             });
 
-            this.loaded = 0;
+            this.segmentsLoaded = 0;
 
             // don't squish img when resized
             window.addEventListener("resize", () => this.resize());
@@ -65,7 +72,7 @@ export default class ImageSequence {
         this.imageUrl = this.sequence.dataset.desktopUrl;
 
         // for retina screens
-        this.retinaScale();
+        // this.retinaScale();
 
         // num of images
         this.frameCount = this.imagesArray.length;
@@ -73,9 +80,10 @@ export default class ImageSequence {
 
         // initial image load
         this.img = new Image();
-        this.img.src = this.currentFrame(1);
-        this.sequence.width = this.sequence.offsetWidth;
-        this.sequence.height = this.sequence.offsetHeight;
+        this.img.src = this.currentFrame(0);
+
+        this.sequence.width = this.canvasWrapper.offsetWidth;
+        this.sequence.height = this.canvasWrapper.offsetHeight;
 
         this.img.onload = () => {
             this.drawImage(this.img);
@@ -91,10 +99,10 @@ export default class ImageSequence {
     }
 
     preloadImages() {
-        if (this.loaded < this.timeSequenceSegments.length) {
+        if (this.segmentsLoaded < this.timeSequenceSegments.length) {
             for (
-                let i = this.singleChunk * this.loaded;
-                i < this.singleChunk * (this.loaded + 1);
+                let i = this.singleChunk * this.segmentsLoaded;
+                i < this.singleChunk * (this.segmentsLoaded + 1);
                 i++
             ) {
                 const img = new Image();
@@ -110,7 +118,7 @@ export default class ImageSequence {
                 };
             }
 
-            this.loaded++;
+            this.segmentsLoaded++;
             setTimeout(() => {
                 this.preloadImages();
             }, 500);
@@ -170,6 +178,7 @@ export default class ImageSequence {
                 }
 
                 this.frameIndex = Math.floor(progress * this.frameCount);
+
                 this.updateImage(this.frameIndex);
             },
         });
@@ -193,48 +202,40 @@ export default class ImageSequence {
         const frameCount = parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond) * this.frameCount;
         const progress = Math.floor((100 / (frameCount)) * this.framesLoaded);
 
-
         if (progress < 100) {
             // console.log(progress);
-        } else if (progress === 100) {
+        } else if (progress >= 100 && !this.loaded) {
             console.log("Images for first section loaded!");
-            gsap.to(this.DOM.sequenceWrapper, {
+            this.loaded = true;
+            gsap.to(this.sequenceWrapper, {
                 autoAlpha: 1,
             });
         }
     }
 
     resize() {
-        this.win = {
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
+        this.sequence.width = this.canvasWrapper.clientWidth;
+        this.sequence.height = this.canvasWrapper.clientHeight;
 
-        this.sequence.width = this.win.w;
-        this.sequence.height = this.win.h;
-
-        // this.sequence.width = this.sequence.offsetWidth;
-        // this.sequence.height = this.sequence.offsetHeight;
-
-        this.retinaScale();
+        // this.retinaScale();
         this.updateImage(this.frameIndex);
     }
 
     retinaScale() {
         // for retina screens
         if (window.devicePixelRatio !== 1) {
-            const width = c.width;
-            const height = c.height;
+            const width = this.canvasWrapper.clientWidth;
+            const height = this.canvasWrapper.clientHeight;
 
             // scale the canvas by window.devicePixelRatio
-            this.context.setAttribute('width', width * window.devicePixelRatio);
-            this.context.setAttribute('height', height * window.devicePixelRatio);
+            this.sequence.setAttribute('width', width * window.devicePixelRatio);
+            this.sequence.setAttribute('height', height * window.devicePixelRatio);
 
             // use css to bring it back to regular size
-            this.context.setAttribute('style', 'width="' + width + '"; height="' + height + '";')
+            this.sequence.setAttribute('style', 'width="' + width + '"; height="' + height + '";')
 
             // set the scale of the context
-            this.context.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
+            this.sequence.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
         }
     }
 }

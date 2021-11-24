@@ -1598,7 +1598,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   height: 100%;
   overflow: hidden; }
 
-.c-image-sequence__background canvas {
+.c-image-sequence__canvas {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1606,6 +1606,13 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
           transform: translate(-50%, -50%);
   height: 100%;
   width: 177vh; }
+
+.c-image-sequence__canvas canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%; }
 
 .c-image-sequence__section {
   display: -webkit-box;
