@@ -19,6 +19,7 @@ import PanningGallery from "./examples/PanningGallery/PanningGallery";
 import HoverClippingNavigation from "./examples/HoverClippingNavigation/HoverClippingNavigation";
 import ImageSequence from "./examples/ImageSequence/ImageSequence";
 import ContentAnimation from "./examples/ImageSequence/ContentAnimation";
+import AnimatedGradient from "./examples/AnimatedGradient/AnimatedGradient";
 
 /**
  * Check if document is ready cross-browser
@@ -124,7 +125,6 @@ ready(() => {
         contentAnimation.init();
     });
 
-
     /**
      * ImageSequence component
      * @type {ImageSequence}
@@ -133,4 +133,10 @@ ready(() => {
         const imageSequence = new ImageSequence();
         imageSequence.init();
     });
+
+    /**
+     * AnimatedGradient component
+     * @type {AnimatedGradient}
+     */
+    const animatedGradient = new AnimatedGradient();
 });
