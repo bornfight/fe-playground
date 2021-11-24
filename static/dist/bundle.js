@@ -6296,6 +6296,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
     this.DOM = {
       sequence: ".js-image-sequence",
+      sequenceWrapper: ".js-image-sequence-wrapper",
       step: ".js-sequence-step"
     };
   }
@@ -6326,22 +6327,15 @@ var ImageSequence = /*#__PURE__*/function () {
       }
 
       if (this.imagesArray && this.imagesArray.length > 0) {
-        this.sections = _gsap.gsap.utils.toArray(this.DOM.step);
-        this.bgVideoSegments = [0];
-        this.sections.forEach(function (section) {
-          _this.bgVideoSegments.push(section.dataset.frameSecond);
+        this.steps = _gsap.gsap.utils.toArray(this.DOM.step);
+        this.timeSequenceSegments = [0];
+        this.steps.forEach(function (step) {
+          _this.timeSequenceSegments.push(parseFloat(step.dataset.frameSecond));
         });
         this.loaded = 0; // don't squish img when resized
 
         window.addEventListener("resize", function () {
-          _this.win = {
-            w: window.innerWidth,
-            h: window.innerHeight
-          };
-          _this.sequence.width = _this.win.w;
-          _this.sequence.height = _this.win.h;
-
-          _this.updateImage(_this.frameIndex);
+          return _this.resize();
         });
         this.canvasLoad();
         this.sequenceController();
@@ -6353,9 +6347,10 @@ var ImageSequence = /*#__PURE__*/function () {
       var _this2 = this;
 
       this.context = this.sequence.getContext("2d");
-      this.imageUrl = this.sequence.dataset.desktopUrl; // this.imageUrls = window.designContentImages;
+      this.context.imageSmoothingEnabled = true;
+      this.imageUrl = this.sequence.dataset.desktopUrl; // for retina screens
 
-      this.context.imageSmoothingEnabled = true; // num of images
+      this.retinaScale(); // num of images
 
       this.frameCount = this.imagesArray.length;
       this.framesLoaded = 0; // initial image load
@@ -6366,10 +6361,10 @@ var ImageSequence = /*#__PURE__*/function () {
       this.sequence.height = this.sequence.offsetHeight;
 
       this.img.onload = function () {
-        _this2.imageStretch(_this2.img);
+        _this2.drawImage(_this2.img);
       };
 
-      this.singleChunk = Math.floor(this.frameCount / this.bgVideoSegments.length);
+      this.singleChunk = Math.floor(this.frameCount / this.timeSequenceSegments.length);
       this.images = [];
       this.preloadImages();
     }
@@ -6378,7 +6373,7 @@ var ImageSequence = /*#__PURE__*/function () {
     value: function preloadImages() {
       var _this3 = this;
 
-      if (this.loaded < this.bgVideoSegments.length) {
+      if (this.loaded < this.timeSequenceSegments.length) {
         for (var i = this.singleChunk * this.loaded; i < this.singleChunk * (this.loaded + 1); i++) {
           var img = new Image();
           img.src = this.currentFrame(i);
@@ -6386,13 +6381,10 @@ var ImageSequence = /*#__PURE__*/function () {
           this.images.push(imageProps);
 
           img.onload = function () {
-            _this3.framesLoaded += 1; // this.frameCount / 2 - load half of frames and than hide the loader
+            _this3.framesLoaded += 1;
 
-            var progress = 100 / (_this3.frameCount / 2) * _this3.framesLoaded;
-            console.log(100 / _this3.frameCount * _this3.framesLoaded);
-
-            if (progress) {
-              _this3.progressController(Math.floor(progress));
+            if (_this3.framesLoaded > 0) {
+              _this3.progressController();
             }
           };
         }
@@ -6400,7 +6392,7 @@ var ImageSequence = /*#__PURE__*/function () {
         this.loaded++;
         setTimeout(function () {
           _this3.preloadImages();
-        }, 1000);
+        }, 500);
       }
     }
   }, {
@@ -6409,30 +6401,17 @@ var ImageSequence = /*#__PURE__*/function () {
       return "".concat(this.imagesArray[index].url);
     }
   }, {
-    key: "imageStretch",
-    value: function imageStretch(img) {
-      if (img == null) {
-        return;
-      }
-
-      var imgRatio = img.height / img.width;
-      var winRatio = window.innerHeight / window.innerWidth;
-
-      if (imgRatio > winRatio) {
-        var h = window.innerWidth * imgRatio;
-        this.context.drawImage(img, 0, (window.innerHeight - h) / 2, window.innerWidth, h);
-      }
-
-      if (imgRatio < winRatio) {
-        var w = window.innerWidth * winRatio / imgRatio;
-        this.context.drawImage(img, (this.win.w - w) / 2, 0, w, window.innerHeight);
+    key: "drawImage",
+    value: function drawImage(img) {
+      if (img != null) {
+        this.context.drawImage(img, 0, 0, this.sequence.width, this.sequence.height);
       }
     }
   }, {
     key: "updateImage",
     value: function updateImage(index) {
       if (this.images[index] != null) {
-        this.imageStretch(this.images[index][0]);
+        this.drawImage(this.images[index][0]);
       }
     }
   }, {
@@ -6441,9 +6420,9 @@ var ImageSequence = /*#__PURE__*/function () {
       var _this4 = this;
 
       var scrollDirection = 1;
-      this.sections.forEach(function (step, i) {
-        var segmentLength = _this4.bgVideoSegments[i + 1] - _this4.bgVideoSegments[i];
-        var inc = segmentLength / _this4.bgVideoSegments[_this4.sections.length]; // step.style.height = segmentLength * 100 + "vh";
+      this.steps.forEach(function (step, i) {
+        var segmentLength = _this4.timeSequenceSegments[i + 1] - _this4.timeSequenceSegments[i];
+        var inc = segmentLength / _this4.timeSequenceSegments[_this4.steps.length];
 
         _this4.scrollInteractions(inc, scrollDirection, i, step);
       });
@@ -6469,8 +6448,8 @@ var ImageSequence = /*#__PURE__*/function () {
         onUpdate: function onUpdate(self) {
           var progress = 0;
 
-          if (_this5.bgVideoSegments[_this5.sections.length] != null) {
-            progress = _this5.bgVideoSegments[i] / _this5.bgVideoSegments[_this5.sections.length] + self.progress * inc;
+          if (_this5.timeSequenceSegments[_this5.steps.length] != null) {
+            progress = _this5.timeSequenceSegments[i] / _this5.timeSequenceSegments[_this5.steps.length] + self.progress * inc;
           }
 
           _this5.frameIndex = Math.floor(progress * _this5.frameCount);
@@ -6498,8 +6477,47 @@ var ImageSequence = /*#__PURE__*/function () {
     }
   }, {
     key: "progressController",
-    value: function progressController(progress) {
-      if (progress > 90) {// ScrollTrigger.refresh();
+    value: function progressController() {
+      var frameCount = parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond) * this.frameCount;
+      var progress = Math.floor(100 / frameCount * this.framesLoaded);
+
+      if (progress < 100) {// console.log(progress);
+      } else if (progress === 100) {
+        console.log("Images for first section loaded!");
+
+        _gsap.gsap.to(this.DOM.sequenceWrapper, {
+          autoAlpha: 1
+        });
+      }
+    }
+  }, {
+    key: "resize",
+    value: function resize() {
+      this.win = {
+        w: window.innerWidth,
+        h: window.innerHeight
+      };
+      this.sequence.width = this.win.w;
+      this.sequence.height = this.win.h; // this.sequence.width = this.sequence.offsetWidth;
+      // this.sequence.height = this.sequence.offsetHeight;
+
+      this.retinaScale();
+      this.updateImage(this.frameIndex);
+    }
+  }, {
+    key: "retinaScale",
+    value: function retinaScale() {
+      // for retina screens
+      if (window.devicePixelRatio !== 1) {
+        var width = c.width;
+        var height = c.height; // scale the canvas by window.devicePixelRatio
+
+        this.context.setAttribute('width', width * window.devicePixelRatio);
+        this.context.setAttribute('height', height * window.devicePixelRatio); // use css to bring it back to regular size
+
+        this.context.setAttribute('style', 'width="' + width + '"; height="' + height + '";'); // set the scale of the context
+
+        this.context.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
       }
     }
   }]);

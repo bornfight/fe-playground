@@ -1586,7 +1586,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
  * 3d Scrollytelling
  */
 .c-image-sequence {
-  position: relative; }
+  position: relative;
+  opacity: 0;
+  visibility: hidden; }
 
 .c-image-sequence__background {
   position: fixed;
@@ -1594,14 +1596,16 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: red; }
+  overflow: hidden; }
 
 .c-image-sequence__background canvas {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%; }
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  height: 100%;
+  width: 177vh; }
 
 .c-image-sequence__section {
   display: -webkit-box;

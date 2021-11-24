@@ -7,14 +7,14 @@
     <title>FE Playground - Image Sequence</title>
     <link rel="stylesheet" href="../../static/dist/style.css">
 </head>
-<body>
+<body class="is-dark">
 
 <script>
     window.sequence = "sequence/";
 
     window.imgArray = [];
 
-    for (let i = 1; i < 402; i++) {
+    for (let i = 1; i < 403; i++) {
         const number = (i < 10 ? '00' : i < 100 ? '0' : '') + i;
         window.imgArray.push({url: `sequence/${number}.jpg`});
     }

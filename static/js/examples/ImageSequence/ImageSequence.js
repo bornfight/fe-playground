@@ -8,6 +8,7 @@ export default class ImageSequence {
     constructor() {
         this.DOM = {
             sequence: ".js-image-sequence",
+            sequenceWrapper: ".js-image-sequence-wrapper",
             step: ".js-sequence-step",
         };
     }
@@ -40,28 +41,18 @@ export default class ImageSequence {
         }
 
         if (this.imagesArray && this.imagesArray.length > 0) {
-            this.sections = gsap.utils.toArray(this.DOM.step);
+            this.steps = gsap.utils.toArray(this.DOM.step);
 
-            this.bgVideoSegments = [0];
+            this.timeSequenceSegments = [0];
 
-            this.sections.forEach((section) => {
-                this.bgVideoSegments.push(section.dataset.frameSecond);
+            this.steps.forEach((step) => {
+                this.timeSequenceSegments.push(parseFloat(step.dataset.frameSecond));
             });
 
             this.loaded = 0;
 
             // don't squish img when resized
-            window.addEventListener("resize", () => {
-                this.win = {
-                    w: window.innerWidth,
-                    h: window.innerHeight,
-                };
-
-                this.sequence.width = this.win.w;
-                this.sequence.height = this.win.h;
-
-                this.updateImage(this.frameIndex);
-            });
+            window.addEventListener("resize", () => this.resize());
 
             this.canvasLoad();
             this.sequenceController();
@@ -70,10 +61,11 @@ export default class ImageSequence {
 
     canvasLoad() {
         this.context = this.sequence.getContext("2d");
+        this.context.imageSmoothingEnabled = true;
         this.imageUrl = this.sequence.dataset.desktopUrl;
 
-        // this.imageUrls = window.designContentImages;
-        this.context.imageSmoothingEnabled = true;
+        // for retina screens
+        this.retinaScale();
 
         // num of images
         this.frameCount = this.imagesArray.length;
@@ -86,11 +78,11 @@ export default class ImageSequence {
         this.sequence.height = this.sequence.offsetHeight;
 
         this.img.onload = () => {
-            this.imageStretch(this.img);
+            this.drawImage(this.img);
         };
 
         this.singleChunk = Math.floor(
-            this.frameCount / this.bgVideoSegments.length,
+            this.frameCount / this.timeSequenceSegments.length,
         );
 
         this.images = [];
@@ -99,7 +91,7 @@ export default class ImageSequence {
     }
 
     preloadImages() {
-        if (this.loaded < this.bgVideoSegments.length) {
+        if (this.loaded < this.timeSequenceSegments.length) {
             for (
                 let i = this.singleChunk * this.loaded;
                 i < this.singleChunk * (this.loaded + 1);
@@ -112,12 +104,8 @@ export default class ImageSequence {
                 img.onload = () => {
                     this.framesLoaded += 1;
 
-                    // this.frameCount / 2 - load half of frames and than hide the loader
-                    const progress =
-                        (100 / (this.frameCount / 2)) * this.framesLoaded;
-                    console.log((100 / this.frameCount) * this.framesLoaded);
-                    if (progress) {
-                        this.progressController(Math.floor(progress));
+                    if (this.framesLoaded > 0) {
+                        this.progressController();
                     }
                 };
             }
@@ -125,7 +113,7 @@ export default class ImageSequence {
             this.loaded++;
             setTimeout(() => {
                 this.preloadImages();
-            }, 1000);
+            }, 500);
         }
     }
 
@@ -133,51 +121,26 @@ export default class ImageSequence {
         return `${this.imagesArray[index].url}`;
     }
 
-    imageStretch(img) {
-        if (img == null) {
-            return;
-        }
-
-        const imgRatio = img.height / img.width;
-        const winRatio = window.innerHeight / window.innerWidth;
-        if (imgRatio > winRatio) {
-            const h = window.innerWidth * imgRatio;
-            this.context.drawImage(
-                img,
-                0,
-                (window.innerHeight - h) / 2,
-                window.innerWidth,
-                h,
-            );
-        }
-        if (imgRatio < winRatio) {
-            const w = (window.innerWidth * winRatio) / imgRatio;
-            this.context.drawImage(
-                img,
-                (this.win.w - w) / 2,
-                0,
-                w,
-                window.innerHeight,
-            );
+    drawImage(img) {
+        if (img != null) {
+            this.context.drawImage(img, 0, 0, this.sequence.width, this.sequence.height);
         }
     }
 
     updateImage(index) {
         if (this.images[index] != null) {
-            this.imageStretch(this.images[index][0]);
+            this.drawImage(this.images[index][0]);
         }
     }
 
     sequenceController() {
         let scrollDirection = 1;
 
-        this.sections.forEach((step, i) => {
+        this.steps.forEach((step, i) => {
             const segmentLength =
-                this.bgVideoSegments[i + 1] - this.bgVideoSegments[i];
+                this.timeSequenceSegments[i + 1] - this.timeSequenceSegments[i];
             const inc =
-                segmentLength / this.bgVideoSegments[this.sections.length];
-
-            // step.style.height = segmentLength * 100 + "vh";
+                segmentLength / this.timeSequenceSegments[this.steps.length];
 
             this.scrollInteractions(inc, scrollDirection, i, step);
         });
@@ -199,10 +162,10 @@ export default class ImageSequence {
             end: ending,
             onUpdate: (self) => {
                 let progress = 0;
-                if (this.bgVideoSegments[this.sections.length] != null) {
+                if (this.timeSequenceSegments[this.steps.length] != null) {
                     progress =
-                        this.bgVideoSegments[i] /
-                        this.bgVideoSegments[this.sections.length] +
+                        this.timeSequenceSegments[i] /
+                        this.timeSequenceSegments[this.steps.length] +
                         self.progress * inc;
                 }
 
@@ -226,9 +189,52 @@ export default class ImageSequence {
         }
     }
 
-    progressController(progress) {
-        if (progress > 90) {
-            // ScrollTrigger.refresh();
+    progressController() {
+        const frameCount = parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond) * this.frameCount;
+        const progress = Math.floor((100 / (frameCount)) * this.framesLoaded);
+
+
+        if (progress < 100) {
+            // console.log(progress);
+        } else if (progress === 100) {
+            console.log("Images for first section loaded!");
+            gsap.to(this.DOM.sequenceWrapper, {
+                autoAlpha: 1,
+            });
+        }
+    }
+
+    resize() {
+        this.win = {
+            w: window.innerWidth,
+            h: window.innerHeight,
+        };
+
+        this.sequence.width = this.win.w;
+        this.sequence.height = this.win.h;
+
+        // this.sequence.width = this.sequence.offsetWidth;
+        // this.sequence.height = this.sequence.offsetHeight;
+
+        this.retinaScale();
+        this.updateImage(this.frameIndex);
+    }
+
+    retinaScale() {
+        // for retina screens
+        if (window.devicePixelRatio !== 1) {
+            const width = c.width;
+            const height = c.height;
+
+            // scale the canvas by window.devicePixelRatio
+            this.context.setAttribute('width', width * window.devicePixelRatio);
+            this.context.setAttribute('height', height * window.devicePixelRatio);
+
+            // use css to bring it back to regular size
+            this.context.setAttribute('style', 'width="' + width + '"; height="' + height + '";')
+
+            // set the scale of the context
+            this.context.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
         }
     }
 }
