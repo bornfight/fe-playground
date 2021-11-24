@@ -18,6 +18,7 @@ import ThreeScrollytelling from "./examples/3dScrollytelling/ThreeScrollytelling
 import PanningGallery from "./examples/PanningGallery/PanningGallery";
 import HoverClippingNavigation from "./examples/HoverClippingNavigation/HoverClippingNavigation";
 import ImageSequence from "./examples/ImageSequence/ImageSequence";
+import ContentAnimation from "./examples/ImageSequence/ContentAnimation";
 
 /**
  * Check if document is ready cross-browser
@@ -115,9 +116,21 @@ ready(() => {
     hoverClippingNavigation.init();
 
     /**
+     * ContentAnimation component
+     * @type {ContentAnimation}
+     */
+    const waitForScrollContentAnimations = new Promise((resolve, reject) => {
+        const contentAnimation = new ContentAnimation(resolve);
+        contentAnimation.init();
+    });
+
+
+    /**
      * ImageSequence component
      * @type {ImageSequence}
      */
-    const imageSequence = new ImageSequence();
-    imageSequence.init();
+    waitForScrollContentAnimations.then(() => {
+        const imageSequence = new ImageSequence();
+        imageSequence.init();
+    });
 });

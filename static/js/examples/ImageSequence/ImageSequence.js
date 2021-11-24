@@ -155,6 +155,12 @@ export default class ImageSequence {
     }
 
     scrollInteractions(inc, scrollDirection, i, step) {
+        let trigger = step;
+
+        if (step.parentNode.classList.contains("pin-spacer")) {
+            trigger = step.parentNode;
+        }
+
         let starting;
         let ending = "bottom bottom";
 
@@ -165,7 +171,7 @@ export default class ImageSequence {
         }
 
         ScrollTrigger.create({
-            trigger: step,
+            trigger: trigger,
             start: starting,
             end: ending,
             onUpdate: (self) => {

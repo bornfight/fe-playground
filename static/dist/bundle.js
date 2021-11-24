@@ -6278,6 +6278,91 @@ var _gsap = require("gsap");
 
 var _ScrollTrigger = require("gsap/ScrollTrigger");
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+_gsap.gsap.registerPlugin(_ScrollTrigger.ScrollTrigger);
+
+var ContentAnimation = /*#__PURE__*/function () {
+  function ContentAnimation(resolve) {
+    _classCallCheck(this, ContentAnimation);
+
+    this.DOM = {
+      content: ".js-sequence-step-content",
+      step: ".js-sequence-step"
+    };
+    this.resolve = resolve;
+  }
+
+  _createClass(ContentAnimation, [{
+    key: "init",
+    value: function init() {
+      var _this = this;
+
+      this.steps = document.querySelectorAll(this.DOM.step);
+
+      if (this.steps.length < 1) {
+        return;
+      }
+
+      this.steps.forEach(function (step) {
+        _this.singleStep(step);
+      });
+    }
+  }, {
+    key: "singleStep",
+    value: function singleStep(step) {
+      var _this2 = this;
+
+      var content = step.querySelector(this.DOM.content);
+
+      _gsap.gsap.set(content, {
+        autoAlpha: 0,
+        y: "100%"
+      });
+
+      var tl = _gsap.gsap.timeline({
+        scrollTrigger: {
+          trigger: step,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+          pin: true
+        },
+        onStart: function onStart() {
+          _this2.resolve();
+        }
+      }).to(content, {
+        duration: 1,
+        y: "0%",
+        autoAlpha: 1
+      }).to(content, {
+        // y: "-100%",
+        autoAlpha: 0
+      });
+    }
+  }]);
+
+  return ContentAnimation;
+}();
+
+exports.default = ContentAnimation;
+
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = require("gsap");
+
+var _ScrollTrigger = require("gsap/ScrollTrigger");
+
 var _is_js = _interopRequireDefault(require("is_js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -6437,6 +6522,12 @@ var ImageSequence = /*#__PURE__*/function () {
     value: function scrollInteractions(inc, scrollDirection, i, step) {
       var _this5 = this;
 
+      var trigger = step;
+
+      if (step.parentNode.classList.contains("pin-spacer")) {
+        trigger = step.parentNode;
+      }
+
       var starting;
       var ending = "bottom bottom";
 
@@ -6447,7 +6538,7 @@ var ImageSequence = /*#__PURE__*/function () {
       }
 
       _ScrollTrigger.ScrollTrigger.create({
-        trigger: step,
+        trigger: trigger,
         start: starting,
         end: ending,
         onUpdate: function onUpdate(self) {
@@ -6527,7 +6618,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
 exports.default = ImageSequence;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],7:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6722,7 +6813,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
 
 exports.default = VerticalMouseDrivenCarousel;
 
-},{"gsap":"gsap"}],8:[function(require,module,exports){
+},{"gsap":"gsap"}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6875,7 +6966,7 @@ var PanningGallery = /*#__PURE__*/function () {
 
 exports.default = PanningGallery;
 
-},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],9:[function(require,module,exports){
+},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6984,7 +7075,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],10:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7065,7 +7156,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -7081,6 +7172,8 @@ var _PanningGallery = _interopRequireDefault(require("./examples/PanningGallery/
 var _HoverClippingNavigation = _interopRequireDefault(require("./examples/HoverClippingNavigation/HoverClippingNavigation"));
 
 var _ImageSequence = _interopRequireDefault(require("./examples/ImageSequence/ImageSequence"));
+
+var _ContentAnimation = _interopRequireDefault(require("./examples/ImageSequence/ContentAnimation"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7186,14 +7279,25 @@ ready(function () {
   var hoverClippingNavigation = new _HoverClippingNavigation.default();
   hoverClippingNavigation.init();
   /**
+   * ContentAnimation component
+   * @type {ContentAnimation}
+   */
+
+  var waitForScrollContentAnimations = new Promise(function (resolve, reject) {
+    var contentAnimation = new _ContentAnimation.default(resolve);
+    contentAnimation.init();
+  });
+  /**
    * ImageSequence component
    * @type {ImageSequence}
    */
 
-  var imageSequence = new _ImageSequence.default();
-  imageSequence.init();
+  waitForScrollContentAnimations.then(function () {
+    var imageSequence = new _ImageSequence.default();
+    imageSequence.init();
+  });
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":4,"./examples/HoverClippingNavigation/HoverClippingNavigation":5,"./examples/ImageSequence/ImageSequence":6,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":7,"./examples/PanningGallery/PanningGallery":8,"./examples/ScrollingMarquee/ScrollingMarquee":9,"./examples/TemplateExample/TemplateComponent":10}]},{},[11])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":4,"./examples/HoverClippingNavigation/HoverClippingNavigation":5,"./examples/ImageSequence/ContentAnimation":6,"./examples/ImageSequence/ImageSequence":7,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":8,"./examples/PanningGallery/PanningGallery":9,"./examples/ScrollingMarquee/ScrollingMarquee":10,"./examples/TemplateExample/TemplateComponent":11}]},{},[12])
 
 //# sourceMappingURL=bundle.js.map

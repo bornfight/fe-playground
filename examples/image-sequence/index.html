@@ -1,46 +1,45 @@
 <html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>FE Playground - Image Sequence</title>
-    <link rel="stylesheet" href="../../static/dist/style.css">
+    <link rel="stylesheet" href="../../static/dist/style.css"/>
 </head>
 <body class="is-dark">
-
 <script>
     window.sequence = "sequence/";
 
     window.imgArray = [];
 
-    for (let i = 1; i < 128; i++) {
-        const number = (i < 10 ? '00' : i < 100 ? '0' : '') + i;
-        window.imgArray.push({url: `sequence/${number}.jpg`});
-    }
+    // for (let i = 1; i < 128; i++) {
+    //     const number = (i < 10 ? "00" : i < 100 ? "0" : "") + i;
+    //     window.imgArray.push({url: `sequence/${number}.jpg`});
+    // }
 
     // apple example
-    // for (let i = 1; i < 148; i++) {
-    //     const number = (i < 10 ? '000' : i < 100 ? '00' : i < 1000 ? '0' : '') + i;
-    //     window.imgArray.push({url: `https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/${number}.jpg`});
-    // }
+    for (let i = 1; i < 148; i++) {
+        const number = (i < 10 ? '000' : i < 100 ? '00' : i < 1000 ? '0' : '') + i;
+        window.imgArray.push({url: `https://www.apple.com/105/media/us/airpods-pro/2019/1299e2f5_9206_4470_b28e_08307a42f19b/anim/sequence/large/01-hero-lightpass/${number}.jpg`});
+    }
 </script>
 
 <div class="c-image-sequence js-image-sequence-wrapper">
     <div class="c-image-sequence__background">
         <div class="c-image-sequence__canvas js-image-sequence-canvas-wrapper">
             <!-- data-desktop-images & data-mobile-images - images path -->
-            <canvas data-page="<?= $page ?>"
+            <canvas
+                    data-page="<?= $page ?>"
                     data-desktop-images="sequence/"
                     data-mobile-images="sequence/"
-                    class="js-image-sequence"></canvas>
+                    class="js-image-sequence"
+            ></canvas>
         </div>
     </div>
 
     <section class="c-image-sequence__section js-sequence-step" data-frame-second="0">
-        <h1 class="u-a6">
-            Fire
-        </h1>
+        <h1 class="u-a6 js-sequence-step-content">Fire</h1>
     </section>
 
     <section class="c-image-sequence__section js-sequence-step" data-frame-second="5">
@@ -59,19 +58,28 @@
     <section class="c-image-sequence__section js-sequence-step" data-frame-second="15">
         <h3 class="u-a1 js-sequence-step-content">
             Once ignited, a chain reaction must take place whereby fires can sustain their own heat by the further
-            release of heat energy in the process of combustion and may propagate, provided there is a continuous supply
-            of an oxidizer and fuel.
+            release of heat energy in
+            the process of combustion and may propagate, provided there is a continuous supply of an oxidizer and fuel.
         </h3>
     </section>
 
     <section class="c-image-sequence__section js-sequence-step" data-frame-second="20">
         <h3 class="u-a1 js-sequence-step-content">
             A flame is a mixture of reacting gases and solids emitting visible, infrared, and sometimes ultraviolet
-            light, the frequency spectrum of which depends on the chemical composition of the burning material and
-            intermediate reaction products.
+            light, the frequency
+            spectrum of which depends on the chemical composition of the burning material and intermediate reaction
+            products.
         </h3>
     </section>
 </div>
+
+<section
+        style="height: 100vh; display: flex; align-items: center; justify-content: center;z-index: 1; position:relative; background: #000000;"
+        data-frame-second="20">
+    <h3 class="u-a6 js-sequence-step-content">
+        Section without sequence
+    </h3>
+</section>
 
 <script type="text/javascript" src="../../static/dist/vendor.js"></script>
 <script type="text/javascript" src="../../static/dist/bundle.js"></script>
