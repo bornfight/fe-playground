@@ -56,6 +56,11 @@ export default class AnimatedGradient {
 
         // Canvas
         this.canvas = document.querySelector("#scene");
+
+        if (this.canvas == null) {
+            return;
+        }
+
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
