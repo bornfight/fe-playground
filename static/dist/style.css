@@ -1802,7 +1802,20 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   opacity: 0.4; }
 
 .c-link-list {
-  padding-bottom: 60px; }
+  padding-bottom: 60px;
+  padding-right: 20px;
+  width: 50%; }
+
+@media (max-width: 800px) {
+  .c-link-list {
+    width: 100%; } }
+
+.c-link-list__wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap; }
 
 /**
  * Pages
