@@ -25,6 +25,13 @@
         // 16:9 AR
         width: 177vh;
 
+        @media (min-aspect-ratio: 16/9) {
+            width: 100%;
+            // 16:9 AR
+            height: 56vw;
+        }
+
+
         canvas {
             position: absolute;
             top: 0;

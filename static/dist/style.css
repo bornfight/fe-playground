@@ -1607,6 +1607,11 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   height: 100%;
   width: 177vh; }
 
+@media (min-aspect-ratio: 16 / 9) {
+  .c-image-sequence__canvas {
+    width: 100%;
+    height: 56vw; } }
+
 .c-image-sequence__canvas canvas {
   position: absolute;
   top: 0;
