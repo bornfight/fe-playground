@@ -57281,11 +57281,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _detectGpu = require("detect-gpu");
+
 var _three = require("three");
 
 var _Camera = _interopRequireDefault(require("./Core/Camera"));
-
-var _Controls = _interopRequireDefault(require("./Core/Controls"));
 
 var _Lights = _interopRequireDefault(require("./Core/Lights"));
 
@@ -57293,13 +57293,7 @@ var _Renderer = _interopRequireDefault(require("./Core/Renderer"));
 
 var _Scene = _interopRequireDefault(require("./Core/Scene"));
 
-var _Textures = _interopRequireDefault(require("./Core/Textures"));
-
-var _Plane = _interopRequireDefault(require("./shapes/Plane"));
-
-var _Logo = _interopRequireDefault(require("./shapes/Logo"));
-
-var _Noise = _interopRequireDefault(require("./shapes/Noise"));
+var _Plane = _interopRequireDefault(require("./Plane"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -57312,9 +57306,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 /**
  * Base
  */
-var clock = new _three.Clock(); // const stats = new Stats();
-// stats.showPanel( 0 );
-// document.body.appendChild( stats.dom );
+var clock = new _three.Clock();
 
 var AnimatedGradient = /*#__PURE__*/function () {
   function AnimatedGradient() {
@@ -57327,7 +57319,7 @@ var AnimatedGradient = /*#__PURE__*/function () {
     this.pixelRatio = 1.5;
     this.wrap = 20;
     this.light = ["#93a0D7", "#FFB648", "#ff4720", "#506eff", "#e3593c", "#F9F5E3"];
-    this.dark = ["#00032d", "#f70000", "#ffa800", "#fc4c35", "#79ffce", "#0808c6"];
+    this.dark = ["#55532d", "#f70000", "#ffa800", "#fc4c35", "#79ffce", "#0808c6"];
     this.colorsList = {
       light: "Light",
       dark: "Dark"
@@ -57345,14 +57337,18 @@ var AnimatedGradient = /*#__PURE__*/function () {
       width: window.innerWidth,
       height: window.innerHeight
     };
-    this.onResize = this.onResize.bind(this); // this.gui = new dat.GUI()
-
+    this.onResize = this.onResize.bind(this);
     /**
      * Dom Elements
      */
     // Canvas
 
     this.canvas = document.querySelector("#scene");
+
+    if (this.canvas == null) {
+      return;
+    }
+
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight; // Scene
 
@@ -57367,30 +57363,17 @@ var AnimatedGradient = /*#__PURE__*/function () {
       scene: this.scene,
       ambiantLight: [0xffffff, 1]
     });
-    /**
-     * Texture Loader
-     */
+    var waitForGPUTier = new Promise(function (resolve, reject) {
+      _this.initScene();
 
-    this.textureLoaded = new _Textures.default({
-      scene: this.scene,
-      textures: [{
-        src: document.querySelector('.js-img-1').src
-      }, {
-        src: document.querySelector('.js-img-2').src,
-        wrap: 20
-      }]
+      var promise = (0, _detectGpu.getGPUTier)({
+        // glContext: !this.isMobile ? this.renderer.getContext() : null,
+        // mobileTiers: [20, 30, 30, 20],
+        desktopTiers: [15, 35, 56, 58]
+      });
+      resolve(promise);
     });
-    this.textureLoaded.then(function (promise) {
-      _this.textures = promise;
-
-      _this.initScene(); // return getGPUTier({
-      //     // glContext: !this.isMobile ? this.renderer.getContext() : null,
-      //     // mobileTiers: [20, 30, 30, 20],
-      //     desktopTiers: [15, 35, 56, 58],
-      // });
-      // Actions
-
-    }).then(function (promise) {
+    waitForGPUTier.then(function (promise) {
       _this.gpu = promise;
 
       _this.buildScene();
@@ -57408,10 +57391,6 @@ var AnimatedGradient = /*#__PURE__*/function () {
         scene: this.scene,
         sizes: this.sizes
       });
-      this.controls = new _Controls.default({
-        camera: this.camera,
-        canvas: this.canvas
-      });
       this.renderer = new _Renderer.default({
         scene: this.scene,
         sizes: this.sizes,
@@ -57423,47 +57402,26 @@ var AnimatedGradient = /*#__PURE__*/function () {
   }, {
     key: "buildScene",
     value: function buildScene() {
-      this.logo = new _Logo.default({
-        sizes: this.sizes,
-        scene: this.scene,
-        colors: this.colorsThree,
-        image: this.textures[0]
-      });
+      var event = new CustomEvent('loaded');
+      document.dispatchEvent(event);
       this.shape = new _Plane.default({
         sizes: this.sizes,
         scene: this.scene,
         colors: this.colorsThree,
         gpuTier: this.gpu
-      }); // this.colorDark = Object.assign({}, this.shape.colorsThree['dark'][5])
-      // this.colorLight = Object.assign({}, this.shape.colorsThree['light'][5])
-
-      this.noise = new _Noise.default({
-        image: this.textures[1],
-        sizes: this.sizes,
-        scene: this.scene
       });
     }
   }, {
     key: "bindEvents",
     value: function bindEvents() {
-      window.addEventListener("resize", this.onResize); // document.addEventListener('updateColors', (evt) => {
-      //   const { detail } = evt
-      //   if(this.shape.color === detail.color || !detail.color) return
-      //   gsap.to(this.shape.mesh.material.uniforms.uColor6.value, {
-      //     r: detail.color === "light" ? colorLight.r : colorDark.r,
-      //     g: detail.color === "light" ? colorLight.g : colorDark.g,
-      //     b: detail.color === "light" ? colorLight.b : colorDark.b,
-      //   })
-      //   this.shape.color = detail.color
-      // })
+      window.addEventListener("resize", this.onResize);
     }
   }, {
     key: "update",
     value: function update() {
       var elapsedTime = clock.getElapsedTime();
       var finalTime = elapsedTime + this.shape.time;
-      this.shape.mesh.material.uniforms.uTime.value = finalTime;
-      this.controls.update(); // Render
+      this.shape.mesh.material.uniforms.uTime.value = finalTime; // Render
 
       this.renderer.render(this.scene, this.camera); // Call update again on the next frame
 
@@ -57488,10 +57446,6 @@ var AnimatedGradient = /*#__PURE__*/function () {
       this.renderer.setSize(this.sizes.width, this.sizes.height);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.pixelRatio));
     }
-    /**
-     * Animations
-     */
-
   }]);
 
   return AnimatedGradient;
@@ -57499,7 +57453,7 @@ var AnimatedGradient = /*#__PURE__*/function () {
 
 exports.default = AnimatedGradient;
 
-},{"./Core/Camera":7,"./Core/Controls":8,"./Core/Lights":9,"./Core/Renderer":10,"./Core/Scene":11,"./Core/Textures":12,"./shapes/Logo":18,"./shapes/Noise":19,"./shapes/Plane":20,"three":3}],7:[function(require,module,exports){
+},{"./Core/Camera":7,"./Core/Lights":8,"./Core/Renderer":9,"./Core/Scene":10,"./Plane":11,"detect-gpu":"detect-gpu","three":3}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -57529,33 +57483,6 @@ var Camera = function Camera(_ref) {
 exports.default = Camera;
 
 },{"three":3}],8:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _OrbitControls = require("three/examples/jsm/controls/OrbitControls");
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Controls = function Controls(_ref) {
-  var camera = _ref.camera,
-      canvas = _ref.canvas;
-
-  _classCallCheck(this, Controls);
-
-  this.controls = new _OrbitControls.OrbitControls(camera, canvas);
-  this.controls.enableDamping = false;
-  this.controls.enabled = false;
-  this.controls.enableZoom = false;
-  return this.controls;
-};
-
-exports.default = Controls;
-
-},{"three/examples/jsm/controls/OrbitControls":"three/examples/jsm/controls/OrbitControls"}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -57595,7 +57522,7 @@ var Lights = /*#__PURE__*/function () {
 
 exports.default = Lights;
 
-},{"three":3}],10:[function(require,module,exports){
+},{"three":3}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -57626,7 +57553,7 @@ var Renderer = function Renderer(_ref) {
 
 exports.default = Renderer;
 
-},{"three":3}],11:[function(require,module,exports){
+},{"three":3}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -57650,145 +57577,7 @@ var Scene = function Scene(_ref) {
 
 exports.default = Scene;
 
-},{"three":3}],12:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _three = require("three");
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Textures = /*#__PURE__*/function () {
-  function Textures(_ref) {
-    var scene = _ref.scene,
-        textures = _ref.textures;
-
-    _classCallCheck(this, Textures);
-
-    this.scene = scene;
-    this.textureLoader = new _three.TextureLoader();
-    this.textures = textures;
-    this.texturesLoaded = [];
-    this.init();
-    return Promise.all(this.texturesLoaded).then(function (messages) {
-      return messages;
-    });
-  }
-
-  _createClass(Textures, [{
-    key: "init",
-    value: function init() {
-      var _this = this;
-
-      this.textures.forEach(function (texture, index) {
-        _this.texturesLoaded[index] = new Promise(function (resolve, reject) {
-          var done = function done(promise) {
-            return resolve(promise);
-          };
-
-          var img = _this.textureLoader.load(texture.src, done);
-
-          if (texture.wrap) {
-            img.wrapS = _three.RepeatWrapping;
-            img.wrapT = _three.RepeatWrapping;
-            img.repeat.set(texture.wrap, texture.wrap);
-          }
-
-          return img;
-        });
-      });
-    }
-  }]);
-
-  return Textures;
-}();
-
-exports.default = Textures;
-
-},{"three":3}],13:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.shuffleArray = exports.random = exports.getRandomArbitrary = void 0;
-
-var random = function random(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-exports.random = random;
-
-var getRandomArbitrary = function getRandomArbitrary(min, max) {
-  return Math.random() * (max - min) + min;
-};
-
-exports.getRandomArbitrary = getRandomArbitrary;
-
-var shuffleArray = function shuffleArray(array) {
-  for (var i = array.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var _ref = [array[j], array[i]];
-    array[i] = _ref[0];
-    array[j] = _ref[1];
-  }
-
-  return array;
-};
-
-exports.shuffleArray = shuffleArray;
-
-},{}],14:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = "#define GLSLIFY 1\n#define saturate(t) clamp(t, 0., 1.)\n#define PI 3.14159265359\n#define TPI PI * 2.\n#define EXP 2.71828182846\nfloat w1 = 3.0;\nfloat w2 = 1.0;\nfloat w3 = 20.0;\nfloat A = 1.0;\nfloat R = 3.0;\n\nvarying vec4 vTranformed;\n\nuniform float uTime;\nuniform float uSpeedColor;\nuniform vec2 uResolution;\nuniform vec2 uStep;\n\nuniform vec3 uColor1;\nuniform vec3 uColor2;\nuniform vec3 uColor3;\nuniform vec3 uColor4;\nuniform vec3 uColor5;\nuniform vec3 uColor6;\nuniform float uOpacity;\nvarying vec3 vNormal;\n\nuniform float fresnelBias;\nuniform float fresnelPower;\nuniform float fresnelScale;\nuniform float fresnelIntesity;\nfloat fr(vec3 viewDirection, vec3 worldNormal) {\n  return saturate(fresnelBias + fresnelScale * pow( 1. + dot( viewDirection, worldNormal), fresnelPower ));\n}\n\nfloat horizontal(in vec2 xy, float t)\t{\n  float v = sin(w1 * xy.x + A * t );\n\treturn v;\n}\n    \nfloat diagonal(in vec2 xy, float t)\t{\n    float v = cos( w2 * ( xy.x * cos(t) + 5.0 * xy.y * sin(t) ) + A * t );\n    return v;\n}\nfloat radial(in vec2 xy, float t)\t{\n    float x = 0.3 * xy.x - 0.5 + cos(t);\n    float y = 0.3 * xy.y - 0.5 + sin(t * 0.5);\n    float v = sin( w3 * sqrt( x * x + y * y + 1.0) + A * t );\n    return v;\n}\nvoid main()\t{\n  float time = uTime / uSpeedColor;\n  vec2 xy = gl_FragCoord.xy / uResolution.xy ;\n  float v = horizontal(xy, time);\n  v += diagonal(xy , time); \n  v += radial(xy , time);\n\n  float circle = PI * 2.;\n  float quart = PI * .5;\n  float fresnel = fr(vTranformed.xyz, vNormal) * fresnelIntesity;\n  float distanceX = length(length(vTranformed.xz) + length(xy));\n  float distanceY = length(length(vTranformed.yz) + length(xy));\n  float maskX = cos((sin(time) + (distanceX - xy.x)) - PI);\n  float maskY = cos((sin(time) + (distanceY - xy.y)) - PI);\n  float maskXY = (vTranformed.z  * v + uStep.x) * uStep.y;\n\n  vec3 m1 = mix(uColor1, uColor2, saturate(maskX));\n  vec3 m3 = mix(m1, uColor3, maskY);\n  vec3 m2 = mix(uColor4, uColor5, saturate(maskY));\n  vec3 m4 = mix(m2, uColor6, maskX);\n\n  vec3 col = mix(m3, m4, saturate(maskXY) - fresnel); \n  gl_FragColor = vec4(col, uOpacity);\n}";
-exports.default = _default;
-
-},{}],15:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = "#define GLSLIFY 1\n//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : ijm\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//\n\nvec3 mod289(vec3 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 mod289(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 permute(vec4 x) {\n     return mod289(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt(vec4 r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat snoise(vec3 v)\n  {\n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289(i);\n  vec4 p = permute( permute( permute(\n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))\n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),\n                                dot(p2,x2), dot(p3,x3) ) );\n  }\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nuniform float uTime;\nuniform float uAmplitude;\n\nuniform bool uLowGpu;\nuniform bool uVeryLowGpu;\nuniform float uSpeedBlob;\nvarying vec4 vTranformed;\n\nvarying vec3 vNormal;\n\nvoid main() {\n  const float max_its = 4.;\n  vec4 transformed = vec4(position, 1.);\n  vec3 elevation = vec3(0.);\n  float distanceToCenter = clamp( (length(position.xy)), 0., 5.);\n\n  elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 1., uTime / uSpeedBlob));\n  elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 2., uTime / uSpeedBlob));\n  if(!uVeryLowGpu) elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 3., uTime / uSpeedBlob));\n  if(!uLowGpu)  elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 4., uTime / uSpeedBlob));\n  \n  transformed.z +=  atan(cos(elevation.z) + cos(elevation.y) + cos(elevation.x) ) ; \n  vec4 viewPosition = viewMatrix * modelMatrix * 3. *  transformed;\n  vec4 projectionPosition = projectionMatrix * viewPosition;\n  gl_Position = projectionPosition;\n  vTranformed = transformed;\n  vNormal = normal;  \n}\n";
-exports.default = _default;
-
-},{}],16:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = "#define GLSLIFY 1\n#define saturate(t) clamp(t, 0., 1.)\n#define PI 3.14159265359\n#define TPI PI * 2.\n#define EXP 2.71828182846\n\nfloat w1 = 3.0;\nfloat w2 = 1.0;\nfloat w3 = 20.0;\nfloat A = 1.0;\nfloat R = 3.0;\n\nuniform bool uLowGpu;\nuniform sampler2D uTexture;\nuniform float uSpeedColor;\nuniform vec2 uResolution;\nuniform float uTime;\nuniform vec2 uStep;\n\nuniform vec3 uColor1;\nuniform vec3 uColor2;\nuniform vec3 uColor3;\nuniform vec3 uColor4;\nuniform vec3 uColor5;\nuniform vec3 uColor6;\nuniform float uOpacity;\nuniform float uWhiteness;\n\nvarying vec2 vUv;\nfloat horizontal(in vec2 xy, float t)\t{\n  float v = sin(w1 * xy.x + A * t );\n\treturn v;\n}\n    \nfloat diagonal(in vec2 xy, float t)\t{\n    float v = cos( w2 * ( xy.x * cos(t) + 5.0 * xy.y * sin(t) ) + A * t );\n    return v;\n}\nfloat radial(in vec2 xy, float t)\t{\n    float x = 0.3 * xy.x - 0.5 + cos(t);\n    float y = 0.3 * xy.y - 0.5 + sin(t * 0.5);\n    float v = sin( w3 * sqrt( x * x + y * y + 1.0) + A * t );\n    return v;\n}\n\nfloat map(float a, float b, float c, float d, float x) {\n    return (( x - a ) * ( d - c ) / ( b - a ) ) + c;\n}\n\nfloat log_map(float a,float b,float c,float d,float x) {\n    float x1 = map( a , b , 1.0 , EXP , x );\n    return log( x1 ) * ( d - c ) + c;\n}\n\nvoid main()\t{\n  float time = uTime / uSpeedColor;\n\n  vec2 xy = gl_FragCoord.xy / uResolution.xy ;\n  vec4 texture = texture2D(uTexture, vUv);\n  vec3 col = vec3(1.);\n  if(!uLowGpu) {\n    float v = horizontal(xy, time);\n    v += diagonal(xy , time); \n    v += radial(xy , time);\n    v += log_map(texture.z , uTime,  texture.x, texture.x, xy.y);\n\n    float circle = PI * 2.;\n    float quart = PI * .5;\n    float distanceX = length( length(texture.xz) + length(xy) )  ;\n    float distanceY = length( length(texture.yz) + length(xy) )  ;\n    float maskX = cos((sin(time) + (distanceX - xy.x)) - PI  )  ;\n    float maskY = cos((sin(time) + (distanceY - xy.y)) - PI  ) ;\n    float maskXY =  (((texture.z) * v + uStep.x) * uStep.y) ;\n\n    vec3 mix1 = mix(uColor1, uColor2, (saturate(maskX)) );\n    vec3 mix3 = mix(mix1, uColor3, ((maskY)) );\n    vec3 mix2 = mix(uColor4, uColor5, (saturate(maskY)) );\n    vec3 mix4 = mix(mix2, uColor6, ((maskX)) );\n\n    col = mix(mix3, mix4,  (saturate(maskXY )) ); \n  } \n\n  gl_FragColor = vec4(col + uWhiteness, texture * uOpacity ) ;\n}";
-exports.default = _default;
-
-},{}],17:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-var _default = "#define GLSLIFY 1\nvarying vec2 vUv;\n\nvoid main() {\n  vec4 viewPosition = viewMatrix * modelMatrix * 3. *  vec4(position, 1.);\n  vec4 projectionPosition = projectionMatrix * viewPosition;\n  gl_Position = projectionPosition;\n  vUv = uv;\n}\n";
-exports.default = _default;
-
-},{}],18:[function(require,module,exports){
+},{"three":3}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -57800,257 +57589,9 @@ var _three = require("three");
 
 var _gsap = _interopRequireDefault(require("gsap"));
 
-var _helpers = require("../helpers");
+var _fragment = _interopRequireDefault(require("./shaders/fragment"));
 
-var _vertex = _interopRequireDefault(require("../shaders/logo/vertex.js"));
-
-var _fragment = _interopRequireDefault(require("../shaders/logo/fragment.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Logo = /*#__PURE__*/function () {
-  function Logo(_ref) {
-    var _this$gpuTier;
-
-    var sizes = _ref.sizes,
-        scene = _ref.scene,
-        image = _ref.image,
-        colors = _ref.colors,
-        gpuTier = _ref.gpuTier;
-
-    _classCallCheck(this, Logo);
-
-    // super({sizes, scene, noPlane: true})
-    this.sizes = sizes;
-    this.scene = scene;
-    this.image = image;
-    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    this.gpuTier = gpuTier;
-    this.colorsThree = colors;
-    this.color = "dark";
-    this.colors = Object.assign({}, this.colorsThree[this.color]);
-    this.time = (0, _helpers.getRandomArbitrary)(-50, 50);
-    this.width = 5 / 574 * 100;
-    this.height = 5 / 574 * 100;
-    this.segments = 1;
-    this.speedBlob = {
-      value: 20
-    };
-    this.speedColor = {
-      value: 20
-    };
-    this.colorStep = {
-      value: new _three.Vector2(0.63, .71)
-    };
-    this.meshes = [];
-    this.geometry = new _three.PlaneGeometry(this.width, this.height, this.segments, this.segments);
-    this.material = new _three.ShaderMaterial({
-      transparent: true,
-      // blending: AdditiveBlending,
-      depthWrite: false,
-      depthTest: false,
-      uniforms: {
-        uTime: {
-          value: this.time
-        },
-        uSpeedBlob: this.speedBlob,
-        uLowGpu: {
-          value: this.isSafari || ((_this$gpuTier = this.gpuTier) === null || _this$gpuTier === void 0 ? void 0 : _this$gpuTier.tier) < 2
-        },
-        uSpeedColor: this.speedColor,
-        uAmplitude: {
-          value: 100
-        },
-        uTexture: {
-          value: this.image
-        },
-        uResolution: {
-          value: new _three.Vector2(this.sizes.width, this.sizes.height)
-        },
-        uOpacity: {
-          value: 0
-        },
-        uColor1: {
-          value: this.colors[0]
-        },
-        uColor2: {
-          value: this.colors[1]
-        },
-        uColor3: {
-          value: this.colors[2]
-        },
-        uColor4: {
-          value: this.colors[3]
-        },
-        uColor5: {
-          value: this.colors[4]
-        },
-        uColor6: {
-          value: this.colors[5]
-        },
-        uWhiteness: {
-          value: 5
-        },
-        // 0.45,
-        uStep: this.colorStep
-      },
-      vertexShader: _vertex.default,
-      fragmentShader: _fragment.default
-    });
-    this.mesh = new _three.Mesh(this.geometry, this.material);
-    this.mesh.position.z = 1.;
-    this.mesh.scale.set(.8, .8, 1);
-    this.scene.add(this.mesh);
-    this.onPlay();
-  }
-
-  _createClass(Logo, [{
-    key: "onPlay",
-    value: function onPlay() {
-      var _this = this;
-
-      var duration = 1.;
-
-      var tl = _gsap.default.timeline({
-        delay: .6
-      });
-
-      tl.to(this.material.uniforms.uOpacity, {
-        value: 1,
-        duration: .8,
-        ease: 'power3.out'
-      }).to(this.mesh.scale, {
-        x: .9,
-        y: .9,
-        duration: .8
-      }, "-=.8").to(this.material.uniforms.uOpacity, {
-        value: 1,
-        duration: .2,
-        ease: 'power3.out'
-      }).to(this.mesh.scale, {
-        x: 1.9,
-        y: 1.9,
-        duration: duration
-      }, "-=.4").to(this.material.uniforms.uWhiteness, {
-        value: .15,
-        duration: .6,
-        ease: 'power3.out'
-      }, "-=.8").to(this.material.uniforms.uOpacity, {
-        value: 0,
-        duration: .4,
-        ease: 'power4.in',
-        onComplete: function onComplete() {
-          var event = new CustomEvent('loaded');
-          document.dispatchEvent(event);
-
-          _this.removeMesh();
-        }
-      }, "-=".concat(duration - .6));
-    } // controls(gui) {
-    //   gui.add(this.mesh.material.uniforms.uWhiteness, 'value').min(0).max(5).step(0.01).onChange().name('uWhiteness')
-    //   gui.add(this.mesh.material.uniforms.fresnelBias, 'value').min(0).max(5).step(0.01).onChange().name('fresnelBias')
-    //   gui.add(this.mesh.material.uniforms.fresnelPower, 'value').min(0).max(5).step(0.01).onChange().name('fresnelPower')
-    //   gui.add(this.mesh.material.uniforms.fresnelScale, 'value').min(0).max(5).step(0.01).onChange().name('fresnelScale')
-    //   gui.add(this.mesh.material.uniforms.fresnelIntesity, 'value').min(0).max(1).step(0.01).onChange().name('fresnelIntesity')
-    // }
-
-  }, {
-    key: "removeMesh",
-    value: function removeMesh() {
-      this.mesh.geometry.dispose();
-      this.mesh.material.dispose();
-      this.scene.remove(this.mesh);
-    }
-  }]);
-
-  return Logo;
-}();
-
-var _default = Logo;
-exports.default = _default;
-
-},{"../helpers":13,"../shaders/logo/fragment.js":16,"../shaders/logo/vertex.js":17,"gsap":"gsap","three":3}],19:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _three = require("three");
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Noise = /*#__PURE__*/function () {
-  function Noise(_ref) {
-    var sizes = _ref.sizes,
-        scene = _ref.scene,
-        image = _ref.image;
-
-    _classCallCheck(this, Noise);
-
-    this.sizes = sizes;
-    this.scene = scene;
-    this.image = image;
-    this.width = 16;
-    this.height = 13;
-    this.segments = 1;
-    this.grainIntensity = {
-      value: 0.09
-    };
-    this.geometry = new _three.PlaneGeometry(this.width, this.height, this.segments, this.segments);
-    this.material = new _three.MeshStandardMaterial({
-      map: this.image,
-      transparent: true,
-      opacity: this.grainIntensity.value,
-      blending: _three.AdditiveBlending,
-      depthWrite: false,
-      depthTest: false
-    });
-    this.mesh = new _three.Mesh(this.geometry, this.material);
-    this.mesh.position.z = 1.;
-    this.scene.add(this.mesh);
-  }
-
-  _createClass(Noise, [{
-    key: "controls",
-    value: function controls(gui) {
-      gui.add(this.material, 'opacity').min(0).max(1).step(0.01).name('Grain Intensity').onChange();
-    }
-  }]);
-
-  return Noise;
-}();
-
-exports.default = Noise;
-
-},{"three":3}],20:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _three = require("three");
-
-var _gsap = _interopRequireDefault(require("gsap"));
-
-var _helpers = require("../helpers");
-
-var _fragment = _interopRequireDefault(require("../shaders/gradient/fragment"));
-
-var _vertex = _interopRequireDefault(require("../shaders/gradient/vertex"));
+var _vertex = _interopRequireDefault(require("./shaders/vertex"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -58071,21 +57612,17 @@ var Shape = /*#__PURE__*/function () {
 
     this.color = "dark";
     this.colorsThree = colors;
-    this.colors = Object.assign({}, this.colorsThree[this.color]); // this.colorsGUI = this.dark.map( color => { return {value : color} })
-
+    this.colors = Object.assign({}, this.colorsThree[this.color]);
     this.sizes = sizes;
     this.scene = scene;
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     this.width = 16;
     this.height = 13;
-    this.gpuTier = gpuTier;
     this.isLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3 || this.isSafari;
     this.isVeryLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 2 || this.isSafari && (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3;
     this.segments = this.isLow ? 200 : 600;
-    this.segments = this.isVeryLow ? 100 : this.segments; // console.log('low', this.isLow)
-    // console.log('very low', this.isVeryLow)
-
-    this.time = (0, _helpers.getRandomArbitrary)(-50, 50);
+    this.segments = this.isVeryLow ? 100 : this.segments;
+    this.time = this.getRandomArbitrary(-50, 50);
     this.speedBlob = {
       value: 20
     };
@@ -58119,6 +57656,11 @@ var Shape = /*#__PURE__*/function () {
         duration: 2,
         ease: "power3.out"
       });
+    }
+  }, {
+    key: "getRandomArbitrary",
+    value: function getRandomArbitrary(min, max) {
+      return Math.random() * (max - min) + min;
     }
   }, {
     key: "setGeometry",
@@ -58202,7 +57744,27 @@ var Shape = /*#__PURE__*/function () {
 
 exports.default = Shape;
 
-},{"../helpers":13,"../shaders/gradient/fragment":14,"../shaders/gradient/vertex":15,"gsap":"gsap","three":3}],21:[function(require,module,exports){
+},{"./shaders/fragment":12,"./shaders/vertex":13,"gsap":"gsap","three":3}],12:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = "#define GLSLIFY 1\n#define saturate(t) clamp(t, 0., 1.)\n#define PI 3.14159265359\n#define TPI PI * 2.\n#define EXP 2.71828182846\nfloat w1 = 3.0;\nfloat w2 = 1.0;\nfloat w3 = 20.0;\nfloat A = 1.0;\nfloat R = 3.0;\n\nvarying vec4 vTranformed;\n\nuniform float uTime;\nuniform float uSpeedColor;\nuniform vec2 uResolution;\nuniform vec2 uStep;\n\nuniform vec3 uColor1;\nuniform vec3 uColor2;\nuniform vec3 uColor3;\nuniform vec3 uColor4;\nuniform vec3 uColor5;\nuniform vec3 uColor6;\nuniform float uOpacity;\nvarying vec3 vNormal;\n\nuniform float fresnelBias;\nuniform float fresnelPower;\nuniform float fresnelScale;\nuniform float fresnelIntesity;\nfloat fr(vec3 viewDirection, vec3 worldNormal) {\n  return saturate(fresnelBias + fresnelScale * pow( 1. + dot( viewDirection, worldNormal), fresnelPower ));\n}\n\nfloat horizontal(in vec2 xy, float t)\t{\n  float v = sin(w1 * xy.x + A * t );\n\treturn v;\n}\n    \nfloat diagonal(in vec2 xy, float t)\t{\n    float v = cos( w2 * ( xy.x * cos(t) + 5.0 * xy.y * sin(t) ) + A * t );\n    return v;\n}\nfloat radial(in vec2 xy, float t)\t{\n    float x = 0.3 * xy.x - 0.5 + cos(t);\n    float y = 0.3 * xy.y - 0.5 + sin(t * 0.5);\n    float v = sin( w3 * sqrt( x * x + y * y + 1.0) + A * t );\n    return v;\n}\nvoid main()\t{\n  float time = uTime / uSpeedColor;\n  vec2 xy = gl_FragCoord.xy / uResolution.xy ;\n  float v = horizontal(xy, time);\n  v += diagonal(xy , time); \n  v += radial(xy , time);\n\n  float circle = PI * 2.;\n  float quart = PI * .5;\n  float fresnel = fr(vTranformed.xyz, vNormal) * fresnelIntesity;\n  float distanceX = length(length(vTranformed.xz) + length(xy));\n  float distanceY = length(length(vTranformed.yz) + length(xy));\n  float maskX = cos((sin(time) + (distanceX - xy.x)) - PI);\n  float maskY = cos((sin(time) + (distanceY - xy.y)) - PI);\n  float maskXY = (vTranformed.z  * v + uStep.x) * uStep.y;\n\n  vec3 m1 = mix(uColor1, uColor2, saturate(maskX));\n  vec3 m3 = mix(m1, uColor3, maskY);\n  vec3 m2 = mix(uColor4, uColor5, saturate(maskY));\n  vec3 m4 = mix(m2, uColor6, maskX);\n\n  vec3 col = mix(m3, m4, saturate(maskXY) - fresnel); \n  gl_FragColor = vec4(col, uOpacity);\n}";
+exports.default = _default;
+
+},{}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = "#define GLSLIFY 1\n//\n// Description : Array and textureless GLSL 2D/3D/4D simplex\n//               noise functions.\n//      Author : Ian McEwan, Ashima Arts.\n//  Maintainer : ijm\n//     Lastmod : 20110822 (ijm)\n//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.\n//               Distributed under the MIT License. See LICENSE file.\n//               https://github.com/ashima/webgl-noise\n//\n\nvec3 mod289(vec3 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 mod289(vec4 x) {\n  return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\n\nvec4 permute(vec4 x) {\n     return mod289(((x*34.0)+1.0)*x);\n}\n\nvec4 taylorInvSqrt(vec4 r)\n{\n  return 1.79284291400159 - 0.85373472095314 * r;\n}\n\nfloat snoise(vec3 v)\n  {\n  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;\n  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);\n\n// First corner\n  vec3 i  = floor(v + dot(v, C.yyy) );\n  vec3 x0 =   v - i + dot(i, C.xxx) ;\n\n// Other corners\n  vec3 g = step(x0.yzx, x0.xyz);\n  vec3 l = 1.0 - g;\n  vec3 i1 = min( g.xyz, l.zxy );\n  vec3 i2 = max( g.xyz, l.zxy );\n\n  //   x0 = x0 - 0.0 + 0.0 * C.xxx;\n  //   x1 = x0 - i1  + 1.0 * C.xxx;\n  //   x2 = x0 - i2  + 2.0 * C.xxx;\n  //   x3 = x0 - 1.0 + 3.0 * C.xxx;\n  vec3 x1 = x0 - i1 + C.xxx;\n  vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y\n  vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y\n\n// Permutations\n  i = mod289(i);\n  vec4 p = permute( permute( permute(\n             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))\n           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))\n           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));\n\n// Gradients: 7x7 points over a square, mapped onto an octahedron.\n// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)\n  float n_ = 0.142857142857; // 1.0/7.0\n  vec3  ns = n_ * D.wyz - D.xzx;\n\n  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)\n\n  vec4 x_ = floor(j * ns.z);\n  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)\n\n  vec4 x = x_ *ns.x + ns.yyyy;\n  vec4 y = y_ *ns.x + ns.yyyy;\n  vec4 h = 1.0 - abs(x) - abs(y);\n\n  vec4 b0 = vec4( x.xy, y.xy );\n  vec4 b1 = vec4( x.zw, y.zw );\n\n  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;\n  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;\n  vec4 s0 = floor(b0)*2.0 + 1.0;\n  vec4 s1 = floor(b1)*2.0 + 1.0;\n  vec4 sh = -step(h, vec4(0.0));\n\n  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;\n  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;\n\n  vec3 p0 = vec3(a0.xy,h.x);\n  vec3 p1 = vec3(a0.zw,h.y);\n  vec3 p2 = vec3(a1.xy,h.z);\n  vec3 p3 = vec3(a1.zw,h.w);\n\n//Normalise gradients\n  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));\n  p0 *= norm.x;\n  p1 *= norm.y;\n  p2 *= norm.z;\n  p3 *= norm.w;\n\n// Mix final noise value\n  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);\n  m = m * m;\n  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),\n                                dot(p2,x2), dot(p3,x3) ) );\n  }\n\nvec3 snoiseVec3( vec3 x ){\n\n  float s  = snoise(vec3( x ));\n  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));\n  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));\n  vec3 c = vec3( s , s1 , s2 );\n  return c;\n\n}\n\nvec3 curlNoise( vec3 p ){\n  \n  const float e = .1;\n  vec3 dx = vec3( e   , 0.0 , 0.0 );\n  vec3 dy = vec3( 0.0 , e   , 0.0 );\n  vec3 dz = vec3( 0.0 , 0.0 , e   );\n\n  vec3 p_x0 = snoiseVec3( p - dx );\n  vec3 p_x1 = snoiseVec3( p + dx );\n  vec3 p_y0 = snoiseVec3( p - dy );\n  vec3 p_y1 = snoiseVec3( p + dy );\n  vec3 p_z0 = snoiseVec3( p - dz );\n  vec3 p_z1 = snoiseVec3( p + dz );\n\n  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;\n  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;\n  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;\n\n  const float divisor = 1.0 / ( 2.0 * e );\n  return normalize( vec3( x , y , z ) * divisor );\n\n}\n\nuniform float uTime;\nuniform float uAmplitude;\n\nuniform bool uLowGpu;\nuniform bool uVeryLowGpu;\nuniform float uSpeedBlob;\nvarying vec4 vTranformed;\n\nvarying vec3 vNormal;\n\nvoid main() {\n  const float max_its = 4.;\n  vec4 transformed = vec4(position, 1.);\n  vec3 elevation = vec3(0.);\n  float distanceToCenter = clamp( (length(position.xy)), 0., 5.);\n\n  elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 1., uTime / uSpeedBlob));\n  elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 2., uTime / uSpeedBlob));\n  if(!uVeryLowGpu) elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 3., uTime / uSpeedBlob));\n  if(!uLowGpu)  elevation += curlNoise(vec3(((transformed.xy + distanceToCenter  ) / uAmplitude) * 4., uTime / uSpeedBlob));\n  \n  transformed.z +=  atan(cos(elevation.z) + cos(elevation.y) + cos(elevation.x) ) ; \n  vec4 viewPosition = viewMatrix * modelMatrix * 3. *  transformed;\n  vec4 projectionPosition = projectionMatrix * viewPosition;\n  gl_Position = projectionPosition;\n  vTranformed = transformed;\n  vNormal = normal;  \n}\n";
+exports.default = _default;
+
+},{}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58283,7 +57845,7 @@ var HoverClippingNavigation = /*#__PURE__*/function () {
 
 exports.default = HoverClippingNavigation;
 
-},{"gsap":"gsap"}],22:[function(require,module,exports){
+},{"gsap":"gsap"}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58373,7 +57935,7 @@ var ContentAnimation = /*#__PURE__*/function () {
 
 exports.default = ContentAnimation;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],23:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58648,7 +58210,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
 exports.default = ImageSequence;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],24:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58843,7 +58405,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
 
 exports.default = VerticalMouseDrivenCarousel;
 
-},{"gsap":"gsap"}],25:[function(require,module,exports){
+},{"gsap":"gsap"}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58996,7 +58558,7 @@ var PanningGallery = /*#__PURE__*/function () {
 
 exports.default = PanningGallery;
 
-},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],26:[function(require,module,exports){
+},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59105,7 +58667,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],27:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59186,7 +58748,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],28:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -59336,6 +58898,6 @@ ready(function () {
   var animatedGradient = new _AnimatedGradient.default();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AnimatedGradient/AnimatedGradient":6,"./examples/HoverClippingNavigation/HoverClippingNavigation":21,"./examples/ImageSequence/ContentAnimation":22,"./examples/ImageSequence/ImageSequence":23,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":24,"./examples/PanningGallery/PanningGallery":25,"./examples/ScrollingMarquee/ScrollingMarquee":26,"./examples/TemplateExample/TemplateComponent":27}]},{},[28])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AnimatedGradient/AnimatedGradient":6,"./examples/HoverClippingNavigation/HoverClippingNavigation":14,"./examples/ImageSequence/ContentAnimation":15,"./examples/ImageSequence/ImageSequence":16,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":17,"./examples/PanningGallery/PanningGallery":18,"./examples/ScrollingMarquee/ScrollingMarquee":19,"./examples/TemplateExample/TemplateComponent":20}]},{},[21])
 
 //# sourceMappingURL=bundle.js.map
