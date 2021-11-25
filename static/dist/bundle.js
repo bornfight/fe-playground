@@ -57318,8 +57318,10 @@ var AnimatedGradient = /*#__PURE__*/function () {
     this.isMobile = window.innerWidth < 1024;
     this.pixelRatio = 1.5;
     this.wrap = 20;
-    this.light = ["#93a0D7", "#FFB648", "#ff4720", "#506eff", "#e3593c", "#F9F5E3"];
-    this.dark = ["#55532d", "#f70000", "#ffa800", "#fc4c35", "#79ffce", "#0808c6"];
+    this.light = ["#7CA0C7", "#FFB648", "#969969", "#A58E2E", "#C85361", "#F9F5E3"]; // this.light = ["#93a0D7", "#FFB648", "#ff4720", "#506eff", "#e3593c", "#F9F5E3"];
+
+    this.dark = ["#C130CE", "#79ffce", "#653BE4", "#FFB648", "#ffa800", "#0084C7"]; // this.dark = ["#55532d", "#f70000", "#ffa800", "#fc4c35", "#79ffce", "#0808c6"];
+
     this.colorsList = {
       light: "Light",
       dark: "Dark"
@@ -57353,7 +57355,7 @@ var AnimatedGradient = /*#__PURE__*/function () {
     this.canvas.height = window.innerHeight; // Scene
 
     this.scene = new _Scene.default({
-      background: 0x00032d
+      background: 0x0E0D13
     });
     /**
      * Lights
@@ -57473,11 +57475,11 @@ var Camera = function Camera(_ref) {
 
   this.sizes = sizes;
   this.scene = scene;
-  this.camera = new _three.PerspectiveCamera(75, this.sizes.width / this.sizes.height, 1, 1000);
-  this.camera.position.set(0, 0., 2.5);
+  this.camera = new _three.PerspectiveCamera(75, this.sizes.width / this.sizes.height, 1, 1000); // this.camera.position.set( 0, 0., 2.5 );
+
+  this.camera.position.set(0, 0., 4);
   this.scene.add(this.camera);
-  return this.camera; // const helper = new THREE.CameraHelper( this.camera );
-  // this.scene.add( helper );
+  return this.camera;
 };
 
 exports.default = Camera;
@@ -57616,18 +57618,19 @@ var Shape = /*#__PURE__*/function () {
     this.sizes = sizes;
     this.scene = scene;
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    this.width = 16;
-    this.height = 13;
+    this.width = 10;
+    this.height = 10;
     this.isLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3 || this.isSafari;
     this.isVeryLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 2 || this.isSafari && (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3;
     this.segments = this.isLow ? 200 : 600;
-    this.segments = this.isVeryLow ? 100 : this.segments;
-    this.time = this.getRandomArbitrary(-50, 50);
+    this.segments = this.isVeryLow ? 100 : this.segments; // this.time = this.getRandomArbitrary(-50, 50);
+
+    this.time = this.getRandomArbitrary(-20, 20);
     this.speedBlob = {
-      value: 20
+      value: 10
     };
     this.speedColor = {
-      value: 20
+      value: 10
     };
     this.amplitude = {
       value: 100
@@ -57636,7 +57639,7 @@ var Shape = /*#__PURE__*/function () {
       value: new _three.Vector3(0)
     };
     this.colorStep = {
-      value: new _three.Vector2(0.63, 0.71)
+      value: new _three.Vector2(0.3, 0.3)
     };
     this.init();
   }
@@ -57652,8 +57655,8 @@ var Shape = /*#__PURE__*/function () {
 
       _gsap.default.to(this.material.uniforms.uOpacity, {
         value: 1,
-        delay: 1.6,
-        duration: 2,
+        delay: 0.5,
+        duration: 3,
         ease: "power3.out"
       });
     }
@@ -57698,12 +57701,8 @@ var Shape = /*#__PURE__*/function () {
           uColor4: {
             value: this.colors[3]
           },
-          uColor5: {
-            value: this.colors[4]
-          },
-          uColor6: {
-            value: this.colors[5]
-          },
+          // uColor5: {value: this.colors[4]},
+          // uColor6: {value: this.colors[5]},
           uAmplitude: this.amplitude,
           uElevation: this.elevation,
           uOpacity: {

@@ -14,20 +14,21 @@ export default class Shape {
         this.scene = scene;
 
         this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        this.width = 16;
-        this.height = 13;
+        this.width = 10;
+        this.height = 10;
 
         this.isLow = gpuTier?.tier < 3 || this.isSafari;
         this.isVeryLow = gpuTier?.tier < 2 || (this.isSafari && gpuTier?.tier < 3);
 
         this.segments = this.isLow ? 200 : 600;
         this.segments = this.isVeryLow ? 100 : this.segments;
-        this.time = this.getRandomArbitrary(-50, 50);
-        this.speedBlob = {value: 20};
-        this.speedColor = {value: 20};
+        // this.time = this.getRandomArbitrary(-50, 50);
+        this.time = this.getRandomArbitrary(-20, 20);
+        this.speedBlob = {value: 10};
+        this.speedColor = {value: 10};
         this.amplitude = {value: 100};
         this.elevation = {value: new Vector3(0)};
-        this.colorStep = {value: new Vector2(0.63, 0.71)};
+        this.colorStep = {value: new Vector2(0.3, 0.3)};
 
         this.init();
     }
@@ -42,8 +43,8 @@ export default class Shape {
 
         gsap.to(this.material.uniforms.uOpacity, {
             value: 1,
-            delay: 1.6,
-            duration: 2,
+            delay: 0.5,
+            duration: 3,
             ease: "power3.out",
         });
     }
@@ -70,8 +71,8 @@ export default class Shape {
                 uColor2: {value: this.colors[1]},
                 uColor3: {value: this.colors[2]},
                 uColor4: {value: this.colors[3]},
-                uColor5: {value: this.colors[4]},
-                uColor6: {value: this.colors[5]},
+                // uColor5: {value: this.colors[4]},
+                // uColor6: {value: this.colors[5]},
                 uAmplitude: this.amplitude,
                 uElevation: this.elevation,
                 uOpacity: {value: 0},
