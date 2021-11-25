@@ -19,10 +19,8 @@ export default class AnimatedGradient {
         this.isMobile = window.innerWidth < 1024;
         this.pixelRatio = 1.5;
         this.wrap = 20;
-        this.light = ["#7CA0C7", "#FFB648", "#969969", "#A58E2E", "#C85361", "#F9F5E3"];
-        // this.light = ["#93a0D7", "#FFB648", "#ff4720", "#506eff", "#e3593c", "#F9F5E3"];
-        this.dark = ["#C130CE", "#79ffce", "#653BE4", "#FFB648", "#ffa800", "#0084C7"];
-        // this.dark = ["#55532d", "#f70000", "#ffa800", "#fc4c35", "#79ffce", "#0808c6"];
+        this.light = ["#A58E2E", "#FFB648", "#969969", "#A58E2E", "#C85361", "#F9F5E3"];
+        this.dark = ["#C130CE", "#0084C7", "#653BE4", "#653BE4", "#ffa800", "#0084C7"];
         this.colorsList = {
             light: "Light",
             dark: "Dark",

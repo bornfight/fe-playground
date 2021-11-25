@@ -57318,10 +57318,8 @@ var AnimatedGradient = /*#__PURE__*/function () {
     this.isMobile = window.innerWidth < 1024;
     this.pixelRatio = 1.5;
     this.wrap = 20;
-    this.light = ["#7CA0C7", "#FFB648", "#969969", "#A58E2E", "#C85361", "#F9F5E3"]; // this.light = ["#93a0D7", "#FFB648", "#ff4720", "#506eff", "#e3593c", "#F9F5E3"];
-
-    this.dark = ["#C130CE", "#79ffce", "#653BE4", "#FFB648", "#ffa800", "#0084C7"]; // this.dark = ["#55532d", "#f70000", "#ffa800", "#fc4c35", "#79ffce", "#0808c6"];
-
+    this.light = ["#A58E2E", "#FFB648", "#969969", "#A58E2E", "#C85361", "#F9F5E3"];
+    this.dark = ["#C130CE", "#0084C7", "#653BE4", "#653BE4", "#ffa800", "#0084C7"];
     this.colorsList = {
       light: "Light",
       dark: "Dark"
@@ -57477,7 +57475,7 @@ var Camera = function Camera(_ref) {
   this.scene = scene;
   this.camera = new _three.PerspectiveCamera(75, this.sizes.width / this.sizes.height, 1, 1000); // this.camera.position.set( 0, 0., 2.5 );
 
-  this.camera.position.set(0, 0., 4);
+  this.camera.position.set(0, 0., 10);
   this.scene.add(this.camera);
   return this.camera;
 };
@@ -57623,9 +57621,8 @@ var Shape = /*#__PURE__*/function () {
     this.isLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3 || this.isSafari;
     this.isVeryLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 2 || this.isSafari && (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3;
     this.segments = this.isLow ? 200 : 600;
-    this.segments = this.isVeryLow ? 100 : this.segments; // this.time = this.getRandomArbitrary(-50, 50);
-
-    this.time = this.getRandomArbitrary(-20, 20);
+    this.segments = this.isVeryLow ? 100 : this.segments;
+    this.time = this.getRandomArbitrary(-50, 50);
     this.speedBlob = {
       value: 10
     };
@@ -57701,8 +57698,12 @@ var Shape = /*#__PURE__*/function () {
           uColor4: {
             value: this.colors[3]
           },
-          // uColor5: {value: this.colors[4]},
-          // uColor6: {value: this.colors[5]},
+          uColor5: {
+            value: this.colors[4]
+          },
+          uColor6: {
+            value: this.colors[5]
+          },
           uAmplitude: this.amplitude,
           uElevation: this.elevation,
           uOpacity: {
@@ -57718,7 +57719,7 @@ var Shape = /*#__PURE__*/function () {
             value: 4.68
           },
           fresnelIntesity: {
-            value: 0.2
+            value: 1
           },
           uStep: this.colorStep
         },

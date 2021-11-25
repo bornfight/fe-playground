@@ -22,8 +22,7 @@ export default class Shape {
 
         this.segments = this.isLow ? 200 : 600;
         this.segments = this.isVeryLow ? 100 : this.segments;
-        // this.time = this.getRandomArbitrary(-50, 50);
-        this.time = this.getRandomArbitrary(-20, 20);
+        this.time = this.getRandomArbitrary(-50, 50);
         this.speedBlob = {value: 10};
         this.speedColor = {value: 10};
         this.amplitude = {value: 100};
@@ -71,15 +70,15 @@ export default class Shape {
                 uColor2: {value: this.colors[1]},
                 uColor3: {value: this.colors[2]},
                 uColor4: {value: this.colors[3]},
-                // uColor5: {value: this.colors[4]},
-                // uColor6: {value: this.colors[5]},
+                uColor5: {value: this.colors[4]},
+                uColor6: {value: this.colors[5]},
                 uAmplitude: this.amplitude,
                 uElevation: this.elevation,
                 uOpacity: {value: 0},
                 fresnelBias: {value: 0},
                 fresnelPower: {value: 0.68},
                 fresnelScale: {value: 4.68},
-                fresnelIntesity: {value: 0.2},
+                fresnelIntesity: {value: 1},
                 uStep: this.colorStep,
             },
             transparent: true,
