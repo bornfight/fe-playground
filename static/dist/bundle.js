@@ -57622,7 +57622,7 @@ var Shape = /*#__PURE__*/function () {
     this.isVeryLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 2 || this.isSafari && (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3;
     this.segments = this.isLow ? 200 : 600;
     this.segments = this.isVeryLow ? 100 : this.segments;
-    this.time = this.getRandomArbitrary(-50, 50);
+    this.time = -5;
     this.speedBlob = {
       value: 20
     };

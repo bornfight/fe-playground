@@ -22,7 +22,7 @@ export default class Shape {
 
         this.segments = this.isLow ? 200 : 600;
         this.segments = this.isVeryLow ? 100 : this.segments;
-        this.time = this.getRandomArbitrary(-50, 50);
+        this.time = -5;
         this.speedBlob = {value: 20};
         this.speedColor = {value: 20};
         this.amplitude = {value: 100};
