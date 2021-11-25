@@ -57475,7 +57475,7 @@ var Camera = function Camera(_ref) {
   this.scene = scene;
   this.camera = new _three.PerspectiveCamera(75, this.sizes.width / this.sizes.height, 1, 1000); // this.camera.position.set( 0, 0., 2.5 );
 
-  this.camera.position.set(0, 0., 10);
+  this.camera.position.set(0, 0., 4);
   this.scene.add(this.camera);
   return this.camera;
 };
@@ -57616,18 +57616,18 @@ var Shape = /*#__PURE__*/function () {
     this.sizes = sizes;
     this.scene = scene;
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    this.width = 10;
-    this.height = 10;
+    this.width = 16;
+    this.height = 13;
     this.isLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3 || this.isSafari;
     this.isVeryLow = (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 2 || this.isSafari && (gpuTier === null || gpuTier === void 0 ? void 0 : gpuTier.tier) < 3;
     this.segments = this.isLow ? 200 : 600;
     this.segments = this.isVeryLow ? 100 : this.segments;
     this.time = this.getRandomArbitrary(-50, 50);
     this.speedBlob = {
-      value: 10
+      value: 20
     };
     this.speedColor = {
-      value: 10
+      value: 20
     };
     this.amplitude = {
       value: 100
@@ -57636,7 +57636,7 @@ var Shape = /*#__PURE__*/function () {
       value: new _three.Vector3(0)
     };
     this.colorStep = {
-      value: new _three.Vector2(0.3, 0.3)
+      value: new _three.Vector2(0.63, 0.71)
     };
     this.init();
   }
@@ -57652,8 +57652,8 @@ var Shape = /*#__PURE__*/function () {
 
       _gsap.default.to(this.material.uniforms.uOpacity, {
         value: 1,
-        delay: 0.5,
-        duration: 3,
+        delay: 1.6,
+        duration: 2,
         ease: "power3.out"
       });
     }
@@ -57684,7 +57684,7 @@ var Shape = /*#__PURE__*/function () {
             value: this.isVeryLow
           },
           uResolution: {
-            value: new _three.Vector2(this.sizes.width, this.sizes.height)
+            value: new _three.Vector2(this.sizes.width / 2, this.sizes.height / 2)
           },
           uColor1: {
             value: this.colors[0]
@@ -57719,7 +57719,7 @@ var Shape = /*#__PURE__*/function () {
             value: 4.68
           },
           fresnelIntesity: {
-            value: 1
+            value: 0.1
           },
           uStep: this.colorStep
         },

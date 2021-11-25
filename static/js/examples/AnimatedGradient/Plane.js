@@ -14,8 +14,8 @@ export default class Shape {
         this.scene = scene;
 
         this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        this.width = 10;
-        this.height = 10;
+        this.width = 16;
+        this.height = 13;
 
         this.isLow = gpuTier?.tier < 3 || this.isSafari;
         this.isVeryLow = gpuTier?.tier < 2 || (this.isSafari && gpuTier?.tier < 3);
@@ -23,11 +23,11 @@ export default class Shape {
         this.segments = this.isLow ? 200 : 600;
         this.segments = this.isVeryLow ? 100 : this.segments;
         this.time = this.getRandomArbitrary(-50, 50);
-        this.speedBlob = {value: 10};
-        this.speedColor = {value: 10};
+        this.speedBlob = {value: 20};
+        this.speedColor = {value: 20};
         this.amplitude = {value: 100};
         this.elevation = {value: new Vector3(0)};
-        this.colorStep = {value: new Vector2(0.3, 0.3)};
+        this.colorStep = {value: new Vector2(0.63, 0.71)};
 
         this.init();
     }
@@ -42,8 +42,8 @@ export default class Shape {
 
         gsap.to(this.material.uniforms.uOpacity, {
             value: 1,
-            delay: 0.5,
-            duration: 3,
+            delay: 1.6,
+            duration: 2,
             ease: "power3.out",
         });
     }
@@ -65,7 +65,7 @@ export default class Shape {
                 uSpeedColor: this.speedColor,
                 uLowGpu: {value: this.isLow},
                 uVeryLowGpu: {value: this.isVeryLow},
-                uResolution: {value: new Vector2(this.sizes.width, this.sizes.height)},
+                uResolution: {value: new Vector2(this.sizes.width / 2, this.sizes.height / 2)},
                 uColor1: {value: this.colors[0]},
                 uColor2: {value: this.colors[1]},
                 uColor3: {value: this.colors[2]},
@@ -78,7 +78,7 @@ export default class Shape {
                 fresnelBias: {value: 0},
                 fresnelPower: {value: 0.68},
                 fresnelScale: {value: 4.68},
-                fresnelIntesity: {value: 1},
+                fresnelIntesity: {value: 0.1},
                 uStep: this.colorStep,
             },
             transparent: true,
