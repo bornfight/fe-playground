@@ -58875,22 +58875,22 @@ ready(function () {
    * ContentAnimation component
    * @type {ContentAnimation}
    */
-  // const waitForScrollContentAnimations = new Promise((resolve, reject) => {
-  //     const contentAnimation = new ContentAnimation(resolve);
-  //     contentAnimation.init();
-  // });
 
+  var waitForScrollContentAnimations = new Promise(function (resolve, reject) {
+    var contentAnimation = new _ContentAnimation.default(resolve);
+    contentAnimation.init();
+  });
   /**
    * ImageSequence component
    * @type {ImageSequence}
    */
-  // waitForScrollContentAnimations.then(() => {
 
-  var wrappers = document.querySelectorAll(".js-image-sequence-wrapper");
-  wrappers.forEach(function (wrapper, index) {
-    var imageSequence = new _ImageSequence.default(wrapper, index);
-  }); // });
-
+  waitForScrollContentAnimations.then(function () {
+    var wrappers = document.querySelectorAll(".js-image-sequence-wrapper");
+    wrappers.forEach(function (wrapper, index) {
+      var imageSequence = new _ImageSequence.default(wrapper, index);
+    });
+  });
   /**
    * AnimatedGradient component
    * @type {AnimatedGradient}
