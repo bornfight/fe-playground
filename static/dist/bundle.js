@@ -57960,15 +57960,17 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 _gsap.gsap.registerPlugin(_ScrollTrigger.ScrollTrigger);
 
 var ImageSequence = /*#__PURE__*/function () {
-  function ImageSequence() {
+  function ImageSequence(wrapper, index) {
     _classCallCheck(this, ImageSequence);
 
     this.DOM = {
       sequence: ".js-image-sequence",
-      sequenceWrapper: ".js-image-sequence-wrapper",
       canvasWrapper: ".js-image-sequence-canvas-wrapper",
       step: ".js-sequence-step"
     };
+    this.wrapper = wrapper;
+    this.index = index;
+    this.init();
   }
 
   _createClass(ImageSequence, [{
@@ -57976,14 +57978,12 @@ var ImageSequence = /*#__PURE__*/function () {
     value: function init() {
       var _this = this;
 
-      this.sequenceWrapper = document.querySelector(this.DOM.sequenceWrapper);
-
-      if (!this.sequenceWrapper) {
+      if (!this.wrapper) {
         return;
       }
 
-      this.sequence = document.querySelector(this.DOM.sequence);
-      this.canvasWrapper = document.querySelector(this.DOM.canvasWrapper); // set scroll position to top of the document
+      this.sequence = this.wrapper.querySelector(this.DOM.sequence);
+      this.canvasWrapper = this.wrapper.querySelector(this.DOM.canvasWrapper); // set scroll position to top of the document
 
       if ("scrollRestoration" in window.history) {
         window.history.scrollRestoration = "manual";
@@ -58001,7 +58001,7 @@ var ImageSequence = /*#__PURE__*/function () {
       }
 
       if (this.imagesArray && this.imagesArray.length > 0) {
-        this.steps = _gsap.gsap.utils.toArray(this.DOM.step);
+        this.steps = this.wrapper.querySelectorAll(this.DOM.step);
         this.timeSequenceSegments = [0];
         this.steps.forEach(function (step) {
           _this.timeSequenceSegments.push(parseFloat(step.dataset.frameSecond));
@@ -58095,14 +58095,13 @@ var ImageSequence = /*#__PURE__*/function () {
     }
     /**
      *
-     * @param {number} index
      */
 
   }, {
     key: "updateImage",
-    value: function updateImage(index) {
-      if (this.images[index] != null) {
-        this.drawImage(this.images[index][0]);
+    value: function updateImage() {
+      if (this.images[this.frameIndex] != null) {
+        this.drawImage(this.images[this.frameIndex][0]);
       }
     }
   }, {
@@ -58159,7 +58158,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
           _this5.frameIndex = Math.floor(progress * _this5.frameCount);
 
-          _this5.updateImage(_this5.frameIndex);
+          _this5.updateImage();
         }
       });
     }
@@ -58174,7 +58173,7 @@ var ImageSequence = /*#__PURE__*/function () {
         console.log("Images for first section are loaded!");
         this.loaded = true;
 
-        _gsap.gsap.to(this.sequenceWrapper, {
+        _gsap.gsap.to(this.wrapper, {
           autoAlpha: 1
         });
       }
@@ -58876,20 +58875,22 @@ ready(function () {
    * ContentAnimation component
    * @type {ContentAnimation}
    */
+  // const waitForScrollContentAnimations = new Promise((resolve, reject) => {
+  //     const contentAnimation = new ContentAnimation(resolve);
+  //     contentAnimation.init();
+  // });
 
-  var waitForScrollContentAnimations = new Promise(function (resolve, reject) {
-    var contentAnimation = new _ContentAnimation.default(resolve);
-    contentAnimation.init();
-  });
   /**
    * ImageSequence component
    * @type {ImageSequence}
    */
+  // waitForScrollContentAnimations.then(() => {
 
-  waitForScrollContentAnimations.then(function () {
-    var imageSequence = new _ImageSequence.default();
-    imageSequence.init();
-  });
+  var wrappers = document.querySelectorAll(".js-image-sequence-wrapper");
+  wrappers.forEach(function (wrapper, index) {
+    var imageSequence = new _ImageSequence.default(wrapper, index);
+  }); // });
+
   /**
    * AnimatedGradient component
    * @type {AnimatedGradient}

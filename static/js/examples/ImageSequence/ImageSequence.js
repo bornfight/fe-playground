@@ -5,23 +5,25 @@ import is from "is_js";
 gsap.registerPlugin(ScrollTrigger);
 
 export default class ImageSequence {
-    constructor() {
+    constructor(wrapper, index) {
         this.DOM = {
             sequence: ".js-image-sequence",
-            sequenceWrapper: ".js-image-sequence-wrapper",
             canvasWrapper: ".js-image-sequence-canvas-wrapper",
             step: ".js-sequence-step",
         };
+
+        this.wrapper = wrapper;
+        this.index = index;
+
+        this.init();
     }
 
     init() {
-        this.sequenceWrapper = document.querySelector(this.DOM.sequenceWrapper);
-
-        if (!this.sequenceWrapper) {
+        if (!this.wrapper) {
             return;
         }
-        this.sequence = document.querySelector(this.DOM.sequence);
-        this.canvasWrapper = document.querySelector(this.DOM.canvasWrapper);
+        this.sequence = this.wrapper.querySelector(this.DOM.sequence);
+        this.canvasWrapper = this.wrapper.querySelector(this.DOM.canvasWrapper);
 
         // set scroll position to top of the document
         if ("scrollRestoration" in window.history) {
@@ -46,7 +48,7 @@ export default class ImageSequence {
         }
 
         if (this.imagesArray && this.imagesArray.length > 0) {
-            this.steps = gsap.utils.toArray(this.DOM.step);
+            this.steps = this.wrapper.querySelectorAll(this.DOM.step);
 
             this.timeSequenceSegments = [0];
 
@@ -145,11 +147,10 @@ export default class ImageSequence {
 
     /**
      *
-     * @param {number} index
      */
-    updateImage(index) {
-        if (this.images[index] != null) {
-            this.drawImage(this.images[index][0]);
+    updateImage() {
+        if (this.images[this.frameIndex] != null) {
+            this.drawImage(this.images[this.frameIndex][0]);
         }
     }
 
@@ -204,8 +205,7 @@ export default class ImageSequence {
                 }
 
                 this.frameIndex = Math.floor(progress * this.frameCount);
-
-                this.updateImage(this.frameIndex);
+                this.updateImage();
             },
         });
     }
@@ -220,7 +220,7 @@ export default class ImageSequence {
             console.log("Images for first section are loaded!");
             this.loaded = true;
 
-            gsap.to(this.sequenceWrapper, {
+            gsap.to(this.wrapper, {
                 autoAlpha: 1,
             });
         }

@@ -120,19 +120,21 @@ ready(() => {
      * ContentAnimation component
      * @type {ContentAnimation}
      */
-    const waitForScrollContentAnimations = new Promise((resolve, reject) => {
-        const contentAnimation = new ContentAnimation(resolve);
-        contentAnimation.init();
-    });
+    // const waitForScrollContentAnimations = new Promise((resolve, reject) => {
+    //     const contentAnimation = new ContentAnimation(resolve);
+    //     contentAnimation.init();
+    // });
 
     /**
      * ImageSequence component
      * @type {ImageSequence}
      */
-    waitForScrollContentAnimations.then(() => {
-        const imageSequence = new ImageSequence();
-        imageSequence.init();
-    });
+    // waitForScrollContentAnimations.then(() => {
+        const wrappers = document.querySelectorAll(".js-image-sequence-wrapper");
+        wrappers.forEach((wrapper, index) => {
+            const imageSequence = new ImageSequence(wrapper, index);
+        });
+    // });
 
     /**
      * AnimatedGradient component
