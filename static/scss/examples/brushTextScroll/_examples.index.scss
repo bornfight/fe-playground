@@ -26,6 +26,8 @@
         font-weight: 900;
         overflow: hidden;
         display: inline-block;
+        opacity: 0;
+        visibility: hidden;
 
         span:first-child {
             opacity: 0.3;

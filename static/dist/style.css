@@ -1714,7 +1714,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   font-family: sans-serif;
   font-weight: 900;
   overflow: hidden;
-  display: inline-block; }
+  display: inline-block;
+  opacity: 0;
+  visibility: hidden; }
 
 .e-brush-text-scroll__text-line span:first-child {
   opacity: 0.3;
