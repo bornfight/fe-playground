@@ -20,6 +20,7 @@ import HoverClippingNavigation from "./examples/HoverClippingNavigation/HoverCli
 import ImageSequence from "./examples/ImageSequence/ImageSequence";
 import ContentAnimation from "./examples/ImageSequence/ContentAnimation";
 import AnimatedGradient from "./examples/AnimatedGradient/AnimatedGradient";
+import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
 
 /**
  * Check if document is ready cross-browser
@@ -139,4 +140,12 @@ ready(() => {
      * @type {AnimatedGradient}
      */
     const animatedGradient = new AnimatedGradient();
+
+
+    /**
+     * BrushTextScroll component
+     * @type {BrushTextScroll}
+     */
+    const brushTextScroll = new BrushTextScroll();
+    brushTextScroll.init();
 });

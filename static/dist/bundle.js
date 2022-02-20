@@ -57774,6 +57774,92 @@ exports.default = void 0;
 
 var _gsap = _interopRequireDefault(require("gsap"));
 
+var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+_gsap.default.registerPlugin(_ScrollTrigger.default);
+
+var BrushTextScroll = /*#__PURE__*/function () {
+  function BrushTextScroll() {
+    _classCallCheck(this, BrushTextScroll);
+
+    this.DOM = {
+      wrapper: ".js-brush-text-scroll",
+      text: ".js-text-line",
+      mask: ".js-text-mask"
+    };
+    this.wrapper = document.querySelectorAll(this.DOM.wrapper);
+    this.init();
+  }
+
+  _createClass(BrushTextScroll, [{
+    key: "init",
+    value: function init() {
+      var _this = this;
+
+      if (this.wrapper.length < 1) {
+        return;
+      }
+
+      this.wrapper.forEach(function (wrapper) {
+        _this.textController(wrapper);
+      });
+    }
+  }, {
+    key: "textController",
+    value: function textController(wrapper) {
+      var texts = wrapper.querySelectorAll(this.DOM.text);
+      var masks = wrapper.querySelectorAll(this.DOM.mask);
+
+      _gsap.default.set(texts, {
+        autoAlpha: 0
+      });
+
+      texts.forEach(function (text) {
+        _gsap.default.to(text, {
+          autoAlpha: 1,
+          scrollTrigger: {
+            trigger: text,
+            start: "bottom 95%"
+          }
+        });
+      });
+      masks.forEach(function (mask) {
+        _gsap.default.to(mask, {
+          x: "120%",
+          scrollTrigger: {
+            trigger: mask,
+            start: "top 80%",
+            end: "top 30%",
+            scrub: true
+          }
+        });
+      });
+    }
+  }]);
+
+  return BrushTextScroll;
+}();
+
+exports.default = BrushTextScroll;
+
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],15:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = _interopRequireDefault(require("gsap"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -57845,7 +57931,7 @@ var HoverClippingNavigation = /*#__PURE__*/function () {
 
 exports.default = HoverClippingNavigation;
 
-},{"gsap":"gsap"}],15:[function(require,module,exports){
+},{"gsap":"gsap"}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -57935,7 +58021,7 @@ var ContentAnimation = /*#__PURE__*/function () {
 
 exports.default = ContentAnimation;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],16:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58210,7 +58296,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
 exports.default = ImageSequence;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],17:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58405,7 +58491,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
 
 exports.default = VerticalMouseDrivenCarousel;
 
-},{"gsap":"gsap"}],18:[function(require,module,exports){
+},{"gsap":"gsap"}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58558,7 +58644,7 @@ var PanningGallery = /*#__PURE__*/function () {
 
 exports.default = PanningGallery;
 
-},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],19:[function(require,module,exports){
+},{"gsap/dist/SplitText":1,"gsap/dist/gsap":2}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58667,7 +58753,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],20:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58748,7 +58834,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -58768,6 +58854,8 @@ var _ImageSequence = _interopRequireDefault(require("./examples/ImageSequence/Im
 var _ContentAnimation = _interopRequireDefault(require("./examples/ImageSequence/ContentAnimation"));
 
 var _AnimatedGradient = _interopRequireDefault(require("./examples/AnimatedGradient/AnimatedGradient"));
+
+var _BrushTextScroll = _interopRequireDefault(require("./examples/BrushTextScroll/BrushTextScroll"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -58896,8 +58984,15 @@ ready(function () {
    */
 
   var animatedGradient = new _AnimatedGradient.default();
+  /**
+   * BrushTextScroll component
+   * @type {BrushTextScroll}
+   */
+
+  var brushTextScroll = new _BrushTextScroll.default();
+  brushTextScroll.init();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AnimatedGradient/AnimatedGradient":6,"./examples/HoverClippingNavigation/HoverClippingNavigation":14,"./examples/ImageSequence/ContentAnimation":15,"./examples/ImageSequence/ImageSequence":16,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":17,"./examples/PanningGallery/PanningGallery":18,"./examples/ScrollingMarquee/ScrollingMarquee":19,"./examples/TemplateExample/TemplateComponent":20}]},{},[21])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AnimatedGradient/AnimatedGradient":6,"./examples/BrushTextScroll/BrushTextScroll":14,"./examples/HoverClippingNavigation/HoverClippingNavigation":15,"./examples/ImageSequence/ContentAnimation":16,"./examples/ImageSequence/ImageSequence":17,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":18,"./examples/PanningGallery/PanningGallery":19,"./examples/ScrollingMarquee/ScrollingMarquee":20,"./examples/TemplateExample/TemplateComponent":21}]},{},[22])
 
 //# sourceMappingURL=bundle.js.map
