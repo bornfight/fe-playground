@@ -21,6 +21,7 @@ import ImageSequence from "./examples/ImageSequence/ImageSequence";
 import ContentAnimation from "./examples/ImageSequence/ContentAnimation";
 import AnimatedGradient from "./examples/AnimatedGradient/AnimatedGradient";
 import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
+import PetPakAwwwards from "./examples/PetPakAwwwards/PetPakAwwwards";
 
 /**
  * Check if document is ready cross-browser
@@ -102,6 +103,13 @@ ready(() => {
      */
     const threeScrollytelling = new ThreeScrollytelling();
     threeScrollytelling.init();
+
+    /**
+     * PetPakAwwwards component
+     * @type {PetPakAwwwards}
+     */
+    const petPakAwwwards = new PetPakAwwwards();
+    petPakAwwwards.init();
 
     /**
      * PanningGallery component

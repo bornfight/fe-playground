@@ -58656,6 +58656,663 @@ var _gsap = _interopRequireDefault(require("gsap"));
 
 var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
 
+var _DRACOLoader = require("three/examples/jsm/loaders/DRACOLoader");
+
+var _ScrollMarquee = _interopRequireDefault(require("../3dScrollytelling/ScrollMarquee"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+_gsap.default.registerPlugin(_ScrollTrigger.default);
+
+var PetPakAwwwards = /*#__PURE__*/function () {
+  function PetPakAwwwards() {
+    _classCallCheck(this, PetPakAwwwards);
+
+    this.DOM = {
+      modelContainer: ".js-petpak-scroll-canvas",
+      scrollNext: ".js-petpak-next",
+      section: ".js-petpak-scroll-section",
+      mainWrapper: ".js-petpak-scroll",
+      title: ".js-petpak-title"
+    };
+    this.models = [];
+    this.scrollTop = false; // config
+
+    this.config = {
+      environment: {
+        scale: 16
+      }
+    };
+  }
+  /**
+   * main init - all dom elements and method calls
+   */
+
+
+  _createClass(PetPakAwwwards, [{
+    key: "init",
+    value: function init() {
+      var _this = this;
+
+      this.modelContainer = document.querySelector(this.DOM.modelContainer);
+
+      if (this.modelContainer !== null) {
+        this.setDimensions();
+        var scrollMarquee = new _ScrollMarquee.default();
+        scrollMarquee.init();
+        this.title = document.querySelector(this.DOM.title);
+        this.scrollNext = document.querySelector(this.DOM.scrollNext);
+        this.xOffset = this.width > 800 ? 10 : 5;
+        this.infos = [];
+
+        _gsap.default.set(this.title, {
+          autoAlpha: 0
+        });
+
+        if ("scrollRestoration" in window.history) {
+          window.history.scrollRestoration = "manual";
+        }
+
+        console.log("ModelScrollSections init()");
+        THREE.Cache.enabled = true; // reflection map
+
+        var path = window.modelMaps;
+        var mapUrls = [path + "posx.jpg", path + "negx.jpg", path + "posy.jpg", path + "negy.jpg", path + "posz.jpg", path + "negz.jpg"];
+        this.cubeMap = new THREE.CubeTextureLoader().load(mapUrls);
+        this.cubeMap.format = THREE.RGBFormat;
+        this.cubeMap.encoding = THREE.sRGBEncoding;
+        this.initCamera();
+        this.initScene();
+        this.initLights();
+        this.initRenderer();
+        var waitModels = new Promise(function (resolve, reject) {
+          _this.throughSections(resolve);
+        });
+        waitModels.then(function () {
+          _this.scrollController();
+
+          _this.animate();
+
+          _this.checkScroll();
+
+          _this.modelInfoScrollTilt();
+
+          _this.models.filter(function (model) {
+            if (model.index !== 0) {
+              _this.modelHide(model.model, true, false);
+            } else {
+              _gsap.default.set(_this.title, {
+                autoAlpha: 1
+              });
+
+              _gsap.default.fromTo(_this.title, {
+                y: "40%",
+                autoAlpha: 0
+              }, {
+                y: "0%",
+                autoAlpha: 1,
+                ease: "power2.out",
+                duration: 1.5,
+                stagger: 0.15
+              });
+
+              _gsap.default.fromTo(model.model.position, {
+                x: 30 * _this.config.environment.scale,
+                z: 0
+              }, {
+                x: _this.xOffset * _this.config.environment.scale * model.direction,
+                z: 0,
+                duration: 1,
+                delay: 0.5,
+                ease: "power3.out"
+              });
+
+              _gsap.default.fromTo(model.model.rotation, {
+                y: -Math.PI * 2,
+                z: 0.17
+              }, {
+                y: 0,
+                z: -0.17,
+                duration: 1,
+                delay: 0.5,
+                ease: "power3.out"
+              });
+
+              if (_this.scrollNext) {
+                _gsap.default.to(_this.scrollNext, {
+                  autoAlpha: 1,
+                  delay: 1
+                });
+              }
+            }
+          });
+        }); // handle resize
+
+        if (window.innerWidth > 800) window.addEventListener("resize", function () {
+          return _this.onWindowResize();
+        }, false);
+      }
+    }
+    /**
+     * camera setup
+     */
+
+  }, {
+    key: "initCamera",
+    value: function initCamera() {
+      this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 0.5 * this.config.environment.scale, 130 * this.config.environment.scale);
+
+      if (this.width > 800) {
+        this.camera.position.set(0, -1 * this.config.environment.scale, 32 * this.config.environment.scale);
+      } else {
+        this.camera.position.set(0, 0, 26 * this.config.environment.scale);
+      }
+    }
+    /**
+     * scene setup
+     */
+
+  }, {
+    key: "initScene",
+    value: function initScene() {
+      this.scene = new THREE.Scene();
+    }
+    /**
+     * lights setup - because of performance > all in one object
+     */
+
+  }, {
+    key: "initLights",
+    value: function initLights() {
+      var lightWrapper = new THREE.Object3D();
+      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x999999);
+      hemiLight.position.set(0, 200 * this.config.environment.scale, 0);
+      this.ambientLight = new THREE.AmbientLight(0x404040); // this is just back light - without it back side of model would be barely visible
+
+      this.dirSubLight = new THREE.DirectionalLight(0xcccccc, 1);
+      this.dirSubLight.position.set(-20 * this.config.environment.scale, 20 * this.config.environment.scale, -20 * this.config.environment.scale);
+      this.dirLight = new THREE.DirectionalLight(0xcccccc, 3.5);
+      this.dirLight.position.set(20 * this.config.environment.scale, 30 * this.config.environment.scale, 10 * this.config.environment.scale);
+      lightWrapper.add(this.dirLight);
+      lightWrapper.add(this.dirSubLight);
+      lightWrapper.add(this.ambientLight);
+      lightWrapper.add(hemiLight);
+      this.scene.add(lightWrapper);
+    }
+    /**
+     * renderer setup
+     */
+
+  }, {
+    key: "initRenderer",
+    value: function initRenderer() {
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        powerPreference: "high-performance",
+        alpha: true
+      });
+      this.renderer.setClearColor(0x000000, 0);
+      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setSize(this.width, this.height);
+      this.renderer.physicallyCorrectLights = true;
+      this.modelContainer.appendChild(this.renderer.domElement);
+    }
+    /**
+     * go through sections and load models
+     * @param {response} resolve
+     */
+
+  }, {
+    key: "throughSections",
+    value: function throughSections(resolve) {
+      var _this2 = this;
+
+      this.sections = document.querySelectorAll(this.DOM.section);
+
+      if (this.sections.length < 1) {
+        return;
+      }
+
+      this.sections.forEach(function (section, index) {
+        var modelScale = section.dataset.modelScale;
+
+        _this2.initModel(index, resolve, modelScale);
+      });
+    }
+    /**
+     *
+     * model setup and load call
+     * @param {number} index
+     * @param {response} resolve
+     * @param {number} modelScale
+     */
+
+  }, {
+    key: "initModel",
+    value: function initModel(index, resolve) {
+      var modelScale = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+      var model = null;
+      this.loaderInner(modelScale, model, index, resolve);
+    }
+  }, {
+    key: "loaderInner",
+    value: function loaderInner(modelScale, model, index, resolve) {
+      var geometry = new THREE.PlaneGeometry(130, 172);
+      geometry.computeVertexNormals();
+      var material = new THREE.MeshStandardMaterial();
+      var mesh = new THREE.Mesh(geometry, material);
+      this.loadModel(mesh, index);
+      model = mesh;
+      this.models.push({
+        model: model,
+        index: index
+      });
+      mesh.modelScale = modelScale;
+      this.scene.add(mesh);
+      this.dirLight.updateMatrix();
+      this.dirSubLight.updateMatrix();
+      this.ambientLight.updateMatrix();
+
+      if (this.models.length === this.sections.length) {
+        setTimeout(function () {
+          resolve();
+        }, 100);
+      }
+    }
+    /**
+     * model loading and controller call
+     * @param [object] object
+     */
+
+  }, {
+    key: "loadModel",
+    value: function loadModel(object, index) {
+      if (object.isMesh) {
+        var box = new THREE.Box3().setFromObject(object);
+        var z = Math.abs(box.min.z);
+        var isTransparent = index % 2 === 0;
+
+        if (z === 0) {
+          z = -Math.abs(box.max.z);
+        }
+
+        object.geometry.translate(0, 0, z / 2);
+        object.material.color.set(0x41557f);
+        object.material.emissive.set(0x1e335d);
+        object.castShadow = false;
+        object.material.refractionRatio = 0;
+        object.material.reflectivity = 0;
+        object.material.roughness = 0.7;
+        object.material.clearcoat = 0;
+        object.material.clearcoatRoughness = 0.5;
+        object.material.opacity = 1;
+        object.material.transparent = false;
+        object.material.envMap = null;
+        object.material.side = 2;
+        object.material.metalness = 0;
+        object.material.depthFunc = false;
+        object.material.color.convertSRGBToLinear();
+      }
+    }
+    /**
+     * resize controller
+     */
+
+  }, {
+    key: "onWindowResize",
+    value: function onWindowResize() {
+      this.setDimensions();
+      this.camera.aspect = this.width / this.height;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(this.width, this.height);
+    }
+    /**
+     * requestAnimationFrame
+     */
+
+  }, {
+    key: "animate",
+    value: function animate() {
+      var _this3 = this;
+
+      this.renderer.render(this.scene, this.camera);
+
+      if (this.renderer != null) {
+        requestAnimationFrame(function () {
+          return _this3.animate();
+        });
+      }
+    }
+    /**
+     * scrollTrigger
+     */
+
+  }, {
+    key: "scrollController",
+    value: function scrollController() {
+      var _this4 = this;
+
+      // sort by index
+      this.models.sort(function (a, b) {
+        return a.index - b.index;
+      });
+      this.models.forEach(function (model, index) {
+        var direction = _this4.checkDirection(_this4.sections[model.index].dataset.position);
+
+        var nextDirection = 0;
+
+        if (_this4.sections[index + 1] != null) {
+          nextDirection = _this4.checkDirection(_this4.sections[index + 1].dataset.position);
+        }
+
+        model.direction = direction;
+
+        _this4.changeModelPosition(direction, nextDirection, model);
+
+        _gsap.default.to(model.model.rotation, {
+          scrollTrigger: {
+            trigger: _this4.sections[model.index],
+            start: "top 50%",
+            end: "bottom ".concat(model.index === _this4.sections.length - 1 ? "top" : "50%"),
+            scrub: true,
+            onEnter: function onEnter() {
+              _this4.modelShow(model.model, model.model.modelScale);
+            },
+            onLeave: function onLeave() {
+              _this4.modelHide(model.model, model.index !== _this4.models.length - 1, true);
+            },
+            onEnterBack: function onEnterBack() {
+              _this4.modelShow(model.model, model.model.modelScale);
+            },
+            onLeaveBack: function onLeaveBack() {
+              _this4.modelHide(model.model, model.index !== 0, true);
+            }
+          },
+          ease: "none"
+        });
+      });
+    }
+    /**
+     *
+     * @param {string} direction
+     * @returns {number}
+     */
+    // -1 = left
+    // 0 = center
+    // 1 = right
+
+  }, {
+    key: "checkDirection",
+    value: function checkDirection(direction) {
+      switch (direction) {
+        case "left":
+          return -1;
+
+        case "right":
+          return 1;
+
+        default:
+          return 0;
+      }
+    }
+    /**
+     *
+     * @param {number} current
+     * @param {number} next
+     * @param {Object} model
+     */
+
+  }, {
+    key: "changeModelPosition",
+    value: function changeModelPosition(current, next, model) {
+      var _this5 = this;
+
+      var rotation = model.index === this.sections.length - 1 ? -2 : -1;
+
+      if (current > next) {
+        rotation = model.index === this.sections.length - 1 ? 2 : 1;
+      }
+
+      this.models.filter(function (modelSingle) {
+        var tl = _gsap.default.timeline({
+          // ease: "power4.inOut",
+          scrollTrigger: {
+            trigger: _this5.sections[model.index],
+            start: "".concat(model.index === 0 ? "top" : "top", " top"),
+            end: "bottom top",
+            scrub: true
+          }
+        }).addLabel("start").add("start").fromTo(modelSingle.model.position, {
+          x: _this5.xOffset * _this5.config.environment.scale * current
+        }, {
+          x: _this5.xOffset * _this5.config.environment.scale * next,
+          ease: "none",
+          duration: 2
+        }, "start").fromTo(modelSingle.model.position, {
+          z: 0
+        }, {
+          z: -100,
+          ease: "none",
+          duration: 1
+        }, "start").fromTo(modelSingle.model.position, {
+          z: -100
+        }, {
+          z: 0,
+          ease: "none",
+          duration: 1
+        }, "-=1").addLabel("end");
+
+        _gsap.default.fromTo(modelSingle.model.rotation, {
+          z: -0.17,
+          y: 0
+        }, {
+          z: -0.17,
+          y: Math.PI * 2 * (_this5.scrollTop ? -1 : 1) * rotation,
+          ease: "none",
+          scrollTrigger: {
+            trigger: _this5.sections[model.index],
+            start: "".concat(model.index === 0 ? "top" : "top", " top"),
+            end: "bottom top",
+            scrub: true
+          }
+        });
+
+        _gsap.default.set(modelSingle.model.position, {
+          x: _this5.xOffset * _this5.config.environment.scale * _this5.models[0].direction
+        });
+      });
+    }
+    /**
+     *
+     * @param {Object} model
+     * @param {boolean} hide
+     * @param {boolean} duration
+     */
+
+  }, {
+    key: "modelHide",
+    value: function modelHide(model) {
+      var hide = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var duration = arguments.length > 2 ? arguments[2] : undefined;
+
+      if (hide === false) {
+        return;
+      }
+
+      _gsap.default.to(model.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        duration: duration ? 0.1 : 0,
+        overwrite: true,
+        onComplete: function onComplete() {
+          model.visible = false;
+        }
+      });
+    }
+    /**
+     *
+     * @param {Object} model
+     * @param {number} model
+     */
+
+  }, {
+    key: "modelShow",
+    value: function modelShow(model, modelScale) {
+      _gsap.default.to(model.scale, {
+        x: modelScale,
+        y: modelScale,
+        z: modelScale,
+        duration: 0.1,
+        delay: 0.08,
+        ease: "none",
+        overwrite: true,
+        onStart: function onStart() {
+          model.visible = true;
+        }
+      });
+    }
+    /**
+     * check scroll position
+     */
+
+  }, {
+    key: "checkScroll",
+    value: function checkScroll() {
+      var _this6 = this;
+
+      var currentTop = window.pageYOffset | document.body.scrollTop;
+      var pervTop = 0;
+      document.addEventListener("scroll", function () {
+        currentTop = window.pageYOffset | document.body.scrollTop;
+        _this6.scrollTop = pervTop >= currentTop;
+      });
+    }
+    /**
+     * scroll controller for model info lines
+     * @param {Array} info
+     * @param {number} index
+     */
+
+  }, {
+    key: "modelInfoController",
+    value: function modelInfoController(info, index) {
+      this.infos.push(info.querySelector(".js-inner-model-info"));
+
+      _gsap.default.to(info, {
+        scrollTrigger: {
+          trigger: info,
+          start: "top ".concat(index === 0 ? "90%" : "40%"),
+          end: "bottom 20%",
+          scrub: 0.8,
+          onEnter: function onEnter() {
+            _gsap.default.to(info, {
+              autoAlpha: 1,
+              y: "0%",
+              duration: 0.6,
+              delay: "".concat(index === 0 ? "0.6" : "0")
+            });
+          },
+          onLeave: function onLeave() {
+            _gsap.default.to(info, {
+              autoAlpha: 0,
+              y: "50%"
+            });
+          },
+          onEnterBack: function onEnterBack() {
+            _gsap.default.to(info, {
+              autoAlpha: 1,
+              y: "0%",
+              duration: 0.6
+            });
+          },
+          onLeaveBack: function onLeaveBack() {
+            _gsap.default.to(info, {
+              autoAlpha: 0,
+              y: "50%"
+            });
+          }
+        },
+        ease: "none"
+      });
+    }
+    /**
+     * model info tilt on mouse move (+ model tilt)
+     */
+
+  }, {
+    key: "modelInfoScrollTilt",
+    value: function modelInfoScrollTilt() {
+      var _this7 = this;
+
+      if (this.width < 801) {
+        return;
+      }
+
+      window.addEventListener("mousemove", function (ev) {
+        var xAmount = (ev.clientX / window.innerWidth - 0.5) * 5;
+        var yAmount = (ev.clientY / window.innerHeight - 0.5) * 5;
+
+        if (_this7.infos.length > 0) {
+          _gsap.default.to(_this7.infos, {
+            x: "".concat(xAmount, "vw"),
+            y: "".concat(yAmount, "vw"),
+            ease: "power4.out"
+          });
+        }
+
+        _gsap.default.to(_this7.modelContainer, {
+          x: "".concat(-xAmount * 0.5, "vw"),
+          y: "".concat(-yAmount * 0.5, "vw"),
+          ease: "power4.out"
+        });
+
+        _gsap.default.to([_this7.title, ".js-scroll-next"], {
+          x: "".concat(xAmount * 0.1, "vw"),
+          y: "".concat(yAmount * 0.1, "vw"),
+          ease: "power4.out"
+        });
+      });
+    }
+    /**
+     * setting canvas dimensions [this.width & this.height]
+     */
+
+  }, {
+    key: "setDimensions",
+    value: function setDimensions() {
+      this.width = window.innerWidth;
+      this.height = window.innerHeight;
+
+      if (this.width <= 800) {
+        this.height = window.innerWidth;
+      }
+    }
+  }]);
+
+  return PetPakAwwwards;
+}();
+
+exports.default = PetPakAwwwards;
+
+},{"../3dScrollytelling/ScrollMarquee":4,"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","three/examples/jsm/loaders/DRACOLoader":"three/examples/jsm/loaders/DRACOLoader"}],21:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = _interopRequireDefault(require("gsap"));
+
+var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -58753,7 +59410,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],21:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58834,7 +59491,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -58856,6 +59513,8 @@ var _ContentAnimation = _interopRequireDefault(require("./examples/ImageSequence
 var _AnimatedGradient = _interopRequireDefault(require("./examples/AnimatedGradient/AnimatedGradient"));
 
 var _BrushTextScroll = _interopRequireDefault(require("./examples/BrushTextScroll/BrushTextScroll"));
+
+var _PetPakAwwwards = _interopRequireDefault(require("./examples/PetPakAwwwards/PetPakAwwwards"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -58947,6 +59606,13 @@ ready(function () {
   var threeScrollytelling = new _ThreeScrollytelling.default();
   threeScrollytelling.init();
   /**
+   * PetPakAwwwards component
+   * @type {PetPakAwwwards}
+   */
+
+  var petPakAwwwards = new _PetPakAwwwards.default();
+  petPakAwwwards.init();
+  /**
    * PanningGallery component
    * @type {PanningGallery}
    */
@@ -58993,6 +59659,6 @@ ready(function () {
   brushTextScroll.init();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AnimatedGradient/AnimatedGradient":6,"./examples/BrushTextScroll/BrushTextScroll":14,"./examples/HoverClippingNavigation/HoverClippingNavigation":15,"./examples/ImageSequence/ContentAnimation":16,"./examples/ImageSequence/ImageSequence":17,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":18,"./examples/PanningGallery/PanningGallery":19,"./examples/ScrollingMarquee/ScrollingMarquee":20,"./examples/TemplateExample/TemplateComponent":21}]},{},[22])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AnimatedGradient/AnimatedGradient":6,"./examples/BrushTextScroll/BrushTextScroll":14,"./examples/HoverClippingNavigation/HoverClippingNavigation":15,"./examples/ImageSequence/ContentAnimation":16,"./examples/ImageSequence/ImageSequence":17,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":18,"./examples/PanningGallery/PanningGallery":19,"./examples/PetPakAwwwards/PetPakAwwwards":20,"./examples/ScrollingMarquee/ScrollingMarquee":21,"./examples/TemplateExample/TemplateComponent":22}]},{},[23])
 
 //# sourceMappingURL=bundle.js.map
