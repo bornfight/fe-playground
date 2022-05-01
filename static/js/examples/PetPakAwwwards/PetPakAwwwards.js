@@ -27,10 +27,10 @@ export default class PetPakAwwwards {
             },
         };
 
-        this.coeff = 72;
-        this.coeff2 = 72;
-        this.gap = 1;
-        this.thespeed = 12;
+        this.coeff = 100;
+        this.coeff2 = 100;
+        this.gap = 1.5;
+        this.thespeed = 7;
         this.spacing = 533;
     }
 
@@ -84,7 +84,6 @@ export default class PetPakAwwwards {
                 this.scrollController();
                 this.animate();
                 this.checkScroll();
-                this.modelInfoScrollTilt();
 
                 this.models.filter((model) => {
                     if (model.index !== 0) {
@@ -127,12 +126,12 @@ export default class PetPakAwwwards {
                         gsap.fromTo(
                             model.model.rotation,
                             {
+                                // z: 0.17,
                                 y: -Math.PI * 2,
-                                z: 0.17,
                             },
                             {
-                                y: 0,
-                                z: -0.17,
+                                // z: -0.17,
+                                y: -0.6,
                                 duration: 1,
                                 delay: 0.5,
                                 ease: "power3.out",
@@ -233,8 +232,8 @@ export default class PetPakAwwwards {
         }
 
         this.sections.forEach((section, index) => {
-            const modelScale = section.dataset.modelScale;
-            this.initModel(index, resolve, modelScale);
+            const textureUrl = section.dataset.texture;
+            this.initModel(index, resolve, textureUrl);
         });
     }
 
@@ -243,17 +242,20 @@ export default class PetPakAwwwards {
      * model setup and load call
      * @param {number} index
      * @param {response} resolve
-     * @param {number} modelScale
+     * @param {string} textureUrl
      */
-    initModel(index, resolve, modelScale = 1) {
+    initModel(index, resolve, textureUrl) {
         let model = null;
-        this.loaderInner(modelScale, model, index, resolve);
+        this.loaderInner(textureUrl, model, index, resolve);
     }
 
-    loaderInner(modelScale, model, index, resolve) {
+    loaderInner(textureUrl, model, index, resolve) {
+        const texture = new THREE.TextureLoader().load(textureUrl);
         const geometry = new THREE.PlaneGeometry(130, 172, 50, 50);
         geometry.computeVertexNormals();
-        const material = new THREE.MeshStandardMaterial();
+        const material = new THREE.MeshBasicMaterial({
+            map: texture,
+        });
         const mesh = new THREE.Mesh(geometry, material);
 
         this.loadModel(mesh, index);
@@ -261,7 +263,7 @@ export default class PetPakAwwwards {
 
         this.models.push({ model, index });
 
-        mesh.modelScale = modelScale;
+        mesh.modelScale = 1;
 
         this.scene.add(mesh);
 
@@ -290,9 +292,9 @@ export default class PetPakAwwwards {
                 z = -Math.abs(box.max.z);
             }
 
+            console.log();
+
             object.geometry.translate(0, 0, z / 2);
-            object.material.color.set(0x41557f);
-            object.material.emissive.set(0x1e335d);
             object.castShadow = false;
             object.material.refractionRatio = 0;
             object.material.reflectivity = 0;
@@ -365,13 +367,13 @@ export default class PetPakAwwwards {
                     end: `bottom ${model.index === this.sections.length - 1 ? "top" : "50%"}`,
                     scrub: true,
                     onEnter: () => {
-                        this.modelShow(model.model, model.model.modelScale);
+                        this.modelShow(model.model);
                     },
                     onLeave: () => {
                         this.modelHide(model.model, model.index !== this.models.length - 1, true);
                     },
                     onEnterBack: () => {
-                        this.modelShow(model.model, model.model.modelScale);
+                        this.modelShow(model.model);
                     },
                     onLeaveBack: () => {
                         this.modelHide(model.model, model.index !== 0, true);
@@ -418,12 +420,6 @@ export default class PetPakAwwwards {
      * @param {Object} model
      */
     changeModelPosition(current, next, model) {
-        let rotation = model.index === this.sections.length - 1 ? -2 : -1;
-
-        if (current > next) {
-            rotation = model.index === this.sections.length - 1 ? 2 : 1;
-        }
-
         this.models.filter((modelSingle) => {
             let tl = gsap
                 .timeline({
@@ -478,12 +474,12 @@ export default class PetPakAwwwards {
             gsap.fromTo(
                 modelSingle.model.rotation,
                 {
-                    z: -0.17,
-                    y: 0,
+                    // z: -0.17,
+                    y: current * -0.6,
                 },
                 {
-                    z: -0.17,
-                    y: Math.PI * 2 * (this.scrollTop ? -1 : 1) * rotation,
+                    // z: -0.17,
+                    y: next * -0.6,
                     ease: "none",
                     scrollTrigger: {
                         trigger: this.sections[model.index],
@@ -511,10 +507,8 @@ export default class PetPakAwwwards {
             return;
         }
 
-        gsap.to(model.scale, {
-            x: 1,
-            y: 1,
-            z: 1,
+        gsap.to(model.material, {
+            opacity: 0,
             duration: duration ? 0.1 : 0,
             overwrite: true,
             onComplete: () => {
@@ -526,14 +520,11 @@ export default class PetPakAwwwards {
     /**
      *
      * @param {Object} model
-     * @param {number} model
      */
-    modelShow(model, modelScale) {
-        gsap.to(model.scale, {
-            x: modelScale,
-            y: modelScale,
-            z: modelScale,
-            duration: 0.1,
+    modelShow(model) {
+        gsap.to(model.material, {
+            opacity: 1,
+            duration: 0.2,
             delay: 0.08,
             ease: "none",
             overwrite: true,
@@ -598,40 +589,6 @@ export default class PetPakAwwwards {
                 },
             },
             ease: "none",
-        });
-    }
-
-    /**
-     * model info tilt on mouse move (+ model tilt)
-     */
-    modelInfoScrollTilt() {
-        if (this.width < 801) {
-            return;
-        }
-
-        window.addEventListener("mousemove", (ev) => {
-            const xAmount = (ev.clientX / window.innerWidth - 0.5) * 5;
-            const yAmount = (ev.clientY / window.innerHeight - 0.5) * 5;
-
-            if (this.infos.length > 0) {
-                gsap.to(this.infos, {
-                    x: `${xAmount}vw`,
-                    y: `${yAmount}vw`,
-                    ease: "power4.out",
-                });
-            }
-
-            gsap.to(this.modelContainer, {
-                x: `${-xAmount * 0.5}vw`,
-                y: `${-yAmount * 0.5}vw`,
-                ease: "power4.out",
-            });
-
-            gsap.to([this.title, ".js-scroll-next"], {
-                x: `${xAmount * 0.1}vw`,
-                y: `${yAmount * 0.1}vw`,
-                ease: "power4.out",
-            });
         });
     }
 

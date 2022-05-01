@@ -58689,10 +58689,10 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         scale: 16
       }
     };
-    this.coeff = 72;
-    this.coeff2 = 72;
-    this.gap = 1;
-    this.thespeed = 12;
+    this.coeff = 100;
+    this.coeff2 = 100;
+    this.gap = 1.5;
+    this.thespeed = 7;
     this.spacing = 533;
   }
   /**
@@ -58746,8 +58746,6 @@ var PetPakAwwwards = /*#__PURE__*/function () {
 
           _this.checkScroll();
 
-          _this.modelInfoScrollTilt();
-
           _this.models.filter(function (model) {
             if (model.index !== 0) {
               _this.modelHide(model.model, true, false);
@@ -58779,11 +58777,11 @@ var PetPakAwwwards = /*#__PURE__*/function () {
               });
 
               _gsap.default.fromTo(model.model.rotation, {
-                y: -Math.PI * 2,
-                z: 0.17
+                // z: 0.17,
+                y: -Math.PI * 2
               }, {
-                y: 0,
-                z: -0.17,
+                // z: -0.17,
+                y: -0.6,
                 duration: 1,
                 delay: 0.5,
                 ease: "power3.out"
@@ -58885,9 +58883,9 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       }
 
       this.sections.forEach(function (section, index) {
-        var modelScale = section.dataset.modelScale;
+        var textureUrl = section.dataset.texture;
 
-        _this2.initModel(index, resolve, modelScale);
+        _this2.initModel(index, resolve, textureUrl);
       });
     }
     /**
@@ -58895,22 +58893,24 @@ var PetPakAwwwards = /*#__PURE__*/function () {
      * model setup and load call
      * @param {number} index
      * @param {response} resolve
-     * @param {number} modelScale
+     * @param {string} textureUrl
      */
 
   }, {
     key: "initModel",
-    value: function initModel(index, resolve) {
-      var modelScale = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+    value: function initModel(index, resolve, textureUrl) {
       var model = null;
-      this.loaderInner(modelScale, model, index, resolve);
+      this.loaderInner(textureUrl, model, index, resolve);
     }
   }, {
     key: "loaderInner",
-    value: function loaderInner(modelScale, model, index, resolve) {
+    value: function loaderInner(textureUrl, model, index, resolve) {
+      var texture = new THREE.TextureLoader().load(textureUrl);
       var geometry = new THREE.PlaneGeometry(130, 172, 50, 50);
       geometry.computeVertexNormals();
-      var material = new THREE.MeshStandardMaterial();
+      var material = new THREE.MeshBasicMaterial({
+        map: texture
+      });
       var mesh = new THREE.Mesh(geometry, material);
       this.loadModel(mesh, index);
       model = mesh;
@@ -58918,7 +58918,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         model: model,
         index: index
       });
-      mesh.modelScale = modelScale;
+      mesh.modelScale = 1;
       this.scene.add(mesh);
       this.dirLight.updateMatrix();
       this.dirSubLight.updateMatrix();
@@ -58947,9 +58947,8 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           z = -Math.abs(box.max.z);
         }
 
+        console.log();
         object.geometry.translate(0, 0, z / 2);
-        object.material.color.set(0x41557f);
-        object.material.emissive.set(0x1e335d);
         object.castShadow = false;
         object.material.refractionRatio = 0;
         object.material.reflectivity = 0;
@@ -59033,13 +59032,13 @@ var PetPakAwwwards = /*#__PURE__*/function () {
             end: "bottom ".concat(model.index === _this4.sections.length - 1 ? "top" : "50%"),
             scrub: true,
             onEnter: function onEnter() {
-              _this4.modelShow(model.model, model.model.modelScale);
+              _this4.modelShow(model.model);
             },
             onLeave: function onLeave() {
               _this4.modelHide(model.model, model.index !== _this4.models.length - 1, true);
             },
             onEnterBack: function onEnterBack() {
-              _this4.modelShow(model.model, model.model.modelScale);
+              _this4.modelShow(model.model);
             },
             onLeaveBack: function onLeaveBack() {
               _this4.modelHide(model.model, model.index !== 0, true);
@@ -59098,12 +59097,6 @@ var PetPakAwwwards = /*#__PURE__*/function () {
     value: function changeModelPosition(current, next, model) {
       var _this5 = this;
 
-      var rotation = model.index === this.sections.length - 1 ? -2 : -1;
-
-      if (current > next) {
-        rotation = model.index === this.sections.length - 1 ? 2 : 1;
-      }
-
       this.models.filter(function (modelSingle) {
         var tl = _gsap.default.timeline({
           // ease: "power4.inOut",
@@ -59134,11 +59127,11 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         }, "-=1").addLabel("end");
 
         _gsap.default.fromTo(modelSingle.model.rotation, {
-          z: -0.17,
-          y: 0
+          // z: -0.17,
+          y: current * -0.6
         }, {
-          z: -0.17,
-          y: Math.PI * 2 * (_this5.scrollTop ? -1 : 1) * rotation,
+          // z: -0.17,
+          y: next * -0.6,
           ease: "none",
           scrollTrigger: {
             trigger: _this5.sections[model.index],
@@ -59170,10 +59163,8 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         return;
       }
 
-      _gsap.default.to(model.scale, {
-        x: 1,
-        y: 1,
-        z: 1,
+      _gsap.default.to(model.material, {
+        opacity: 0,
         duration: duration ? 0.1 : 0,
         overwrite: true,
         onComplete: function onComplete() {
@@ -59184,17 +59175,14 @@ var PetPakAwwwards = /*#__PURE__*/function () {
     /**
      *
      * @param {Object} model
-     * @param {number} model
      */
 
   }, {
     key: "modelShow",
-    value: function modelShow(model, modelScale) {
-      _gsap.default.to(model.scale, {
-        x: modelScale,
-        y: modelScale,
-        z: modelScale,
-        duration: 0.1,
+    value: function modelShow(model) {
+      _gsap.default.to(model.material, {
+        opacity: 1,
+        duration: 0.2,
         delay: 0.08,
         ease: "none",
         overwrite: true,
@@ -59265,44 +59253,6 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           }
         },
         ease: "none"
-      });
-    }
-    /**
-     * model info tilt on mouse move (+ model tilt)
-     */
-
-  }, {
-    key: "modelInfoScrollTilt",
-    value: function modelInfoScrollTilt() {
-      var _this7 = this;
-
-      if (this.width < 801) {
-        return;
-      }
-
-      window.addEventListener("mousemove", function (ev) {
-        var xAmount = (ev.clientX / window.innerWidth - 0.5) * 5;
-        var yAmount = (ev.clientY / window.innerHeight - 0.5) * 5;
-
-        if (_this7.infos.length > 0) {
-          _gsap.default.to(_this7.infos, {
-            x: "".concat(xAmount, "vw"),
-            y: "".concat(yAmount, "vw"),
-            ease: "power4.out"
-          });
-        }
-
-        _gsap.default.to(_this7.modelContainer, {
-          x: "".concat(-xAmount * 0.5, "vw"),
-          y: "".concat(-yAmount * 0.5, "vw"),
-          ease: "power4.out"
-        });
-
-        _gsap.default.to([_this7.title, ".js-scroll-next"], {
-          x: "".concat(xAmount * 0.1, "vw"),
-          y: "".concat(yAmount * 0.1, "vw"),
-          ease: "power4.out"
-        });
       });
     }
     /**
