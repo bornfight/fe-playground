@@ -58689,6 +58689,11 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         scale: 16
       }
     };
+    this.coeff = 72;
+    this.coeff2 = 72;
+    this.gap = 1;
+    this.thespeed = 12;
+    this.spacing = 533;
   }
   /**
    * main init - all dom elements and method calls
@@ -58903,7 +58908,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "loaderInner",
     value: function loaderInner(modelScale, model, index, resolve) {
-      var geometry = new THREE.PlaneGeometry(130, 172);
+      var geometry = new THREE.PlaneGeometry(130, 172, 50, 50);
       geometry.computeVertexNormals();
       var material = new THREE.MeshStandardMaterial();
       var mesh = new THREE.Mesh(geometry, material);
@@ -58983,6 +58988,12 @@ var PetPakAwwwards = /*#__PURE__*/function () {
 
       this.renderer.render(this.scene, this.camera);
 
+      if (this.models.length > 0) {
+        this.models.forEach(function (model) {
+          _this3.update(model.model);
+        });
+      }
+
       if (this.renderer != null) {
         requestAnimationFrame(function () {
           return _this3.animate();
@@ -59037,6 +59048,20 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           ease: "none"
         });
       });
+    }
+  }, {
+    key: "update",
+    value: function update(model) {
+      this.time = performance.now() * 0.001 * (this.thespeed / 10);
+
+      for (var i = 0; i < model.geometry.vertices.length; i++) {
+        var p = model.geometry.vertices[i];
+        p.z = 1 + this.spacing / 25 * noise.perlin2(p.x * (this.gap / this.coeff) + this.time, p.y * (this.gap / this.coeff2));
+      }
+
+      model.geometry.verticesNeedUpdate = true; //must be set or vertices will not update
+
+      model.geometry.computeVertexNormals();
     }
     /**
      *

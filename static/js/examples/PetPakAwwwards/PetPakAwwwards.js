@@ -26,6 +26,12 @@ export default class PetPakAwwwards {
                 scale: 16,
             },
         };
+
+        this.coeff = 72;
+        this.coeff2 = 72;
+        this.gap = 1;
+        this.thespeed = 12;
+        this.spacing = 533;
     }
 
     /**
@@ -245,7 +251,7 @@ export default class PetPakAwwwards {
     }
 
     loaderInner(modelScale, model, index, resolve) {
-        const geometry = new THREE.PlaneGeometry(130, 172);
+        const geometry = new THREE.PlaneGeometry(130, 172, 50, 50);
         geometry.computeVertexNormals();
         const material = new THREE.MeshStandardMaterial();
         const mesh = new THREE.Mesh(geometry, material);
@@ -319,6 +325,13 @@ export default class PetPakAwwwards {
      */
     animate() {
         this.renderer.render(this.scene, this.camera);
+
+        if (this.models.length > 0) {
+            this.models.forEach((model) => {
+                this.update(model.model);
+            });
+        }
+
         if (this.renderer != null) {
             requestAnimationFrame(() => this.animate());
         }
@@ -367,6 +380,16 @@ export default class PetPakAwwwards {
                 ease: "none",
             });
         });
+    }
+
+    update(model) {
+        this.time = performance.now() * 0.001 * (this.thespeed / 10);
+        for (let i = 0; i < model.geometry.vertices.length; i++) {
+            let p = model.geometry.vertices[i];
+            p.z = 1 + (this.spacing / 25) * noise.perlin2(p.x * (this.gap / this.coeff) + this.time, p.y * (this.gap / this.coeff2));
+        }
+        model.geometry.verticesNeedUpdate = true; //must be set or vertices will not update
+        model.geometry.computeVertexNormals();
     }
 
     /**
