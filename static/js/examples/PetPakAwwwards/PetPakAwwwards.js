@@ -17,8 +17,6 @@ export default class PetPakAwwwards {
 
         this.models = [];
 
-        this.scrollTop = false;
-
         // config
         this.config = {
             environment: {
