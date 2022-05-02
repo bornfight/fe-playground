@@ -3,7 +3,6 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import ScrollMarquee from "../3dScrollytelling/ScrollMarquee";
 
 export default class PetPakAwwwards {
@@ -62,14 +61,6 @@ export default class PetPakAwwwards {
             console.log("ModelScrollSections init()");
 
             THREE.Cache.enabled = true;
-
-            // reflection map
-            const path = window.modelMaps;
-            const mapUrls = [path + "posx.jpg", path + "negx.jpg", path + "posy.jpg", path + "negy.jpg", path + "posz.jpg", path + "negz.jpg"];
-
-            this.cubeMap = new THREE.CubeTextureLoader().load(mapUrls);
-            this.cubeMap.format = THREE.RGBFormat;
-            this.cubeMap.encoding = THREE.sRGBEncoding;
 
             this.initCamera();
             this.initScene();
