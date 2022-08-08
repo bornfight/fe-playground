@@ -58656,8 +58656,6 @@ var _gsap = _interopRequireDefault(require("gsap"));
 
 var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
 
-var _DRACOLoader = require("three/examples/jsm/loaders/DRACOLoader");
-
 var _ScrollMarquee = _interopRequireDefault(require("../3dScrollytelling/ScrollMarquee"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -58681,8 +58679,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       mainWrapper: ".js-petpak-scroll",
       title: ".js-petpak-title"
     };
-    this.models = [];
-    this.scrollTop = false; // config
+    this.models = []; // config
 
     this.config = {
       environment: {
@@ -58725,13 +58722,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         }
 
         console.log("ModelScrollSections init()");
-        THREE.Cache.enabled = true; // reflection map
-
-        var path = window.modelMaps;
-        var mapUrls = [path + "posx.jpg", path + "negx.jpg", path + "posy.jpg", path + "negy.jpg", path + "posz.jpg", path + "negz.jpg"];
-        this.cubeMap = new THREE.CubeTextureLoader().load(mapUrls);
-        this.cubeMap.format = THREE.RGBFormat;
-        this.cubeMap.encoding = THREE.sRGBEncoding;
+        THREE.Cache.enabled = true;
         this.initCamera();
         this.initScene();
         this.initLights();
@@ -58777,10 +58768,10 @@ var PetPakAwwwards = /*#__PURE__*/function () {
               });
 
               _gsap.default.fromTo(model.model.rotation, {
-                // z: 0.17,
-                y: -Math.PI * 2
+                z: 0.17,
+                y: -Math.PI
               }, {
-                // z: -0.17,
+                z: -0.17,
                 y: -0.6,
                 duration: 1,
                 delay: 0.5,
@@ -59127,10 +59118,10 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         }, "-=1").addLabel("end");
 
         _gsap.default.fromTo(modelSingle.model.rotation, {
-          // z: -0.17,
+          z: -0.17,
           y: current * -0.6
         }, {
-          // z: -0.17,
+          z: -0.17,
           y: next * -0.6,
           ease: "none",
           scrollTrigger: {
@@ -59183,7 +59174,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       _gsap.default.to(model.material, {
         opacity: 1,
         duration: 0.2,
-        delay: 0.08,
+        delay: 0,
         ease: "none",
         overwrite: true,
         onStart: function onStart() {
@@ -59208,54 +59199,6 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       });
     }
     /**
-     * scroll controller for model info lines
-     * @param {Array} info
-     * @param {number} index
-     */
-
-  }, {
-    key: "modelInfoController",
-    value: function modelInfoController(info, index) {
-      this.infos.push(info.querySelector(".js-inner-model-info"));
-
-      _gsap.default.to(info, {
-        scrollTrigger: {
-          trigger: info,
-          start: "top ".concat(index === 0 ? "90%" : "40%"),
-          end: "bottom 20%",
-          scrub: 0.8,
-          onEnter: function onEnter() {
-            _gsap.default.to(info, {
-              autoAlpha: 1,
-              y: "0%",
-              duration: 0.6,
-              delay: "".concat(index === 0 ? "0.6" : "0")
-            });
-          },
-          onLeave: function onLeave() {
-            _gsap.default.to(info, {
-              autoAlpha: 0,
-              y: "50%"
-            });
-          },
-          onEnterBack: function onEnterBack() {
-            _gsap.default.to(info, {
-              autoAlpha: 1,
-              y: "0%",
-              duration: 0.6
-            });
-          },
-          onLeaveBack: function onLeaveBack() {
-            _gsap.default.to(info, {
-              autoAlpha: 0,
-              y: "50%"
-            });
-          }
-        },
-        ease: "none"
-      });
-    }
-    /**
      * setting canvas dimensions [this.width & this.height]
      */
 
@@ -59276,7 +59219,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
 
 exports.default = PetPakAwwwards;
 
-},{"../3dScrollytelling/ScrollMarquee":4,"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","three/examples/jsm/loaders/DRACOLoader":"three/examples/jsm/loaders/DRACOLoader"}],21:[function(require,module,exports){
+},{"../3dScrollytelling/ScrollMarquee":4,"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

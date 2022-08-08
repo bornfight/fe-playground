@@ -115,11 +115,11 @@ export default class PetPakAwwwards {
                         gsap.fromTo(
                             model.model.rotation,
                             {
-                                // z: 0.17,
-                                y: -Math.PI * 2,
+                                z: 0.17,
+                                y: -Math.PI,
                             },
                             {
-                                // z: -0.17,
+                                z: -0.17,
                                 y: -0.6,
                                 duration: 1,
                                 delay: 0.5,
@@ -463,11 +463,11 @@ export default class PetPakAwwwards {
             gsap.fromTo(
                 modelSingle.model.rotation,
                 {
-                    // z: -0.17,
+                    z: -0.17,
                     y: current * -0.6,
                 },
                 {
-                    // z: -0.17,
+                    z: -0.17,
                     y: next * -0.6,
                     ease: "none",
                     scrollTrigger: {
@@ -514,7 +514,7 @@ export default class PetPakAwwwards {
         gsap.to(model.material, {
             opacity: 1,
             duration: 0.2,
-            delay: 0.08,
+            delay: 0,
             ease: "none",
             overwrite: true,
             onStart: () => {
@@ -532,52 +532,6 @@ export default class PetPakAwwwards {
         document.addEventListener("scroll", () => {
             currentTop = window.pageYOffset | document.body.scrollTop;
             this.scrollTop = pervTop >= currentTop;
-        });
-    }
-
-    /**
-     * scroll controller for model info lines
-     * @param {Array} info
-     * @param {number} index
-     */
-    modelInfoController(info, index) {
-        this.infos.push(info.querySelector(".js-inner-model-info"));
-
-        gsap.to(info, {
-            scrollTrigger: {
-                trigger: info,
-                start: `top ${index === 0 ? "90%" : "40%"}`,
-                end: `bottom 20%`,
-                scrub: 0.8,
-                onEnter: () => {
-                    gsap.to(info, {
-                        autoAlpha: 1,
-                        y: "0%",
-                        duration: 0.6,
-                        delay: `${index === 0 ? "0.6" : "0"}`,
-                    });
-                },
-                onLeave: () => {
-                    gsap.to(info, {
-                        autoAlpha: 0,
-                        y: "50%",
-                    });
-                },
-                onEnterBack: () => {
-                    gsap.to(info, {
-                        autoAlpha: 1,
-                        y: "0%",
-                        duration: 0.6,
-                    });
-                },
-                onLeaveBack: () => {
-                    gsap.to(info, {
-                        autoAlpha: 0,
-                        y: "50%",
-                    });
-                },
-            },
-            ease: "none",
         });
     }
 
