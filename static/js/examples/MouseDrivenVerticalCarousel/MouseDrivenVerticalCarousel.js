@@ -115,6 +115,13 @@ export default class VerticalMouseDrivenCarousel {
                     scale: 1,
                     overwrite: true,
                 });
+
+                gsap.to(this.getListItems()[currentId], {
+                    duration: 0.5,
+                    autoAlpha: 1,
+                    x: "0vw",
+                    ease: "power3.out",
+                });
             });
         }
     }
@@ -133,7 +140,6 @@ export default class VerticalMouseDrivenCarousel {
                     autoAlpha: opacity,
                     x: `${offset}vw`,
                     ease: "power3.out",
-                    overwrite: true,
                 });
             }
         }
@@ -147,7 +153,6 @@ export default class VerticalMouseDrivenCarousel {
                     autoAlpha: opacity,
                     x: `${offset}vw`,
                     ease: "power3.out",
-                    overwrite: true,
                 });
             }
         }

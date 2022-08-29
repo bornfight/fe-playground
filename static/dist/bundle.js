@@ -60321,6 +60321,13 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
               scale: 1,
               overwrite: true
             });
+
+            _gsap.default.to(_this2.getListItems()[currentId], {
+              duration: 0.5,
+              autoAlpha: 1,
+              x: "0vw",
+              ease: "power3.out"
+            });
           });
         }
       } catch (err) {
@@ -60345,8 +60352,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
             duration: 0.5,
             autoAlpha: opacity,
             x: "".concat(offset, "vw"),
-            ease: "power3.out",
-            overwrite: true
+            ease: "power3.out"
           });
         }
       }
@@ -60361,8 +60367,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
             duration: 0.5,
             autoAlpha: _opacity,
             x: "".concat(_offset, "vw"),
-            ease: "power3.out",
-            overwrite: true
+            ease: "power3.out"
           });
         }
       }

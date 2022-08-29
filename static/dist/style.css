@@ -868,7 +868,11 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   display: flex;
   padding-bottom: 4vw;
   padding-top: 4vw;
-  padding-left: 58.33333%; }
+  padding-left: 66.66667%; }
+
+@media (max-width: 1140px) {
+  .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__list-item a {
+    padding-left: 52.08333%; } }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__eyebrow {
   position: relative;
@@ -935,6 +939,10 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   height: 100%;
   left: 0;
   width: 58.33333%; }
+
+@media (max-width: 1140px) {
+  .e-mouse-driven-vertical-carousel__img-wrapper {
+    width: 50%; } }
 
 /**
  * Scrolling Marquee
