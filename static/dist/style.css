@@ -1687,7 +1687,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .e-brush-text-scroll__wrapper {
   background-color: #290847;
   color: #3a1260;
-  padding-top: 25vh;
+  padding-top: 70vh;
   padding-bottom: 70vh; }
 
 .e-brush-text-scroll__text {
