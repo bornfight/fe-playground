@@ -13,7 +13,6 @@ $serif-font: 'Playfair Display', serif;
     justify-content: center;
     align-items: center;
     position: relative;
-    background-image: linear-gradient(-225deg, #B7F8DB 0%, #50A7C2 100%);
 
     .c-title-wrapper {
         mix-blend-mode: difference;
@@ -62,20 +61,18 @@ $serif-font: 'Playfair Display', serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: transparentize($white, 0.8);
+            background-color: transparentize($slate, 0.8);
             transition: all 0.3s $ease-in-out-quad;
             cursor: pointer;
             background-position: center;
             background-size: cover;
-            opacity: 0.35;
-            filter: blur(12px) brightness(150%) contrast(255%);
+            filter: blur(14px);
             backface-visibility: hidden;
             will-change: filter;
 
             &:hover {
-                opacity: 1;
                 transform: scale(1.025);
-                filter: blur(0) brightness(100%) contrast(100%);
+                filter: blur(0);
             }
 
             &:after {

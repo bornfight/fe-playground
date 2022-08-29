@@ -1370,8 +1370,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  position: relative;
-  background-image: linear-gradient(-225deg, #B7F8DB 0%, #50A7C2 100%); }
+  position: relative; }
 
 .c-panning-container .c-title-wrapper {
   mix-blend-mode: difference;
@@ -1438,25 +1437,23 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(60, 81, 99, 0.2);
   -webkit-transition: all 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955);
   transition: all 0.3s cubic-bezier(0.455, 0.03, 0.515, 0.955);
   cursor: pointer;
   background-position: center;
   background-size: cover;
-  opacity: 0.35;
-  -webkit-filter: blur(12px) brightness(150%) contrast(255%);
-          filter: blur(12px) brightness(150%) contrast(255%);
+  -webkit-filter: blur(14px);
+          filter: blur(14px);
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
   will-change: filter; }
 
 .c-panning__row span:hover {
-  opacity: 1;
   -webkit-transform: scale(1.025);
           transform: scale(1.025);
-  -webkit-filter: blur(0) brightness(100%) contrast(100%);
-          filter: blur(0) brightness(100%) contrast(100%); }
+  -webkit-filter: blur(0);
+          filter: blur(0); }
 
 .c-panning__row span:after {
   content: "";
@@ -1731,6 +1728,10 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   display: inline-block;
   height: auto;
   z-index: 1; }
+
+@media (max-width: 800px) {
+  .e-brush-text-scroll img {
+    display: none; } }
 
 .e-brush-text-scroll img:nth-of-type(1) {
   width: 250px;
