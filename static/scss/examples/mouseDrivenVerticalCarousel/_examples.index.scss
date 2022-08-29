@@ -145,10 +145,10 @@
 
     &__img-wrapper {
         position: absolute;
-        top: 0;
-        height: 100%;
+        top: 50%;
         left: 0;
         width: percentage(14/24);
+        transform: translateY(-50%);
 
         @include mq(lg) {
             width: percentage(12/24);

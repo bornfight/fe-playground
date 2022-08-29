@@ -935,10 +935,11 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 
 .e-mouse-driven-vertical-carousel__img-wrapper {
   position: absolute;
-  top: 0;
-  height: 100%;
+  top: 50%;
   left: 0;
-  width: 58.33333%; }
+  width: 58.33333%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%); }
 
 @media (max-width: 1140px) {
   .e-mouse-driven-vertical-carousel__img-wrapper {
