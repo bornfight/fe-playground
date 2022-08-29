@@ -9,7 +9,12 @@
     align-items: center;
     align-content: stretch;
     width: 100%;
-    background-color: $white;
+    color: $white;
+    font-family: "PP Editorial New", serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 55px;
+    line-height: 100%;
 
     .c-header {
         display: block;
@@ -29,11 +34,14 @@
 
             &:nth-of-type(2) {
                 align-self: flex-end;
+                position: relative;
+                top: -0.6em;
             }
         }
 
         span {
             font-size: 8px;
+            margin-top: -0.7em;
         }
     }
 
@@ -78,27 +86,64 @@
         &__bg-img {
             position: absolute;
             top: 50%;
-            left: 30px;
-            width: 40%;
-            height: 0;
-            padding-top: 26%;
-            transform: translateY(-50%);
+            left: 50%;
+            height: auto;
+            transform: translate(-50%, -50%);
             background-size: cover;
             background-position: center;
             will-change: transform;
+
+            &:nth-of-type(1) {
+                width: 90%;
+            }
+
+            &:nth-of-type(2) {
+                width: 80%;
+            }
+
+            &:nth-of-type(3) {
+                width: 85%;
+            }
+
+            &:nth-of-type(4) {
+                width: 95%;
+            }
+
+            &:nth-of-type(5) {
+                width: 91%;
+            }
+
+            &:nth-of-type(6) {
+                width: 84%;
+            }
+
+            &:nth-of-type(7) {
+                width: 90%;
+            }
+
+            &:nth-of-type(8) {
+                width: 78%;
+            }
+
+            &:nth-of-type(9) {
+                width: 88%;
+            }
+
+            &:nth-of-type(10) {
+                width: 90%;
+            }
+
+            &:nth-of-type(11) {
+                width: 84%;
+            }
         }
     }
 
-    //MEDIA WRAPPER
-    .u-media-wrapper {
-        position: relative;
-        width: 100%;
-        background-size: cover;
-        background-position: center;
-        height: 0;
-
-        &#{&}--16-9 {
-            padding-bottom: percentage(9/16);
-        }
+    &__img-wrapper {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        left: 0;
+        width: percentage(14/24);
     }
 }

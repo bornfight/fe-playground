@@ -52,6 +52,10 @@ export default class VerticalMouseDrivenCarousel {
 
         this.listItems = this.getListItems().length - 1;
 
+        gsap.to("body", {
+            backgroundColor: this.getListItems()[0].dataset.color,
+        });
+
         this.listOpacityController(0);
     }
 
@@ -80,8 +84,13 @@ export default class VerticalMouseDrivenCarousel {
         for (const link of this.getListItems()) {
             link.addEventListener("mouseenter", (ev) => {
                 let currentId = ev.currentTarget.dataset.itemId;
+                let currentColor = ev.currentTarget.dataset.color;
 
                 this.listOpacityController(currentId);
+
+                gsap.to("body", {
+                    backgroundColor: currentColor,
+                });
 
                 gsap.to(ev.currentTarget, {
                     duration: 0.3,

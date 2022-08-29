@@ -60251,6 +60251,11 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
       });
 
       this.listItems = this.getListItems().length - 1;
+
+      _gsap.default.to("body", {
+        backgroundColor: this.getListItems()[0].dataset.color
+      });
+
       this.listOpacityController(0);
     }
   }, {
@@ -60285,8 +60290,13 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
           var link = _step.value;
           link.addEventListener("mouseenter", function (ev) {
             var currentId = ev.currentTarget.dataset.itemId;
+            var currentColor = ev.currentTarget.dataset.color;
 
             _this2.listOpacityController(currentId);
+
+            _gsap.default.to("body", {
+              backgroundColor: currentColor
+            });
 
             _gsap.default.to(ev.currentTarget, {
               duration: 0.3,
