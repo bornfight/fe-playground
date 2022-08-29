@@ -59653,6 +59653,14 @@ var BrushTextScroll = /*#__PURE__*/function () {
     value: function textController(wrapper) {
       var texts = wrapper.querySelector(this.DOM.text);
       var textClone = wrapper.querySelector(this.DOM.textClone);
+      var mainLineParent = new _SplitText.default(texts, {
+        type: "lines",
+        linesClass: "lineParent"
+      });
+      var mainLineChild = new _SplitText.default(mainLineParent.lines, {
+        type: "lines",
+        linesClass: "lineChild"
+      });
       var lineParent = new _SplitText.default(textClone, {
         type: "lines",
         linesClass: "lineParent"

@@ -29,6 +29,16 @@ export default class BrushTextScroll {
         const texts = wrapper.querySelector(this.DOM.text);
         const textClone = wrapper.querySelector(this.DOM.textClone);
 
+        const mainLineParent = new SplitText(texts, {
+            type: "lines",
+            linesClass: "lineParent",
+        });
+
+        const mainLineChild = new SplitText(mainLineParent.lines, {
+            type: "lines",
+            linesClass: "lineChild",
+        });
+
         const lineParent = new SplitText(textClone, {
             type: "lines",
             linesClass: "lineParent",

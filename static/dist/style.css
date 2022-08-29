@@ -203,6 +203,13 @@
   font-style: normal;
   font-display: swap; }
 
+@font-face {
+  font-family: "Migra";
+  src: url("../fonts/PPMigra-Regular.woff2?1") format("woff2"), url("../fonts/PPMigra-Regular.woff?1") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; }
+
 /**
  * Font variables
  */
