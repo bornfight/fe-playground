@@ -1,18 +1,18 @@
-import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
+import { gsap } from "gsap";
+import ScrollTrigger from "gsap/dist/ScrollTrigger";
+import SplitText from "gsap/dist/SplitText";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export default class BrushTextScroll {
     constructor() {
         this.DOM = {
             wrapper: ".js-brush-text-scroll",
             text: ".js-text-line",
-            mask: ".js-text-mask",
+            textClone: ".js-text-line-clone",
         };
 
         this.wrapper = document.querySelectorAll(this.DOM.wrapper);
-        this.init();
     }
 
     init() {
@@ -26,33 +26,51 @@ export default class BrushTextScroll {
     }
 
     textController(wrapper) {
-        const texts = wrapper.querySelectorAll(this.DOM.text);
-        const masks = wrapper.querySelectorAll(this.DOM.mask);
+        const texts = wrapper.querySelector(this.DOM.text);
+        const textClone = wrapper.querySelector(this.DOM.textClone);
 
-        gsap.set(texts, {
-            autoAlpha: 0,
+        const lineParent = new SplitText(textClone, {
+            type: "lines",
+            linesClass: "lineParent",
         });
 
-        texts.forEach(text => {
-            gsap.to(text, {
-                autoAlpha: 1,
-                scrollTrigger: {
-                    trigger: text,
-                    start: "bottom 95%",
-                }
-            })
-        })
+        const lineChild = new SplitText(lineParent.lines, {
+            type: "lines",
+            linesClass: "lineChild",
+        });
 
-        masks.forEach(mask => {
-            gsap.to(mask, {
-                x: "120%",
+        gsap.set(lineChild.lines, {
+            x: "100%",
+        });
+
+        gsap.set(lineParent.lines, {
+            x: "-100%",
+        });
+
+        lineChild.lines.forEach((line) => {
+            gsap.to(line, {
+                x: "0%",
                 scrollTrigger: {
-                    trigger: mask,
-                    start: "top 80%",
-                    end: "top 30%",
-                    scrub: true
-                }
-            })
-        })
+                    scrub: 0.8,
+                    trigger: line,
+                    start: "bottom 70%",
+                    end: `bottom ${window.innerHeight * 0.7 - line.offsetHeight}`,
+                    toggleActions: "play play play play",
+                },
+            });
+        });
+
+        lineParent.lines.forEach((line) => {
+            gsap.to(line, {
+                x: "0%",
+                scrollTrigger: {
+                    scrub: 0.8,
+                    trigger: line,
+                    start: "bottom 70%",
+                    end: `bottom ${window.innerHeight * 0.7 - line.offsetHeight}`,
+                    toggleActions: "play play play play",
+                },
+            });
+        });
     }
 }

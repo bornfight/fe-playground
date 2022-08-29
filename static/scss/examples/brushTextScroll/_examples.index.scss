@@ -4,70 +4,39 @@
 
 .e-brush-text-scroll {
     &__wrapper {
-        background-color: $black;
-        color: $white;
+        background-color: #290847;
+        color: #3a1260;
+        padding-top: 25vh;
+        padding-bottom: 70vh;
     }
 
     &__text {
-        padding-top: calc(100vh - 10vw);
-        padding-bottom: 90vh;
-        display: flex;
-        flex-wrap: wrap;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
+        position: relative;
     }
 
     &__text-line {
-        font-size: 8vw;
-        line-height: 1.3;
+        font-family: "Migra", serif;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 6.8vw;
+        line-height: 110%;
+        letter-spacing: -0.03em;
         position: relative;
-        font-family: sans-serif;
-        font-weight: 900;
         overflow: hidden;
         display: inline-block;
-        opacity: 0;
-        visibility: hidden;
 
-        span:first-child {
-            opacity: 0.3;
-            z-index: 3;
-            position: relative;
-        }
-
-        span:last-child {
+        &--clone {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            color: #d32f25;
             z-index: 1;
-        }
 
-        i {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: $black;
-            z-index: 2;
-            transform: translateX(0%);
-            transition: transform 1s ease-out;
-
-            &:before {
-                content: "";
-                position: absolute;
-                top: 0;
-                right: 100%;
-                width: 90px;
-                height: 100%;
-                background: linear-gradient(0.25turn, rgba($black, 0), $black);
+            .lineParent {
+                overflow: hidden;
             }
-        }
-
-        &--secondary {
-            font-size: 7vw;
         }
     }
 }
