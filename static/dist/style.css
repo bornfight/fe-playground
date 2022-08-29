@@ -1688,7 +1688,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   background-color: #290847;
   color: #3a1260;
   padding-top: 70vh;
-  padding-bottom: 70vh; }
+  padding-bottom: 70vh;
+  padding-left: 15px;
+  padding-right: 15px; }
 
 .e-brush-text-scroll__text {
   position: relative; }
