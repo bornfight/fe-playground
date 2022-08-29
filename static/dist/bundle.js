@@ -60241,12 +60241,16 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
       _gsap.default.set(this.getBgImgs(), {
         autoAlpha: 0,
         scale: 1.05,
+        y: "-50%",
+        x: "-50%",
         overwrite: true
       });
 
       _gsap.default.set(this.getBgImgs()[0], {
         autoAlpha: 1,
         scale: 1,
+        y: "-50%",
+        x: "-50%",
         overwrite: true
       });
 
@@ -60308,6 +60312,8 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
               duration: 0.2,
               autoAlpha: 0,
               scale: 1.05,
+              y: "-50%",
+              x: "-50%",
               overwrite: true
             });
 
@@ -60319,6 +60325,8 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
               duration: 0.6,
               autoAlpha: 1,
               scale: 1,
+              y: "-50%",
+              x: "-50%",
               overwrite: true
             });
 

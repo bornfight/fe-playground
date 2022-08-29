@@ -41,12 +41,16 @@ export default class VerticalMouseDrivenCarousel {
         gsap.set(this.getBgImgs(), {
             autoAlpha: 0,
             scale: 1.05,
+            y: "-50%",
+            x: "-50%",
             overwrite: true,
         });
 
         gsap.set(this.getBgImgs()[0], {
             autoAlpha: 1,
             scale: 1,
+            y: "-50%",
+            x: "-50%",
             overwrite: true,
         });
 
@@ -102,6 +106,8 @@ export default class VerticalMouseDrivenCarousel {
                     duration: 0.2,
                     autoAlpha: 0,
                     scale: 1.05,
+                    y: "-50%",
+                    x: "-50%",
                     overwrite: true,
                 });
 
@@ -113,6 +119,8 @@ export default class VerticalMouseDrivenCarousel {
                     duration: 0.6,
                     autoAlpha: 1,
                     scale: 1,
+                    y: "-50%",
+                    x: "-50%",
                     overwrite: true,
                 });
 

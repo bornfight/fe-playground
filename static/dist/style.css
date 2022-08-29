@@ -894,8 +894,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   top: 50%;
   left: 50%;
   height: auto;
-  -webkit-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
   background-size: cover;
   background-position: center;
   will-change: transform; }
@@ -939,7 +937,16 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   left: 0;
   width: 58.33333%;
   -webkit-transform: translateY(-50%);
-          transform: translateY(-50%); }
+          transform: translateY(-50%);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
 
 @media (max-width: 1140px) {
   .e-mouse-driven-vertical-carousel__img-wrapper {
