@@ -28,6 +28,7 @@ export default class BrushTextScroll {
     textController(wrapper) {
         const texts = wrapper.querySelector(this.DOM.text);
         const textClone = wrapper.querySelector(this.DOM.textClone);
+        const images = wrapper.querySelectorAll("img");
 
         const mainLineParent = new SplitText(texts, {
             type: "lines",
@@ -82,5 +83,21 @@ export default class BrushTextScroll {
                 },
             });
         });
+
+        gsap.fromTo(
+            images,
+            {
+                y: "100%",
+            },
+            {
+                y: "-100%",
+                scrollTrigger: {
+                    scrub: 0.8,
+                    start: "top bottom",
+                    end: "bottom top",
+                    toggleActions: "play play play play",
+                },
+            },
+        );
     }
 }

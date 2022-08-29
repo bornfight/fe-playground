@@ -59653,6 +59653,7 @@ var BrushTextScroll = /*#__PURE__*/function () {
     value: function textController(wrapper) {
       var texts = wrapper.querySelector(this.DOM.text);
       var textClone = wrapper.querySelector(this.DOM.textClone);
+      var images = wrapper.querySelectorAll("img");
       var mainLineParent = new _SplitText.default(texts, {
         type: "lines",
         linesClass: "lineParent"
@@ -59701,6 +59702,18 @@ var BrushTextScroll = /*#__PURE__*/function () {
             toggleActions: "play play play play"
           }
         });
+      });
+
+      _gsap.gsap.fromTo(images, {
+        y: "100%"
+      }, {
+        y: "-100%",
+        scrollTrigger: {
+          scrub: 0.8,
+          start: "top bottom",
+          end: "bottom top",
+          toggleActions: "play play play play"
+        }
       });
     }
   }]);
