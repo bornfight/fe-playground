@@ -812,33 +812,28 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   -ms-flex-line-pack: stretch;
       align-content: stretch;
   width: 100%;
-  background-color: #000000;
-  margin-bottom: 100vh; }
+  background-color: #ffffff; }
 
 .e-mouse-driven-vertical-carousel .c-header {
   display: block;
   width: 100%; }
 
-.e-mouse-driven-vertical-carousel .u-a5 {
-  font-family: "RobotoMono-Regular", sans-serif;
-  font-size: 5vw;
-  line-height: 4.5vw;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 700;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-  color: #ffffff; }
-
-.e-mouse-driven-vertical-carousel .u-b4 {
-  font-family: "RobotoMono-Regular", sans-serif;
-  font-size: 1vw;
-  line-height: 1.2vw;
-  letter-spacing: 0.01em;
-  font-weight: normal;
-  color: #ffffff; }
-
 .e-mouse-driven-vertical-carousel a {
-  text-decoration: none; }
+  text-decoration: none;
+  font-size: 8px; }
+
+.e-mouse-driven-vertical-carousel a p {
+  line-height: 0.75; }
+
+.e-mouse-driven-vertical-carousel a p:nth-of-type(1) {
+  font-size: 55px; }
+
+.e-mouse-driven-vertical-carousel a p:nth-of-type(2) {
+  -ms-flex-item-align: end;
+      align-self: flex-end; }
+
+.e-mouse-driven-vertical-carousel a span {
+  font-size: 8px; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel {
   position: relative;
@@ -853,14 +848,18 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   z-index: 1; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__list-item a {
-  display: block;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
   padding-bottom: 4vw;
   padding-top: 4vw;
-  padding-left: 45.83333%; }
+  padding-left: 58.33333%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__eyebrow {
   position: relative;
-  padding-bottom: 1.2vw; }
+  -webkit-box-flex: 1;
+      -ms-flex: 1 0 auto;
+          flex: 1 0 auto; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__eyebrow span {
   position: absolute;
@@ -868,14 +867,18 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   top: 0; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__title {
-  width: 100%; }
+  width: 100%;
+  padding-left: 10px; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 30px;
+  width: 40%;
+  height: 0;
+  padding-top: 26%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
   background-size: cover;
   background-position: center;
   will-change: transform; }
@@ -889,15 +892,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 
 .e-mouse-driven-vertical-carousel .u-media-wrapper.e-mouse-driven-vertical-carousel .u-media-wrapper--16-9 {
   padding-bottom: 56.25%; }
-
-.e-mouse-driven-vertical-carousel .c-gradient-overlay {
-  position: absolute;
-  display: block;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(circle at 49% 50%, rgba(2, 21, 25, 0.3), rgba(2, 21, 25, 0.6)); }
 
 /**
  * Scrolling Marquee

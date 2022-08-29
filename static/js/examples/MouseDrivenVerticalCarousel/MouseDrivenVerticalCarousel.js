@@ -6,7 +6,7 @@ export default class VerticalMouseDrivenCarousel {
             carousel: ".js-mouse-driven-vertical-carousel",
             bgImg: ".js-mouse-driven-vertical-carousel-bg-img",
             list: ".js-mouse-driven-vertical-carousel-list",
-            listItem: ".js-mouse-driven-vertical-carousel-list-item"
+            listItem: ".js-mouse-driven-vertical-carousel-list-item",
         };
 
         this.posY = 0;
@@ -41,13 +41,13 @@ export default class VerticalMouseDrivenCarousel {
         gsap.set(this.getBgImgs(), {
             autoAlpha: 0,
             scale: 1.05,
-            overwrite: true
+            overwrite: true,
         });
 
         gsap.set(this.getBgImgs()[0], {
             autoAlpha: 1,
             scale: 1,
-            overwrite: true
+            overwrite: true,
         });
 
         this.listItems = this.getListItems().length - 1;
@@ -61,24 +61,24 @@ export default class VerticalMouseDrivenCarousel {
 
         this.getCarousel().addEventListener(
             "mousemove",
-            event => {
+            (event) => {
                 this.posY = event.pageY - this.getCarousel().offsetTop;
-                let offset = -this.posY / carouselHeight * listHeight;
+                let offset = (-this.posY / carouselHeight) * listHeight;
 
                 gsap.to(this.getList(), {
                     duration: 0.3,
                     y: offset,
                     ease: "power4.out",
-                    overwrite: true
+                    overwrite: true,
                 });
             },
-            false
+            false,
         );
     }
 
     bgImgController() {
         for (const link of this.getListItems()) {
-            link.addEventListener("mouseenter", ev => {
+            link.addEventListener("mouseenter", (ev) => {
                 let currentId = ev.currentTarget.dataset.itemId;
 
                 this.listOpacityController(currentId);
@@ -86,14 +86,14 @@ export default class VerticalMouseDrivenCarousel {
                 gsap.to(ev.currentTarget, {
                     duration: 0.3,
                     autoAlpha: 1,
-                    overwrite: true
+                    overwrite: true,
                 });
 
                 gsap.to(".is-visible", {
                     duration: 0.2,
                     autoAlpha: 0,
                     scale: 1.05,
-                    overwrite: true
+                    overwrite: true,
                 });
 
                 if (!this.getBgImgs()[currentId].classList.contains("is-visible")) {
@@ -104,7 +104,7 @@ export default class VerticalMouseDrivenCarousel {
                     duration: 0.6,
                     autoAlpha: 1,
                     scale: 1,
-                    overwrite: true
+                    overwrite: true,
                 });
             });
         }
@@ -124,7 +124,7 @@ export default class VerticalMouseDrivenCarousel {
                     autoAlpha: opacity,
                     x: `${offset}vw`,
                     ease: "power3.out",
-                    overwrite: true
+                    overwrite: true,
                 });
             }
         }
@@ -138,7 +138,7 @@ export default class VerticalMouseDrivenCarousel {
                     autoAlpha: opacity,
                     x: `${offset}vw`,
                     ease: "power3.out",
-                    overwrite: true
+                    overwrite: true,
                 });
             }
         }

@@ -9,39 +9,33 @@
     align-items: center;
     align-content: stretch;
     width: 100%;
-    background-color: $black;
-    margin-bottom: 100vh;
+    background-color: $white;
 
     .c-header {
         display: block;
         width: 100%;
     }
 
-    .u-a5 {
-        font-family: $font-secondary;
-        font-size: 5vw;
-        line-height: 4.5vw;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-weight: 700;
-        text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-        color: $white;
-    }
-
-    .u-b4 {
-        font-family: $font-primary;
-        font-size: 1vw;
-        line-height: 1.2vw;
-        letter-spacing: 0.01em;
-        font-weight: normal;
-        color: $white;
-    }
-
     a {
         text-decoration: none;
+        font-size: 8px;
+
+        p {
+            line-height: 0.75;
+
+            &:nth-of-type(1) {
+                font-size: 55px;
+            }
+
+            &:nth-of-type(2) {
+                align-self: flex-end;
+            }
+        }
+
+        span {
+            font-size: 8px;
+        }
     }
-
-
 
     .c-mouse-vertical-carousel {
         position: relative;
@@ -58,16 +52,16 @@
 
         &__list-item {
             a {
-                display: block;
+                display: flex;
                 padding-bottom: 4vw;
                 padding-top: 4vw;
-                padding-left: percentage(11/24);
+                padding-left: percentage(14/24);
             }
         }
 
         &__eyebrow {
             position: relative;
-            padding-bottom: 1.2vw;
+            flex: 1 0 auto;
 
             span {
                 position: absolute;
@@ -78,14 +72,17 @@
 
         &__title {
             width: 100%;
+            padding-left: 10px;
         }
 
         &__bg-img {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 30px;
+            width: 40%;
+            height: 0;
+            padding-top: 26%;
+            transform: translateY(-50%);
             background-size: cover;
             background-position: center;
             will-change: transform;
@@ -103,20 +100,5 @@
         &#{&}--16-9 {
             padding-bottom: percentage(9/16);
         }
-    }
-
-    // GRADIENT IMAGE OVERLAY
-    .c-gradient-overlay {
-        position: absolute;
-        display: block;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-image: radial-gradient(
-                        circle at 49% 50%,
-                        rgba(2, 21, 25, 0.3),
-                        rgba(2, 21, 25, 0.6)
-        );
     }
 }
