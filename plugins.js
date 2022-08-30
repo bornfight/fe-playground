@@ -6,4 +6,5 @@ export const plugins = [
     "three/examples/jsm/controls/OrbitControls",
     "is_js",
     "detect-gpu",
+    "pixi.js",
 ];

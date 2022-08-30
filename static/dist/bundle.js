@@ -60172,6 +60172,291 @@ exports.default = ImageSequence;
 },{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],19:[function(require,module,exports){
 "use strict";
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = _interopRequireDefault(require("gsap"));
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+ * Magnetic Cta class
+ */
+var MagneticCta = /*#__PURE__*/function () {
+  function MagneticCta(element, innerElement) {
+    var _this = this;
+
+    _classCallCheck(this, MagneticCta);
+
+    this.innerEl = element.querySelectorAll(innerElement);
+    this.innerText = element.querySelectorAll("div");
+    element.addEventListener("mousemove", function (ev) {
+      ev.currentTarget.classList.add("is-active");
+
+      _this.mousemoveFn(ev, element);
+    });
+    element.addEventListener("mouseleave", function (ev) {
+      ev.currentTarget.classList.remove("is-active");
+
+      _this.mouseleaveFn(ev, element);
+    });
+  }
+
+  _createClass(MagneticCta, [{
+    key: "mousemoveFn",
+    value: function mousemoveFn(ev, element) {
+      // Get X-coordinate for the left button edge
+      var buttonPosX = element.getBoundingClientRect().left;
+      var buttonPosY = element.getBoundingClientRect().top; // Get position of the mouse inside element from left edge
+      // (current mouse X position - button x coordinate)
+
+      var pageX = ev.clientX;
+      var pageY = ev.clientY;
+      var xPosOfMouse = pageX - buttonPosX;
+      var yPosOfMouse = pageY - buttonPosY; // Get position of mouse relative to button center
+      // Mouse position inside element - button width / 2
+      // To get positive or negative movement
+
+      var xPosOfMouseInsideButton = xPosOfMouse - element.offsetWidth / 2;
+      var yPosOfMouseInsideButton = yPosOfMouse - element.offsetHeight / 2; // Button text divider to increase or decrease text path
+
+      var animationDivider = 3;
+      var animationDividerText = 1.5; // Animate button text positive or negative from center
+
+      _gsap.default.to(this.innerEl, {
+        duration: 0.3,
+        x: xPosOfMouseInsideButton / animationDivider,
+        y: yPosOfMouseInsideButton / animationDivider,
+        ease: "power3.out"
+      });
+
+      if (this.innerText.length > 0) {
+        _gsap.default.to(this.innerText, {
+          duration: 0.2,
+          x: xPosOfMouseInsideButton / animationDividerText,
+          y: yPosOfMouseInsideButton / animationDividerText,
+          ease: "power3.out"
+        });
+      }
+    } // On mouse leave
+
+  }, {
+    key: "mouseleaveFn",
+    value: function mouseleaveFn() {
+      // Animate button text reset to initial position (center)
+      _gsap.default.to(this.innerEl, {
+        duration: 0.3,
+        x: 0,
+        y: 0,
+        ease: "power3.out"
+      });
+
+      if (this.innerText.length > 0) {
+        _gsap.default.to(this.innerText, {
+          duration: 0.5,
+          x: 0,
+          y: 0,
+          ease: "power3.out"
+        });
+      }
+    }
+  }]);
+
+  return MagneticCta;
+}();
+/**
+ * Hotspots class
+ */
+
+
+var Hotspots = /*#__PURE__*/function () {
+  /**
+   *
+   * @param options
+   */
+  function Hotspots(options) {
+    _classCallCheck(this, Hotspots);
+
+    /**
+     *
+     * @type {{hotspotText: string, hotspot: string, hotspotCircle: string, hotspotCanvasContainer: string, hotspotContainer: string}}
+     * @private
+     */
+    var _defaults = {
+      hotspotContainer: ".js-hotspot-container",
+      hotspot: ".js-hotspot",
+      hotspotCanvasContainer: ".js-hotspot-lines-container",
+      hotspotCircle: ".js-hotspot-circle",
+      hotspotText: ".js-hotspot-text"
+    };
+    this.defaults = Object.assign({}, _defaults, options);
+
+    if (this.hotspotContainer) {
+      this.init();
+      this.initHotspotLines();
+    }
+  }
+  /**
+   *
+   * @returns {NodeListOf<Element>}
+   */
+
+
+  _createClass(Hotspots, [{
+    key: "hotspotContainer",
+    get: function get() {
+      return document.querySelectorAll(this.defaults.hotspotContainer);
+    }
+    /**
+     *
+     * @returns {NodeListOf<Element>}
+     */
+
+  }, {
+    key: "hotspotCanvasContainer",
+    get: function get() {
+      return document.querySelectorAll(this.defaults.hotspotCanvasContainer);
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      console.log("Hotspots init()");
+    }
+  }, {
+    key: "initHotspotLines",
+    value: function initHotspotLines() {
+      var _this2 = this;
+
+      var lineColor = 0xb1b1b1;
+      var lineGradient = ["#b1b1b1", "#ffffff"];
+      var lineEndingRadius = 2;
+      var gradientTexture = this.getGradientTexture(lineGradient[0], lineGradient[1]);
+      this.hotspotContainer.forEach(function (hotspotContainer) {
+        var hotspots = hotspotContainer.querySelectorAll(_this2.defaults.hotspot); // CANVAS SIZE
+
+        var canvasWidth = hotspotContainer.clientWidth;
+        var canvasHeight = hotspotContainer.clientHeight; // CREATE PIXI APPLICATION
+
+        var app = new PIXI.Application({
+          width: canvasWidth,
+          height: canvasHeight,
+          antialias: true,
+          transparent: true,
+          //resolution: window.devicePixelRatio,
+          resizeTo: hotspotContainer
+        }); // ADD CANVAS TO CANVAS WRAPPER ELEMENT
+
+        hotspotContainer.appendChild(app.view);
+        hotspots.forEach(function (hotspot) {
+          var circle = hotspot.querySelector(_this2.defaults.hotspotCircle);
+          var text = hotspot.querySelector(_this2.defaults.hotspotText);
+          var line = new PIXI.Graphics();
+          line.alpha = 0;
+          app.stage.addChild(line);
+          app.ticker.add(function () {
+            line.clear();
+            line.beginFill(lineColor, 1);
+            line.drawCircle(_this2.getPosition(circle)[0], _this2.getPosition(circle)[1], lineEndingRadius);
+            line.endFill();
+            line.beginFill(lineColor, 1);
+            line.drawCircle(_this2.getPosition(text)[0], _this2.getPosition(text)[1], lineEndingRadius);
+            line.endFill();
+            line.moveTo(_this2.getPosition(circle)[0], _this2.getPosition(circle)[1]);
+            line.lineStyle(1, lineColor, 1);
+            line.lineTextureStyle({
+              width: 1,
+              texture: gradientTexture,
+              color: 0xffffff
+            });
+            line.lineTo(_this2.getPosition(text)[0], _this2.getPosition(text)[1]);
+          }); //hover
+
+          hotspot.addEventListener("mouseenter", function () {
+            _gsap.default.to(line, {
+              alpha: 1,
+              duration: 0.4,
+              onComplete: function onComplete() {}
+            });
+          });
+          hotspot.addEventListener("mouseleave", function () {
+            _gsap.default.to(line, {
+              alpha: 0,
+              duration: 0.4,
+              onComplete: function onComplete() {}
+            });
+          });
+        });
+      });
+    }
+    /**
+     *
+     * @param {HTMLElement} element - element which position we should get
+     * @returns {[number, number]} - position of element relative to viewport
+     */
+
+  }, {
+    key: "getPosition",
+    value: function getPosition(element) {
+      var posX = element.getBoundingClientRect().left - element.closest(this.defaults.hotspotContainer).getBoundingClientRect().left + element.clientWidth / 2;
+      var posY = element.getBoundingClientRect().top - element.closest(this.defaults.hotspotContainer).getBoundingClientRect().top + element.clientHeight / 2;
+      return [posX, posY];
+    }
+    /**
+     *
+     * @param {string} from - color in hex format
+     * @param {string} to - color in hex format
+     * @returns {PIXI.Texture}
+     */
+
+  }, {
+    key: "getGradientTexture",
+    value: function getGradientTexture(from, to) {
+      var textureWH = 300;
+      var canvas = document.createElement("canvas");
+      var context = canvas.getContext("2d");
+      var gradient = context.createLinearGradient(0, 0, textureWH, textureWH);
+      gradient.addColorStop(0, from);
+      gradient.addColorStop(1, to);
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, textureWH, textureWH);
+      return new PIXI.Texture.from(canvas);
+    }
+  }]);
+
+  return Hotspots;
+}();
+
+var MagneticHotspots = function MagneticHotspots() {
+  _classCallCheck(this, MagneticHotspots);
+
+  var magneticCta = document.querySelectorAll(".js-hotspot");
+  magneticCta.forEach(function (element) {
+    new MagneticCta(element, "span");
+  });
+  new Hotspots();
+};
+
+exports.default = MagneticHotspots;
+
+},{"gsap":"gsap","pixi.js":"pixi.js"}],20:[function(require,module,exports){
+"use strict";
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -60387,7 +60672,7 @@ var VerticalMouseDrivenCarousel = /*#__PURE__*/function () {
 
 exports.default = VerticalMouseDrivenCarousel;
 
-},{"gsap":"gsap"}],20:[function(require,module,exports){
+},{"gsap":"gsap"}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60540,7 +60825,7 @@ var PanningGallery = /*#__PURE__*/function () {
 
 exports.default = PanningGallery;
 
-},{"gsap/dist/SplitText":2,"gsap/dist/gsap":3}],21:[function(require,module,exports){
+},{"gsap/dist/SplitText":2,"gsap/dist/gsap":3}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60649,7 +60934,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],22:[function(require,module,exports){
+},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60730,7 +61015,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -60752,6 +61037,8 @@ var _ContentAnimation = _interopRequireDefault(require("./examples/ImageSequence
 var _AnimatedGradient = _interopRequireDefault(require("./examples/AnimatedGradient/AnimatedGradient"));
 
 var _BrushTextScroll = _interopRequireDefault(require("./examples/BrushTextScroll/BrushTextScroll"));
+
+var _MagneticHotspots = _interopRequireDefault(require("./examples/MagneticHotspots/MagneticHotspots"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -60887,8 +61174,14 @@ ready(function () {
 
   var brushTextScroll = new _BrushTextScroll.default();
   brushTextScroll.init();
+  /**
+   * MagneticHotspots component
+   * @type {MagneticHotspots}
+   */
+
+  var magneticHotspots = new _MagneticHotspots.default();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":19,"./examples/PanningGallery/PanningGallery":20,"./examples/ScrollingMarquee/ScrollingMarquee":21,"./examples/TemplateExample/TemplateComponent":22}]},{},[23])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/ScrollingMarquee/ScrollingMarquee":22,"./examples/TemplateExample/TemplateComponent":23}]},{},[24])
 
 //# sourceMappingURL=bundle.js.map

@@ -21,6 +21,7 @@ import ImageSequence from "./examples/ImageSequence/ImageSequence";
 import ContentAnimation from "./examples/ImageSequence/ContentAnimation";
 import AnimatedGradient from "./examples/AnimatedGradient/AnimatedGradient";
 import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
+import MagneticHotspots from "./examples/MagneticHotspots/MagneticHotspots";
 
 /**
  * Check if document is ready cross-browser
@@ -141,11 +142,16 @@ ready(() => {
      */
     const animatedGradient = new AnimatedGradient();
 
-
     /**
      * BrushTextScroll component
      * @type {BrushTextScroll}
      */
     const brushTextScroll = new BrushTextScroll();
     brushTextScroll.init();
+
+    /**
+     * MagneticHotspots component
+     * @type {MagneticHotspots}
+     */
+    const magneticHotspots = new MagneticHotspots();
 });

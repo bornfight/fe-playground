@@ -31,6 +31,7 @@
         "detect-gpu": "^3.1.27",
         "gsap": "npm:@gsap/shockingly@^3.8.0",
         "is_js": "^0.9.0",
+        "pixi.js": "^6.5.2",
         "poly-fluid-sizing": "^1.1.0",
         "three": "0.120.1"
     },
