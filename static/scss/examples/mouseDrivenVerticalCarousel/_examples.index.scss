@@ -101,7 +101,7 @@
             }
 
             &:nth-of-type(2) {
-                width: 80%;
+                width: 70%;
             }
 
             &:nth-of-type(3) {
@@ -109,7 +109,7 @@
             }
 
             &:nth-of-type(4) {
-                width: 95%;
+                width: 65%;
             }
 
             &:nth-of-type(5) {
@@ -117,11 +117,11 @@
             }
 
             &:nth-of-type(6) {
-                width: 84%;
+                width: 74%;
             }
 
             &:nth-of-type(7) {
-                width: 90%;
+                width: 85%;
             }
 
             &:nth-of-type(8) {
@@ -129,11 +129,11 @@
             }
 
             &:nth-of-type(9) {
-                width: 88%;
+                width: 68%;
             }
 
             &:nth-of-type(10) {
-                width: 90%;
+                width: 80%;
             }
 
             &:nth-of-type(11) {
@@ -146,7 +146,7 @@
         position: absolute;
         top: 50%;
         left: 60px;
-        width: percentage(14/24);
+        width: percentage(10/24);
         transform: translateY(-50%);
         display: flex;
         align-items: center;

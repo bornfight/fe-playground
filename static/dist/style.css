@@ -902,31 +902,31 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   width: 90%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(2) {
-  width: 80%; }
+  width: 70%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(3) {
   width: 85%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(4) {
-  width: 95%; }
+  width: 65%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(5) {
   width: 91%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(6) {
-  width: 84%; }
+  width: 74%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(7) {
-  width: 90%; }
+  width: 85%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(8) {
   width: 78%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(9) {
-  width: 88%; }
+  width: 68%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(10) {
-  width: 90%; }
+  width: 80%; }
 
 .e-mouse-driven-vertical-carousel .c-mouse-vertical-carousel__bg-img:nth-of-type(11) {
   width: 84%; }
@@ -935,7 +935,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   position: absolute;
   top: 50%;
   left: 60px;
-  width: 58.33333%;
+  width: 41.66667%;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
   display: -webkit-box;
