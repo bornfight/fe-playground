@@ -4,6 +4,7 @@
 @include font-face("RobotoMono-Regular", "RobotoMono-Regular");
 @include font-face("Migra", "PPMigra-Regular");
 @include font-face("PP Editorial New", "PPEditorialNew-Regular");
+@include font-face("Plain", "Plain-Light");
 
 /**
  * Font variables
@@ -16,52 +17,52 @@ $font-secondary: $roboto;
  * Font size map
  */
 $settings-typography: (
-        "a7": (
-                $breakpoint-sm: 24px,
-                $breakpoint-xl: 85px,
-        ),
-        "a6": (
-                $breakpoint-sm: 45px,
-                $breakpoint-xl: 75px,
-        ),
-        "a5": (
-                $breakpoint-sm: 40px,
-                $breakpoint-xl: 65px,
-        ),
-        "a4": (
-                $breakpoint-sm: 37px,
-                $breakpoint-xl: 60px,
-        ),
-        "a3": (
-                $breakpoint-sm: 28px,
-                $breakpoint-xl: 48px,
-        ),
-        "a2": (
-                $breakpoint-sm: 25px,
-                $breakpoint-xl: 41px,
-        ),
-        "a1": (
-                $breakpoint-sm: 18px,
-                $breakpoint-xl: 25px,
-        ),
-        "b0": (
-                $breakpoint-sm: 14px,
-                $breakpoint-xl: 14px,
-        ),
-        "b1": (
-                $breakpoint-sm: 12px,
-                $breakpoint-xl: 16px,
-        ),
-        "b2": (
-                $breakpoint-sm: 10px,
-                $breakpoint-xl: 10px,
-        ),
-        "b3": (
-                $breakpoint-sm: 12px,
-                $breakpoint-xl: 14px,
-        ),
-        "b4": (
-                $breakpoint-sm: 11px,
-                $breakpoint-xl: 12px,
-        ),
+    "a7": (
+        $breakpoint-sm: 24px,
+        $breakpoint-xl: 85px,
+    ),
+    "a6": (
+        $breakpoint-sm: 45px,
+        $breakpoint-xl: 75px,
+    ),
+    "a5": (
+        $breakpoint-sm: 40px,
+        $breakpoint-xl: 65px,
+    ),
+    "a4": (
+        $breakpoint-sm: 37px,
+        $breakpoint-xl: 60px,
+    ),
+    "a3": (
+        $breakpoint-sm: 28px,
+        $breakpoint-xl: 48px,
+    ),
+    "a2": (
+        $breakpoint-sm: 25px,
+        $breakpoint-xl: 41px,
+    ),
+    "a1": (
+        $breakpoint-sm: 18px,
+        $breakpoint-xl: 25px,
+    ),
+    "b0": (
+        $breakpoint-sm: 14px,
+        $breakpoint-xl: 14px,
+    ),
+    "b1": (
+        $breakpoint-sm: 12px,
+        $breakpoint-xl: 16px,
+    ),
+    "b2": (
+        $breakpoint-sm: 10px,
+        $breakpoint-xl: 10px,
+    ),
+    "b3": (
+        $breakpoint-sm: 12px,
+        $breakpoint-xl: 14px,
+    ),
+    "b4": (
+        $breakpoint-sm: 11px,
+        $breakpoint-xl: 12px,
+    ),
 );

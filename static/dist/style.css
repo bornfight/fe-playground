@@ -196,7 +196,6 @@
  * Roboto
  */
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1");
-@import url("https://fonts.googleapis.com/css?family=Arimo:400,700&display=swap");
 @font-face {
   font-family: "RobotoMono-Regular";
   src: url("../fonts/RobotoMono-Regular.woff2?1") format("woff2"), url("../fonts/RobotoMono-Regular.woff?1") format("woff");
@@ -214,6 +213,13 @@
 @font-face {
   font-family: "PP Editorial New";
   src: url("../fonts/PPEditorialNew-Regular.woff2?1") format("woff2"), url("../fonts/PPEditorialNew-Regular.woff?1") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; }
+
+@font-face {
+  font-family: "Plain";
+  src: url("../fonts/Plain-Light.woff2?1") format("woff2"), url("../fonts/Plain-Light.woff?1") format("woff");
   font-weight: normal;
   font-style: normal;
   font-display: swap; }
@@ -1797,15 +1803,19 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   bottom: 10%;
   left: 10%; }
 
-.e-magnetic-hotspots body {
-  font-family: "Arimo"; }
-
 .e-magnetic-hotspots .u-a1 {
-  font-size: 24px; }
+  font-size: 31px;
+  font-family: "Plain", sans-serif;
+  letter-spacing: -0.04em;
+  line-height: 130%;
+  padding-bottom: 20px; }
 
-.e-magnetic-hotspots .u-b0, .e-magnetic-hotspots body {
-  font-size: 14px;
-  opacity: 0.56; }
+.e-magnetic-hotspots .u-b2 {
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  line-height: 115%;
+  opacity: 0.6;
+  font-family: "Plain", sans-serif; }
 
 .e-magnetic-hotspots .c-hotspot-image {
   position: relative;
@@ -1900,10 +1910,10 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .e-magnetic-hotspots .c-hotspot__text {
   pointer-events: none;
   display: block;
-  width: 320px;
   position: absolute;
   left: 0;
-  top: 100%; }
+  top: 100%;
+  width: 290px; }
 
 .e-magnetic-hotspots .c-hotspot__text article {
   -webkit-transform: translateY(-50%) translateX(25%);
@@ -1911,9 +1921,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   padding: 20px 0; }
 
 .e-magnetic-hotspots .c-hotspot__text .u-a1 {
-  margin-bottom: 0.4em;
   opacity: 0;
-  margin-left: -30px;
   -webkit-transform-origin: left;
           transform-origin: left;
   visibility: hidden;
@@ -1923,7 +1931,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   transition: all 0.3s ease-out; }
 
 .e-magnetic-hotspots .c-hotspot__text .u-b2 {
-  max-width: 240px;
   opacity: 0;
   visibility: hidden;
   -webkit-transform-origin: left;
@@ -1934,9 +1941,12 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   transition: all 0.3s 0.1s ease-out; }
 
 .e-magnetic-hotspots .c-hotspot--1 .c-hotspot__text {
-  top: auto;
-  bottom: 200%;
-  left: -75%; }
+  bottom: auto;
+  top: -50%;
+  left: -200%; }
+
+.e-magnetic-hotspots .c-hotspot--2 .c-hotspot__text {
+  left: 100%; }
 
 .e-magnetic-hotspots .c-hotspot--top .c-hotspot__text {
   top: auto;
@@ -1952,7 +1962,8 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
           transform: translateY(50%) translateX(25%); }
 
 .e-magnetic-hotspots .c-hotspot--3 .c-hotspot__text {
-  left: -100%; }
+  left: 50%;
+  top: 50%; }
 
 .e-magnetic-hotspots .c-hotspot:hover .c-hotspot__circle-inner {
   -webkit-animation: none;

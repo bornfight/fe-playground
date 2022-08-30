@@ -1,21 +1,21 @@
-//
-@import url("https://fonts.googleapis.com/css?family=Arimo:400,700&display=swap");
-
 .e-magnetic-hotspots {
     $white: #ffffff;
     $red: #d8202b;
 
-    body {
-        font-family: "Arimo";
-    }
-
     .u-a1 {
-        font-size: 24px;
+        font-size: 31px;
+        font-family: "Plain", sans-serif;
+        letter-spacing: -0.04em;
+        line-height: 130%;
+        padding-bottom: 20px;
     }
 
-    .u-b0 {
-        font-size: 14px;
-        opacity: 0.56;
+    .u-b2 {
+        font-size: 16px;
+        letter-spacing: -0.01em;
+        line-height: 115%;
+        opacity: 0.6;
+        font-family: "Plain", sans-serif;
     }
 
     //HOTSPOTS
@@ -102,10 +102,10 @@
         &__text {
             pointer-events: none;
             display: block;
-            width: 320px;
             position: absolute;
             left: 0;
             top: 100%;
+            width: 290px;
 
             article {
                 transform: translateY(-50%) translateX(25%);
@@ -114,9 +114,7 @@
 
             //overrides
             .u-a1 {
-                margin-bottom: 0.4em;
                 opacity: 0;
-                margin-left: -30px;
                 transform-origin: left;
                 visibility: hidden;
                 transform: rotate(-1.5deg);
@@ -124,7 +122,6 @@
             }
 
             .u-b2 {
-                max-width: 240px;
                 opacity: 0;
                 visibility: hidden;
                 transform-origin: left;
@@ -136,13 +133,16 @@
         //modifiers
         &--1 {
             .c-hotspot__text {
-                top: auto;
-                bottom: 200%;
-                left: -75%;
+                bottom: auto;
+                top: -50%;
+                left: -200%;
             }
         }
 
         &--2 {
+            .c-hotspot__text {
+                left: 100%;
+            }
         }
 
         &--top {
@@ -166,7 +166,8 @@
 
         &--3 {
             .c-hotspot__text {
-                left: -100%;
+                left: 50%;
+                top: 50%;
             }
         }
 
