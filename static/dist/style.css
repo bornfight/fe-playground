@@ -934,7 +934,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .e-mouse-driven-vertical-carousel__img-wrapper {
   position: absolute;
   top: 50%;
-  left: 0;
+  left: 60px;
   width: 58.33333%;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
