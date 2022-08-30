@@ -78,8 +78,8 @@
         &__circle {
             display: inline-block;
             margin: 0 auto;
-            width: 50px;
-            height: 50px;
+            width: 80px;
+            height: 80px;
             position: relative;
         }
 
@@ -145,9 +145,6 @@
         &--2 {
         }
 
-        &--3 {
-        }
-
         &--top {
             .c-hotspot__text {
                 top: auto;
@@ -170,12 +167,6 @@
         &--3 {
             .c-hotspot__text {
                 left: -100%;
-            }
-        }
-
-        &--4 {
-            .c-hotspot__text {
-                top: 150%;
             }
         }
 
