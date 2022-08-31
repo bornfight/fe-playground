@@ -60851,8 +60851,6 @@ _gsap.default.registerPlugin(_ScrollTrigger.ScrollTrigger);
 
 var PetPakAwwwards = /*#__PURE__*/function () {
   function PetPakAwwwards() {
-    var _this = this;
-
     _classCallCheck(this, PetPakAwwwards);
 
     this.DOM = {
@@ -60873,12 +60871,10 @@ var PetPakAwwwards = /*#__PURE__*/function () {
     this.xOffset = 10;
     this.firstXPos = 5 * this.config.environment.scale;
 
-    _ScrollTrigger.ScrollTrigger.matchMedia({
-      "(max-width: 800px)": function maxWidth800px() {
-        _this.xOffset = 0;
-        _this.firstXPos = 0;
-      }
-    });
+    if (window.innerWidth < 800) {
+      this.xOffset = 0;
+      this.firstXPos = 0;
+    }
 
     this.models = [];
     this.coeff = 100;
@@ -60895,7 +60891,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   _createClass(PetPakAwwwards, [{
     key: "init",
     value: function init() {
-      var _this2 = this;
+      var _this = this;
 
       if (this.modelContainer !== null) {
         this.setDimensions();
@@ -60917,28 +60913,28 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         this.initLights();
         this.initRenderer();
         var waitModels = new Promise(function (resolve, reject) {
-          _this2.throughSections(resolve);
+          _this.throughSections(resolve);
         });
         waitModels.then(function () {
-          _this2.scrollController();
+          _this.scrollController();
 
-          _this2.animate();
+          _this.animate();
 
-          _this2.models.filter(function (model) {
+          _this.models.filter(function (model) {
             if (model.index !== 0) {
-              _this2.modelHide(model.model, true, false);
+              _this.modelHide(model.model, true, false);
             } else {
-              _gsap.default.set(_this2.title, {
+              _gsap.default.set(_this.title, {
                 autoAlpha: 1
               });
 
               _gsap.default.fromTo(model.model.position, {
-                y: 20 * _this2.config.environment.scale,
-                x: _this2.firstXPos,
+                y: 20 * _this.config.environment.scale,
+                x: _this.firstXPos,
                 z: 0
               }, {
                 y: 0,
-                x: _this2.firstXPos,
+                x: _this.firstXPos,
                 z: 0,
                 duration: 1,
                 delay: 0.5,
@@ -60959,9 +60955,11 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           });
         }); // handle resize
 
-        window.addEventListener("resize", function () {
-          return _this2.onWindowResize();
-        }, false);
+        if (window.innerWidth > 800) {
+          window.addEventListener("resize", function () {
+            return _this.onWindowResize();
+          }, false);
+        }
       }
     }
     /**
@@ -60971,16 +60969,17 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "initCamera",
     value: function initCamera() {
-      var _this$camera;
-
       this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 0.5 * this.config.environment.scale, 130 * this.config.environment.scale);
-      (_this$camera = this.camera) === null || _this$camera === void 0 ? void 0 : _this$camera.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale); // ScrollTrigger.matchMedia({
-      //     "(min-width: 801px)": () => {
-      //     },
-      //     "(max-width: 800px)": () => {
-      //         this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
-      //     },
-      // });
+
+      if (window.innerWidth < 800) {
+        var _this$camera;
+
+        (_this$camera = this.camera) === null || _this$camera === void 0 ? void 0 : _this$camera.position.set(0, 0, 40 * this.config.environment.scale);
+      } else {
+        var _this$camera2;
+
+        (_this$camera2 = this.camera) === null || _this$camera2 === void 0 ? void 0 : _this$camera2.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
+      }
     }
     /**
      * scene setup
@@ -61039,7 +61038,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "throughSections",
     value: function throughSections(resolve) {
-      var _this3 = this;
+      var _this2 = this;
 
       this.sections = document.querySelectorAll(this.DOM.section);
 
@@ -61050,7 +61049,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       this.sections.forEach(function (section, index) {
         var textureUrl = section.dataset.texture;
 
-        _this3.initModel(index, resolve, textureUrl);
+        _this2.initModel(index, resolve, textureUrl);
       });
     }
     /**
@@ -61146,19 +61145,19 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this4 = this;
+      var _this3 = this;
 
       this.renderer.render(this.scene, this.camera);
 
       if (this.models.length > 0) {
         this.models.forEach(function (model) {
-          _this4.update(model.model);
+          _this3.update(model.model);
         });
       }
 
       if (this.renderer != null) {
         requestAnimationFrame(function () {
-          return _this4.animate();
+          return _this3.animate();
         });
       }
     }
@@ -61169,42 +61168,42 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "scrollController",
     value: function scrollController() {
-      var _this5 = this;
+      var _this4 = this;
 
       // sort by index
       this.models.sort(function (a, b) {
         return a.index - b.index;
       });
       this.models.forEach(function (model, index) {
-        var direction = _this5.checkDirection(_this5.sections[model.index].dataset.position);
+        var direction = _this4.checkDirection(_this4.sections[model.index].dataset.position);
 
         var nextDirection = 0;
 
-        if (_this5.sections[index + 1] != null) {
-          nextDirection = _this5.checkDirection(_this5.sections[index + 1].dataset.position);
+        if (_this4.sections[index + 1] != null) {
+          nextDirection = _this4.checkDirection(_this4.sections[index + 1].dataset.position);
         }
 
         model.direction = direction;
 
-        _this5.changeModelPosition(direction, nextDirection, model);
+        _this4.changeModelPosition(direction, nextDirection, model);
 
         _gsap.default.to(model.model.rotation, {
           scrollTrigger: {
-            trigger: _this5.sections[model.index],
+            trigger: _this4.sections[model.index],
             start: "top 50%",
-            end: "bottom ".concat(model.index === _this5.sections.length - 1 ? "top" : "50%"),
+            end: "bottom ".concat(model.index === _this4.sections.length - 1 ? "top" : "50%"),
             scrub: true,
             onEnter: function onEnter() {
-              _this5.modelShow(model.model);
+              _this4.modelShow(model.model);
             },
             onLeave: function onLeave() {
-              _this5.modelHide(model.model, model.index !== _this5.models.length - 1, true);
+              _this4.modelHide(model.model, model.index !== _this4.models.length - 1, true);
             },
             onEnterBack: function onEnterBack() {
-              _this5.modelShow(model.model);
+              _this4.modelShow(model.model);
             },
             onLeaveBack: function onLeaveBack() {
-              _this5.modelHide(model.model, model.index !== 0, true);
+              _this4.modelHide(model.model, model.index !== 0, true);
             }
           },
           ease: "none"
@@ -61258,7 +61257,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "changeModelPosition",
     value: function changeModelPosition(current, next, model) {
-      var _this6 = this;
+      var _this5 = this;
 
       var fromCurrent = current === 1 ? current * 1.5 : current;
       var toNext = next === 1 ? next * 1.5 : next;
@@ -61275,15 +61274,15 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         var tl = _gsap.default.timeline({
           // ease: "power4.inOut",
           scrollTrigger: {
-            trigger: _this6.sections[model.index],
+            trigger: _this5.sections[model.index],
             start: "top top",
             end: "bottom top",
             scrub: true
           }
         }).addLabel("start").add("start").fromTo(modelSingle.model.position, {
-          x: model.index === 0 ? _this6.firstXPos : _this6.xOffset * _this6.config.environment.scale * fromCurrent
+          x: model.index === 0 ? _this5.firstXPos : _this5.xOffset * _this5.config.environment.scale * fromCurrent
         }, {
-          x: _this6.xOffset * _this6.config.environment.scale * toNext,
+          x: _this5.xOffset * _this5.config.environment.scale * toNext,
           ease: "none",
           duration: 2
         }, "start").fromTo(modelSingle.model.position, {
@@ -61305,10 +61304,10 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           y: model.index === 0 ? -0.3 : current * -0.6
         }, {
           z: -0.17 * next,
-          y: model.index === _this6.sections.length - 1 ? -0.6 : next * -0.6,
+          y: model.index === _this5.sections.length - 1 ? -0.6 : next * -0.6,
           ease: "none",
           scrollTrigger: {
-            trigger: _this6.sections[model.index],
+            trigger: _this5.sections[model.index],
             start: "top top",
             end: "bottom top",
             scrub: true
@@ -61316,7 +61315,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         });
 
         _gsap.default.set(modelSingle.model.position, {
-          x: model.index === 0 ? 0 : _this6.xOffset * _this6.config.environment.scale * _this6.models[0].direction
+          x: model.index === 0 ? 0 : _this5.xOffset * _this5.config.environment.scale * _this5.models[0].direction
         });
       });
     }

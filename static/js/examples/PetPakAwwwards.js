@@ -27,12 +27,10 @@ export default class PetPakAwwwards {
         this.xOffset = 10;
         this.firstXPos = 5 * this.config.environment.scale;
 
-        ScrollTrigger.matchMedia({
-            "(max-width: 800px)": () => {
-                this.xOffset = 0;
-                this.firstXPos = 0;
-            },
-        });
+        if (window.innerWidth < 800) {
+            this.xOffset = 0;
+            this.firstXPos = 0;
+        }
 
         this.models = [];
 
@@ -122,7 +120,9 @@ export default class PetPakAwwwards {
             });
 
             // handle resize
-            window.addEventListener("resize", () => this.onWindowResize(), false);
+            if (window.innerWidth > 800) {
+                window.addEventListener("resize", () => this.onWindowResize(), false);
+            }
         }
     }
 
@@ -137,12 +137,11 @@ export default class PetPakAwwwards {
             130 * this.config.environment.scale,
         );
 
-        this.camera?.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
-        ScrollTrigger.matchMedia({
-            "(max-width: 800px)": () => {
-                this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
-            },
-        });
+        if (window.innerWidth < 800) {
+            this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
+        } else {
+            this.camera?.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
+        }
     }
 
     /**
