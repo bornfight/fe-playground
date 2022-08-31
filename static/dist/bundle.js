@@ -60837,6 +60837,8 @@ var _gsap = _interopRequireDefault(require("gsap"));
 
 var _ScrollTrigger = require("gsap/dist/ScrollTrigger");
 
+var _ScrollMarquee = _interopRequireDefault(require("../examples/3dScrollytelling/ScrollMarquee"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -60845,8 +60847,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-_gsap.default.registerPlugin(_ScrollTrigger.ScrollTrigger); // import ScrollMarquee from "./ScrollMarquee";
-
+_gsap.default.registerPlugin(_ScrollTrigger.ScrollTrigger);
 
 var PetPakAwwwards = /*#__PURE__*/function () {
   function PetPakAwwwards() {
@@ -60897,8 +60898,9 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       var _this2 = this;
 
       if (this.modelContainer !== null) {
-        this.setDimensions(); // const scrollMarquee = new ScrollMarquee();
-        // scrollMarquee.init();
+        this.setDimensions();
+        var scrollMarquee = new _ScrollMarquee.default();
+        scrollMarquee.init();
 
         _gsap.default.set(this.title, {
           autoAlpha: 0
@@ -60939,7 +60941,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
                 x: _this2.firstXPos,
                 z: 0,
                 duration: 1,
-                delay: 2.2,
+                delay: 0.5,
                 ease: "power3.out"
               });
 
@@ -60950,7 +60952,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
                 z: 0.17,
                 y: -0.3,
                 duration: 1,
-                delay: 2.2,
+                delay: 0.5,
                 ease: "power3.out"
               });
             }
@@ -61385,7 +61387,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
 
 exports.default = PetPakAwwwards;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],23:[function(require,module,exports){
+},{"../examples/3dScrollytelling/ScrollMarquee":5,"gsap":"gsap","gsap/dist/ScrollTrigger":1}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

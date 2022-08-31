@@ -3,7 +3,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// import ScrollMarquee from "./ScrollMarquee";
+import ScrollMarquee from "../examples/3dScrollytelling/ScrollMarquee";
 
 export default class PetPakAwwwards {
     constructor() {
@@ -50,8 +50,8 @@ export default class PetPakAwwwards {
         if (this.modelContainer !== null) {
             this.setDimensions();
 
-            // const scrollMarquee = new ScrollMarquee();
-            // scrollMarquee.init();
+            const scrollMarquee = new ScrollMarquee();
+            scrollMarquee.init();
 
             gsap.set(this.title, {
                 autoAlpha: 0,
@@ -98,7 +98,7 @@ export default class PetPakAwwwards {
                                 x: this.firstXPos,
                                 z: 0,
                                 duration: 1,
-                                delay: 2.2,
+                                delay: 0.5,
                                 ease: "power3.out",
                             },
                         );
@@ -113,7 +113,7 @@ export default class PetPakAwwwards {
                                 z: 0.17,
                                 y: -0.3,
                                 duration: 1,
-                                delay: 2.2,
+                                delay: 0.5,
                                 ease: "power3.out",
                             },
                         );
