@@ -138,13 +138,11 @@ export default class PetPakAwwwards {
         );
 
         this.camera?.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
-        // ScrollTrigger.matchMedia({
-        //     "(min-width: 801px)": () => {
-        //     },
-        //     "(max-width: 800px)": () => {
-        //         this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
-        //     },
-        // });
+        ScrollTrigger.matchMedia({
+            "(max-width: 800px)": () => {
+                this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
+            },
+        });
     }
 
     /**
