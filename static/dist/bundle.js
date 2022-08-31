@@ -58489,7 +58489,7 @@ exports.default = void 0;
 
 var _gsap = _interopRequireDefault(require("gsap"));
 
-var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
+var _ScrollTrigger = _interopRequireDefault(require("gsap/dist/ScrollTrigger"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -58581,7 +58581,7 @@ var ScrollMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],6:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58591,7 +58591,7 @@ exports.default = void 0;
 
 var _gsap = _interopRequireDefault(require("gsap"));
 
-var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
+var _ScrollTrigger = _interopRequireDefault(require("gsap/dist/ScrollTrigger"));
 
 var _DRACOLoader = require("three/examples/jsm/loaders/DRACOLoader");
 
@@ -59108,7 +59108,7 @@ var ThreeScrollytelling = /*#__PURE__*/function () {
 
 exports.default = ThreeScrollytelling;
 
-},{"./ScrollMarquee":5,"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","three/examples/jsm/loaders/DRACOLoader":"three/examples/jsm/loaders/DRACOLoader"}],7:[function(require,module,exports){
+},{"./ScrollMarquee":5,"gsap":"gsap","gsap/dist/ScrollTrigger":1,"three/examples/jsm/loaders/DRACOLoader":"three/examples/jsm/loaders/DRACOLoader"}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59814,7 +59814,7 @@ exports.default = void 0;
 
 var _gsap = require("gsap");
 
-var _ScrollTrigger = require("gsap/ScrollTrigger");
+var _ScrollTrigger = require("gsap/dist/ScrollTrigger");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -59894,7 +59894,7 @@ var ContentAnimation = /*#__PURE__*/function () {
 
 exports.default = ContentAnimation;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],18:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59904,7 +59904,7 @@ exports.default = void 0;
 
 var _gsap = require("gsap");
 
-var _ScrollTrigger = require("gsap/ScrollTrigger");
+var _ScrollTrigger = require("gsap/dist/ScrollTrigger");
 
 var _is_js = _interopRequireDefault(require("is_js"));
 
@@ -60169,7 +60169,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
 exports.default = ImageSequence;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger","is_js":"is_js"}],19:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":1,"is_js":"is_js"}],19:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -60981,10 +60981,14 @@ var PetPakAwwwards = /*#__PURE__*/function () {
 
       _ScrollTrigger.ScrollTrigger.matchMedia({
         "(min-width: 801px)": function minWidth801px() {
-          _this3.camera.position.set(2.5 * _this3.config.environment.scale, 0, 32 * _this3.config.environment.scale);
+          var _this3$camera;
+
+          (_this3$camera = _this3.camera) === null || _this3$camera === void 0 ? void 0 : _this3$camera.position.set(2.5 * _this3.config.environment.scale, 0, 32 * _this3.config.environment.scale);
         },
         "(max-width: 800px)": function maxWidth800px() {
-          _this3.camera.position.set(0, 0, 40 * _this3.config.environment.scale);
+          var _this3$camera2;
+
+          (_this3$camera2 = _this3.camera) === null || _this3$camera2 === void 0 ? void 0 : _this3$camera2.position.set(0, 0, 40 * _this3.config.environment.scale);
         }
       });
     }
@@ -61397,7 +61401,7 @@ exports.default = void 0;
 
 var _gsap = _interopRequireDefault(require("gsap"));
 
-var _ScrollTrigger = _interopRequireDefault(require("gsap/ScrollTrigger"));
+var _ScrollTrigger = _interopRequireDefault(require("gsap/dist/ScrollTrigger"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -61496,7 +61500,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/ScrollTrigger":"gsap/ScrollTrigger"}],24:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

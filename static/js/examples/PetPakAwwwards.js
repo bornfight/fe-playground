@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -143,10 +143,10 @@ export default class PetPakAwwwards {
 
         ScrollTrigger.matchMedia({
             "(min-width: 801px)": () => {
-                this.camera.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
+                this.camera?.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
             },
             "(max-width: 800px)": () => {
-                this.camera.position.set(0, 0, 40 * this.config.environment.scale);
+                this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
             },
         });
     }
