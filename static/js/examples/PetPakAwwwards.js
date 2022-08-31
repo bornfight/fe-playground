@@ -27,12 +27,12 @@ export default class PetPakAwwwards {
         this.xOffset = 10;
         this.firstXPos = 5 * this.config.environment.scale;
 
-        // ScrollTrigger.matchMedia({
-        //     "(max-width: 800px)": () => {
-        //         this.xOffset = 0;
-        //         this.firstXPos = 0;
-        //     },
-        // });
+        ScrollTrigger.matchMedia({
+            "(max-width: 800px)": () => {
+                this.xOffset = 0;
+                this.firstXPos = 0;
+            },
+        });
 
         this.models = [];
 

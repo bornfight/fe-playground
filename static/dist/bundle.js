@@ -60959,13 +60959,9 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           });
         }); // handle resize
 
-        _ScrollTrigger.ScrollTrigger.matchMedia({
-          "(min-width: 801px)": function minWidth801px() {
-            window.addEventListener("resize", function () {
-              return _this2.onWindowResize();
-            }, false);
-          }
-        });
+        window.addEventListener("resize", function () {
+          return _this2.onWindowResize();
+        }, false);
       }
     }
     /**
@@ -60975,22 +60971,16 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "initCamera",
     value: function initCamera() {
-      var _this3 = this;
+      var _this$camera;
 
       this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 0.5 * this.config.environment.scale, 130 * this.config.environment.scale);
-
-      _ScrollTrigger.ScrollTrigger.matchMedia({
-        "(min-width: 801px)": function minWidth801px() {
-          var _this3$camera;
-
-          (_this3$camera = _this3.camera) === null || _this3$camera === void 0 ? void 0 : _this3$camera.position.set(2.5 * _this3.config.environment.scale, 0, 32 * _this3.config.environment.scale);
-        },
-        "(max-width: 800px)": function maxWidth800px() {
-          var _this3$camera2;
-
-          (_this3$camera2 = _this3.camera) === null || _this3$camera2 === void 0 ? void 0 : _this3$camera2.position.set(0, 0, 40 * _this3.config.environment.scale);
-        }
-      });
+      (_this$camera = this.camera) === null || _this$camera === void 0 ? void 0 : _this$camera.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale); // ScrollTrigger.matchMedia({
+      //     "(min-width: 801px)": () => {
+      //     },
+      //     "(max-width: 800px)": () => {
+      //         this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
+      //     },
+      // });
     }
     /**
      * scene setup
@@ -61049,7 +61039,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "throughSections",
     value: function throughSections(resolve) {
-      var _this4 = this;
+      var _this3 = this;
 
       this.sections = document.querySelectorAll(this.DOM.section);
 
@@ -61060,7 +61050,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
       this.sections.forEach(function (section, index) {
         var textureUrl = section.dataset.texture;
 
-        _this4.initModel(index, resolve, textureUrl);
+        _this3.initModel(index, resolve, textureUrl);
       });
     }
     /**
@@ -61156,19 +61146,19 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this5 = this;
+      var _this4 = this;
 
       this.renderer.render(this.scene, this.camera);
 
       if (this.models.length > 0) {
         this.models.forEach(function (model) {
-          _this5.update(model.model);
+          _this4.update(model.model);
         });
       }
 
       if (this.renderer != null) {
         requestAnimationFrame(function () {
-          return _this5.animate();
+          return _this4.animate();
         });
       }
     }
@@ -61179,42 +61169,42 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "scrollController",
     value: function scrollController() {
-      var _this6 = this;
+      var _this5 = this;
 
       // sort by index
       this.models.sort(function (a, b) {
         return a.index - b.index;
       });
       this.models.forEach(function (model, index) {
-        var direction = _this6.checkDirection(_this6.sections[model.index].dataset.position);
+        var direction = _this5.checkDirection(_this5.sections[model.index].dataset.position);
 
         var nextDirection = 0;
 
-        if (_this6.sections[index + 1] != null) {
-          nextDirection = _this6.checkDirection(_this6.sections[index + 1].dataset.position);
+        if (_this5.sections[index + 1] != null) {
+          nextDirection = _this5.checkDirection(_this5.sections[index + 1].dataset.position);
         }
 
         model.direction = direction;
 
-        _this6.changeModelPosition(direction, nextDirection, model);
+        _this5.changeModelPosition(direction, nextDirection, model);
 
         _gsap.default.to(model.model.rotation, {
           scrollTrigger: {
-            trigger: _this6.sections[model.index],
+            trigger: _this5.sections[model.index],
             start: "top 50%",
-            end: "bottom ".concat(model.index === _this6.sections.length - 1 ? "top" : "50%"),
+            end: "bottom ".concat(model.index === _this5.sections.length - 1 ? "top" : "50%"),
             scrub: true,
             onEnter: function onEnter() {
-              _this6.modelShow(model.model);
+              _this5.modelShow(model.model);
             },
             onLeave: function onLeave() {
-              _this6.modelHide(model.model, model.index !== _this6.models.length - 1, true);
+              _this5.modelHide(model.model, model.index !== _this5.models.length - 1, true);
             },
             onEnterBack: function onEnterBack() {
-              _this6.modelShow(model.model);
+              _this5.modelShow(model.model);
             },
             onLeaveBack: function onLeaveBack() {
-              _this6.modelHide(model.model, model.index !== 0, true);
+              _this5.modelHide(model.model, model.index !== 0, true);
             }
           },
           ease: "none"
@@ -61268,7 +61258,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
   }, {
     key: "changeModelPosition",
     value: function changeModelPosition(current, next, model) {
-      var _this7 = this;
+      var _this6 = this;
 
       var fromCurrent = current === 1 ? current * 1.5 : current;
       var toNext = next === 1 ? next * 1.5 : next;
@@ -61285,15 +61275,15 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         var tl = _gsap.default.timeline({
           // ease: "power4.inOut",
           scrollTrigger: {
-            trigger: _this7.sections[model.index],
+            trigger: _this6.sections[model.index],
             start: "top top",
             end: "bottom top",
             scrub: true
           }
         }).addLabel("start").add("start").fromTo(modelSingle.model.position, {
-          x: model.index === 0 ? _this7.firstXPos : _this7.xOffset * _this7.config.environment.scale * fromCurrent
+          x: model.index === 0 ? _this6.firstXPos : _this6.xOffset * _this6.config.environment.scale * fromCurrent
         }, {
-          x: _this7.xOffset * _this7.config.environment.scale * toNext,
+          x: _this6.xOffset * _this6.config.environment.scale * toNext,
           ease: "none",
           duration: 2
         }, "start").fromTo(modelSingle.model.position, {
@@ -61315,10 +61305,10 @@ var PetPakAwwwards = /*#__PURE__*/function () {
           y: model.index === 0 ? -0.3 : current * -0.6
         }, {
           z: -0.17 * next,
-          y: model.index === _this7.sections.length - 1 ? -0.6 : next * -0.6,
+          y: model.index === _this6.sections.length - 1 ? -0.6 : next * -0.6,
           ease: "none",
           scrollTrigger: {
-            trigger: _this7.sections[model.index],
+            trigger: _this6.sections[model.index],
             start: "top top",
             end: "bottom top",
             scrub: true
@@ -61326,7 +61316,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
         });
 
         _gsap.default.set(modelSingle.model.position, {
-          x: model.index === 0 ? 0 : _this7.xOffset * _this7.config.environment.scale * _this7.models[0].direction
+          x: model.index === 0 ? 0 : _this6.xOffset * _this6.config.environment.scale * _this6.models[0].direction
         });
       });
     }
