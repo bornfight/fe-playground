@@ -1,6 +1,10 @@
 .e-magnetic-hotspots {
     $white: #ffffff;
     $red: #d8202b;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 100vh;
 
     .u-a1 {
         font-size: 31px;
@@ -23,7 +27,7 @@
         position: relative;
         width: 100%;
         max-width: 1200px;
-        min-height: 100vh;
+        height: auto;
         margin: 0 auto;
         display: flex;
         align-items: center;
@@ -72,6 +76,11 @@
         top: 50%;
         left: 50%;
 
+        @include mq(lg) {
+            width: 13vw;
+            height: 13vw;
+        }
+
         .is-mobile & {
         }
 
@@ -81,6 +90,11 @@
             width: 80px;
             height: 80px;
             position: relative;
+
+            @include mq(lg) {
+                width: 50%;
+                height: 50%;
+            }
         }
 
         &__circle-inner {

@@ -1803,6 +1803,17 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   bottom: 10%;
   left: 10%; }
 
+.e-magnetic-hotspots {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  min-height: 100vh; }
+
 .e-magnetic-hotspots .u-a1 {
   font-size: 31px;
   font-family: "Plain", sans-serif;
@@ -1821,7 +1832,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   position: relative;
   width: 100%;
   max-width: 1200px;
-  min-height: 100vh;
+  height: auto;
   margin: 0 auto;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1877,12 +1888,22 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   top: 50%;
   left: 50%; }
 
+@media (max-width: 1140px) {
+  .e-magnetic-hotspots .c-hotspot {
+    width: 13vw;
+    height: 13vw; } }
+
 .e-magnetic-hotspots .c-hotspot__circle {
   display: inline-block;
   margin: 0 auto;
   width: 80px;
   height: 80px;
   position: relative; }
+
+@media (max-width: 1140px) {
+  .e-magnetic-hotspots .c-hotspot__circle {
+    width: 50%;
+    height: 50%; } }
 
 .e-magnetic-hotspots .c-hotspot__circle-inner {
   position: absolute;
