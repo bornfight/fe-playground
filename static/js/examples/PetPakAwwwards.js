@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,12 +27,12 @@ export default class PetPakAwwwards {
         this.xOffset = 10;
         this.firstXPos = 5 * this.config.environment.scale;
 
-        ScrollTrigger.matchMedia({
-            "(max-width: 800px)": () => {
-                this.xOffset = 0;
-                this.firstXPos = 0;
-            },
-        });
+        // ScrollTrigger.matchMedia({
+        //     "(max-width: 800px)": () => {
+        //         this.xOffset = 0;
+        //         this.firstXPos = 0;
+        //     },
+        // });
 
         this.models = [];
 
@@ -122,11 +122,7 @@ export default class PetPakAwwwards {
             });
 
             // handle resize
-            ScrollTrigger.matchMedia({
-                "(min-width: 801px)": () => {
-                    window.addEventListener("resize", () => this.onWindowResize(), false);
-                },
-            });
+            window.addEventListener("resize", () => this.onWindowResize(), false);
         }
     }
 
@@ -141,14 +137,14 @@ export default class PetPakAwwwards {
             130 * this.config.environment.scale,
         );
 
-        ScrollTrigger.matchMedia({
-            "(min-width: 801px)": () => {
-                this.camera?.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
-            },
-            "(max-width: 800px)": () => {
-                this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
-            },
-        });
+        this.camera?.position.set(2.5 * this.config.environment.scale, 0, 32 * this.config.environment.scale);
+        // ScrollTrigger.matchMedia({
+        //     "(min-width: 801px)": () => {
+        //     },
+        //     "(max-width: 800px)": () => {
+        //         this.camera?.position.set(0, 0, 40 * this.config.environment.scale);
+        //     },
+        // });
     }
 
     /**
