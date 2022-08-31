@@ -22,6 +22,7 @@ import ContentAnimation from "./examples/ImageSequence/ContentAnimation";
 import AnimatedGradient from "./examples/AnimatedGradient/AnimatedGradient";
 import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
 import MagneticHotspots from "./examples/MagneticHotspots/MagneticHotspots";
+import PetPakAwwwards from "./examples/PetPakAwwwards";
 
 /**
  * Check if document is ready cross-browser
@@ -154,4 +155,11 @@ ready(() => {
      * @type {MagneticHotspots}
      */
     const magneticHotspots = new MagneticHotspots();
+
+    /**
+     * PetPakAwwwards component
+     * @type {PetPakAwwwards}
+     */
+    const petPakAwwwards = new PetPakAwwwards();
+    petPakAwwwards.init();
 });
