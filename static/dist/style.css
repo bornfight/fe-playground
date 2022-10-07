@@ -2927,26 +2927,40 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   display: inline-block; }
 
 .c-aime-concept__circle--blur {
-  top: 250px;
   -webkit-backdrop-filter: blur(27px);
           backdrop-filter: blur(27px);
-  left: calc(50% - 13.33333vw);
   background: rgba(217, 217, 217, 0.07);
-  z-index: 2; }
-
-@media (min-width: 1440px) {
-  .c-aime-concept__circle--blur {
-    top: 17.36111vw; } }
+  z-index: 2;
+  right: 0;
+  bottom: 0; }
 
 .c-aime-concept__circle--gradient {
-  top: 250px;
   background: radial-gradient(circle at 85%, #598ad3 2%, #bbc823 90%);
-  left: calc(50% - 13.33333vw);
-  z-index: 0; }
+  z-index: 0;
+  left: 0;
+  top: 0; }
 
-@media (min-width: 1440px) {
-  .c-aime-concept__circle--gradient {
-    top: 17.36111vw; } }
+.c-aime-concept__circle-1-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50vw;
+  height: 50vh;
+  border: 1px solid red;
+  -webkit-transform-origin: bottom right;
+          transform-origin: bottom right;
+  z-index: 2; }
+
+.c-aime-concept__circle-2-wrapper {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 50vw;
+  height: 50vh;
+  border: 1px solid red;
+  -webkit-transform-origin: top left;
+          transform-origin: top left;
+  z-index: 0; }
 
 /**
  * Components

@@ -71,20 +71,42 @@ $gray: #C1C1C1;
         display: inline-block;
 
         &--blur {
-            @include fluidValue("top", null, 250px);
-
             backdrop-filter: blur(27px);
-            left: calc(50% - #{get-vw(192px)});
             background: rgba(217, 217, 217, 0.07);
             z-index: 2;
+
+            right: 0;
+            bottom: 0;
         }
 
         &--gradient {
-            @include fluidValue("top", null, 250px);
 
             background: radial-gradient(circle at 85%, rgba(89, 138, 211, 1) 2%, rgba(187, 200, 35, 1) 90%);
-            left: calc(50% - #{get-vw(192px)});
             z-index: 0;
+            left: 0;
+            top: 0;
         }
+    }
+
+    &__circle-1-wrapper{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50vw;
+        height: 50vh;
+        border: 1px solid red;
+        transform-origin: bottom right;
+        z-index: 2;
+    }
+
+    &__circle-2-wrapper{
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 50vw;
+        height: 50vh;
+        border: 1px solid red;
+        transform-origin: top left;
+        z-index: 0;
     }
 }

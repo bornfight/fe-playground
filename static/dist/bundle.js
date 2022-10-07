@@ -56958,7 +56958,9 @@ var AimeConcept = /*#__PURE__*/function () {
       titleLine1: ".js-aime-concept-title-line-1",
       titleLine2: ".js-aime-concept-title-line-2",
       blurCircle: ".js-aime-concept-circle-blur",
+      blurCircleWrapper: ".js-aime-concept-circle-blur-wrapper",
       gradientCircle: ".js-aime-concept-circle-gradient",
+      gradientCircleWrapper: ".js-aime-concept-circle-gradient-wrapper",
       states: {
         isActive: "is-active"
       }
@@ -56984,13 +56986,18 @@ var AimeConcept = /*#__PURE__*/function () {
       var titleLine1 = this.component.querySelector(this.DOM.titleLine1);
       var titleLine2 = this.component.querySelector(this.DOM.titleLine2);
       var blurCircle = this.component.querySelector(this.DOM.blurCircle);
+      var blurCircleWrapper = this.component.querySelector(this.DOM.blurCircleWrapper);
       var gradientCircle = this.component.querySelector(this.DOM.gradientCircle);
+      var gradientCircleWrapper = this.component.querySelector(this.DOM.gradientCircleWrapper);
 
       var tl = _gsap.gsap.timeline({
-        paused: true
+        delay: 2 // paused: true,
+
       });
 
-      var circleTl = _gsap.gsap.timeline({// paused: true,
+      var circleTl = _gsap.gsap.timeline({
+        // paused: true,
+        delay: 2
       });
 
       tl.to(titleLine2, {
@@ -57011,25 +57018,64 @@ var AimeConcept = /*#__PURE__*/function () {
         text: "AI",
         ease: "power2"
       });
-      circleTl.add("start").fromTo(blurCircle, {
-        rotate: 0,
-        xPercent: -50,
-        yPercent: -25
+      circleTl.add("start").fromTo(blurCircleWrapper, {
+        rotate: 0
       }, {
-        rotate: 365,
-        xPercent: 0,
-        yPercent: 0,
-        duration: 2
-      }).fromTo(gradientCircle, {
+        rotate: 180,
+        duration: 2,
+        ease: "power2.in"
+      }, "start").fromTo(blurCircle, {
         rotate: 0,
-        xPercent: 35,
+        xPercent: 0,
         yPercent: 0
       }, {
-        rotate: 365,
+        rotate: 180,
+        xPercent: 48,
+        yPercent: 48,
+        duration: 2,
+        ease: "power2.in"
+      }, "start").fromTo(gradientCircle, {
+        rotate: 0,
         xPercent: 0,
-        yPercent: 0,
-        duration: 2
-      }, "start");
+        yPercent: 0
+      }, {
+        rotate: 180,
+        xPercent: -48,
+        yPercent: -48,
+        duration: 2,
+        ease: "power2.in"
+      }, "start").to(gradientCircleWrapper, {
+        rotate: 180,
+        duration: 2,
+        ease: "power2.in"
+      }, "start").add("half") // .addPause()
+      .to(blurCircleWrapper, {
+        rotate: 360,
+        duration: 2,
+        ease: "power2.out"
+      }, "half").to(blurCircle, {
+        rotate: 0,
+        xPercent: -20,
+        yPercent: 50,
+        duration: 2,
+        ease: "power2.out"
+      }, "half").to(gradientCircle, {
+        rotate: 0,
+        xPercent: 20,
+        yPercent: -50,
+        duration: 2,
+        ease: "power2.out"
+      }, "half").to(gradientCircleWrapper, {
+        rotate: 360,
+        duration: 2,
+        ease: "power2.out"
+      }, "half").to(blurCircle, {
+        opacity: 0.5,
+        duration: 1,
+        ease: "power2.out"
+      }, "-=1").set(gradientCircleWrapper, {
+        zIndex: 2
+      }, "-=1");
     }
   }]);
 
