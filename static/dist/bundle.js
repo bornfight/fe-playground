@@ -5,1841 +5,7 @@
 	(global = global || self, factory(global.window = global.window || {}));
 }(this, (function (exports) { 'use strict';
 
-	/*!
-	 * ScrollTrigger 3.8.0
-	 * https://greensock.com
-	 *
-	 * @license Copyright 2008-2021, GreenSock. All rights reserved.
-	 * Subject to the terms at https://greensock.com/standard-license or for
-	 * Club GreenSock members, the agreement issued with that membership.
-	 * @author: Jack Doyle, jack@greensock.com
-	*/
-	var gsap,
-	    _coreInitted,
-	    _win,
-	    _doc,
-	    _docEl,
-	    _body,
-	    _root,
-	    _resizeDelay,
-	    _raf,
-	    _request,
-	    _toArray,
-	    _clamp,
-	    _time2,
-	    _syncInterval,
-	    _refreshing,
-	    _pointerIsDown,
-	    _transformProp,
-	    _i,
-	    _prevWidth,
-	    _prevHeight,
-	    _autoRefresh,
-	    _sort,
-	    _suppressOverwrites,
-	    _ignoreResize,
-	    _limitCallbacks,
-	    _startup = 1,
-	    _proxies = [],
-	    _scrollers = [],
-	    _getTime = Date.now,
-	    _time1 = _getTime(),
-	    _lastScrollTime = 0,
-	    _enabled = 1,
-	    _passThrough = function _passThrough(v) {
-	  return v;
-	},
-	    _getTarget = function _getTarget(t) {
-	  return _toArray(t)[0] || (_isString(t) ? console.warn("Element not found:", t) : null);
-	},
-	    _round = function _round(value) {
-	  return Math.round(value * 100000) / 100000 || 0;
-	},
-	    _windowExists = function _windowExists() {
-	  return typeof window !== "undefined";
-	},
-	    _getGSAP = function _getGSAP() {
-	  return gsap || _windowExists() && (gsap = window.gsap) && gsap.registerPlugin && gsap;
-	},
-	    _isViewport = function _isViewport(e) {
-	  return !!~_root.indexOf(e);
-	},
-	    _getProxyProp = function _getProxyProp(element, property) {
-	  return ~_proxies.indexOf(element) && _proxies[_proxies.indexOf(element) + 1][property];
-	},
-	    _getScrollFunc = function _getScrollFunc(element, _ref) {
-	  var s = _ref.s,
-	      sc = _ref.sc;
-
-	  var i = _scrollers.indexOf(element),
-	      offset = sc === _vertical.sc ? 1 : 2;
-
-	  !~i && (i = _scrollers.push(element) - 1);
-	  return _scrollers[i + offset] || (_scrollers[i + offset] = _getProxyProp(element, s) || (_isViewport(element) ? sc : function (value) {
-	    return arguments.length ? element[s] = value : element[s];
-	  }));
-	},
-	    _getBoundsFunc = function _getBoundsFunc(element) {
-	  return _getProxyProp(element, "getBoundingClientRect") || (_isViewport(element) ? function () {
-	    _winOffsets.width = _win.innerWidth;
-	    _winOffsets.height = _win.innerHeight;
-	    return _winOffsets;
-	  } : function () {
-	    return _getBounds(element);
-	  });
-	},
-	    _getSizeFunc = function _getSizeFunc(scroller, isViewport, _ref2) {
-	  var d = _ref2.d,
-	      d2 = _ref2.d2,
-	      a = _ref2.a;
-	  return (a = _getProxyProp(scroller, "getBoundingClientRect")) ? function () {
-	    return a()[d];
-	  } : function () {
-	    return (isViewport ? _win["inner" + d2] : scroller["client" + d2]) || 0;
-	  };
-	},
-	    _getOffsetsFunc = function _getOffsetsFunc(element, isViewport) {
-	  return !isViewport || ~_proxies.indexOf(element) ? _getBoundsFunc(element) : function () {
-	    return _winOffsets;
-	  };
-	},
-	    _maxScroll = function _maxScroll(element, _ref3) {
-	  var s = _ref3.s,
-	      d2 = _ref3.d2,
-	      d = _ref3.d,
-	      a = _ref3.a;
-	  return (s = "scroll" + d2) && (a = _getProxyProp(element, s)) ? a() - _getBoundsFunc(element)()[d] : _isViewport(element) ? (_body[s] || _docEl[s]) - (_win["inner" + d2] || _docEl["client" + d2] || _body["client" + d2]) : element[s] - element["offset" + d2];
-	},
-	    _iterateAutoRefresh = function _iterateAutoRefresh(func, events) {
-	  for (var i = 0; i < _autoRefresh.length; i += 3) {
-	    (!events || ~events.indexOf(_autoRefresh[i + 1])) && func(_autoRefresh[i], _autoRefresh[i + 1], _autoRefresh[i + 2]);
-	  }
-	},
-	    _isString = function _isString(value) {
-	  return typeof value === "string";
-	},
-	    _isFunction = function _isFunction(value) {
-	  return typeof value === "function";
-	},
-	    _isNumber = function _isNumber(value) {
-	  return typeof value === "number";
-	},
-	    _isObject = function _isObject(value) {
-	  return typeof value === "object";
-	},
-	    _callIfFunc = function _callIfFunc(value) {
-	  return _isFunction(value) && value();
-	},
-	    _combineFunc = function _combineFunc(f1, f2) {
-	  return function () {
-	    var result1 = _callIfFunc(f1),
-	        result2 = _callIfFunc(f2);
-
-	    return function () {
-	      _callIfFunc(result1);
-
-	      _callIfFunc(result2);
-	    };
-	  };
-	},
-	    _endAnimation = function _endAnimation(animation, reversed, pause) {
-	  return animation && animation.progress(reversed ? 0 : 1) && pause && animation.pause();
-	},
-	    _callback = function _callback(self, func) {
-	  var result = func(self);
-	  result && result.totalTime && (self.callbackAnimation = result);
-	},
-	    _abs = Math.abs,
-	    _scrollLeft = "scrollLeft",
-	    _scrollTop = "scrollTop",
-	    _left = "left",
-	    _top = "top",
-	    _right = "right",
-	    _bottom = "bottom",
-	    _width = "width",
-	    _height = "height",
-	    _Right = "Right",
-	    _Left = "Left",
-	    _Top = "Top",
-	    _Bottom = "Bottom",
-	    _padding = "padding",
-	    _margin = "margin",
-	    _Width = "Width",
-	    _Height = "Height",
-	    _px = "px",
-	    _horizontal = {
-	  s: _scrollLeft,
-	  p: _left,
-	  p2: _Left,
-	  os: _right,
-	  os2: _Right,
-	  d: _width,
-	  d2: _Width,
-	  a: "x",
-	  sc: function sc(value) {
-	    return arguments.length ? _win.scrollTo(value, _vertical.sc()) : _win.pageXOffset || _doc[_scrollLeft] || _docEl[_scrollLeft] || _body[_scrollLeft] || 0;
-	  }
-	},
-	    _vertical = {
-	  s: _scrollTop,
-	  p: _top,
-	  p2: _Top,
-	  os: _bottom,
-	  os2: _Bottom,
-	  d: _height,
-	  d2: _Height,
-	  a: "y",
-	  op: _horizontal,
-	  sc: function sc(value) {
-	    return arguments.length ? _win.scrollTo(_horizontal.sc(), value) : _win.pageYOffset || _doc[_scrollTop] || _docEl[_scrollTop] || _body[_scrollTop] || 0;
-	  }
-	},
-	    _getComputedStyle = function _getComputedStyle(element) {
-	  return _win.getComputedStyle(element);
-	},
-	    _makePositionable = function _makePositionable(element) {
-	  var position = _getComputedStyle(element).position;
-
-	  element.style.position = position === "absolute" || position === "fixed" ? position : "relative";
-	},
-	    _setDefaults = function _setDefaults(obj, defaults) {
-	  for (var p in defaults) {
-	    p in obj || (obj[p] = defaults[p]);
-	  }
-
-	  return obj;
-	},
-	    _getBounds = function _getBounds(element, withoutTransforms) {
-	  var tween = withoutTransforms && _getComputedStyle(element)[_transformProp] !== "matrix(1, 0, 0, 1, 0, 0)" && gsap.to(element, {
-	    x: 0,
-	    y: 0,
-	    xPercent: 0,
-	    yPercent: 0,
-	    rotation: 0,
-	    rotationX: 0,
-	    rotationY: 0,
-	    scale: 1,
-	    skewX: 0,
-	    skewY: 0
-	  }).progress(1),
-	      bounds = element.getBoundingClientRect();
-	  tween && tween.progress(0).kill();
-	  return bounds;
-	},
-	    _getSize = function _getSize(element, _ref4) {
-	  var d2 = _ref4.d2;
-	  return element["offset" + d2] || element["client" + d2] || 0;
-	},
-	    _getLabelRatioArray = function _getLabelRatioArray(timeline) {
-	  var a = [],
-	      labels = timeline.labels,
-	      duration = timeline.duration(),
-	      p;
-
-	  for (p in labels) {
-	    a.push(labels[p] / duration);
-	  }
-
-	  return a;
-	},
-	    _getClosestLabel = function _getClosestLabel(animation) {
-	  return function (value) {
-	    return gsap.utils.snap(_getLabelRatioArray(animation), value);
-	  };
-	},
-	    _snapDirectional = function _snapDirectional(snapIncrementOrArray) {
-	  var snap = gsap.utils.snap(snapIncrementOrArray),
-	      a = Array.isArray(snapIncrementOrArray) && snapIncrementOrArray.slice(0).sort(function (a, b) {
-	    return a - b;
-	  });
-	  return a ? function (value, direction) {
-	    var i;
-
-	    if (!direction) {
-	      return snap(value);
-	    }
-
-	    if (direction > 0) {
-	      value -= 1e-4;
-
-	      for (i = 0; i < a.length; i++) {
-	        if (a[i] >= value) {
-	          return a[i];
-	        }
-	      }
-
-	      return a[i - 1];
-	    } else {
-	      i = a.length;
-	      value += 1e-4;
-
-	      while (i--) {
-	        if (a[i] <= value) {
-	          return a[i];
-	        }
-	      }
-	    }
-
-	    return a[0];
-	  } : function (value, direction) {
-	    var snapped = snap(value);
-	    return !direction || Math.abs(snapped - value) < 0.001 || snapped - value < 0 === direction < 0 ? snapped : snap(direction < 0 ? value - snapIncrementOrArray : value + snapIncrementOrArray);
-	  };
-	},
-	    _getLabelAtDirection = function _getLabelAtDirection(timeline) {
-	  return function (value, st) {
-	    return _snapDirectional(_getLabelRatioArray(timeline))(value, st.direction);
-	  };
-	},
-	    _multiListener = function _multiListener(func, element, types, callback) {
-	  return types.split(",").forEach(function (type) {
-	    return func(element, type, callback);
-	  });
-	},
-	    _addListener = function _addListener(element, type, func) {
-	  return element.addEventListener(type, func, {
-	    passive: true
-	  });
-	},
-	    _removeListener = function _removeListener(element, type, func) {
-	  return element.removeEventListener(type, func);
-	},
-	    _markerDefaults = {
-	  startColor: "green",
-	  endColor: "red",
-	  indent: 0,
-	  fontSize: "16px",
-	  fontWeight: "normal"
-	},
-	    _defaults = {
-	  toggleActions: "play",
-	  anticipatePin: 0
-	},
-	    _keywords = {
-	  top: 0,
-	  left: 0,
-	  center: 0.5,
-	  bottom: 1,
-	  right: 1
-	},
-	    _offsetToPx = function _offsetToPx(value, size) {
-	  if (_isString(value)) {
-	    var eqIndex = value.indexOf("="),
-	        relative = ~eqIndex ? +(value.charAt(eqIndex - 1) + 1) * parseFloat(value.substr(eqIndex + 1)) : 0;
-
-	    if (~eqIndex) {
-	      value.indexOf("%") > eqIndex && (relative *= size / 100);
-	      value = value.substr(0, eqIndex - 1);
-	    }
-
-	    value = relative + (value in _keywords ? _keywords[value] * size : ~value.indexOf("%") ? parseFloat(value) * size / 100 : parseFloat(value) || 0);
-	  }
-
-	  return value;
-	},
-	    _createMarker = function _createMarker(type, name, container, direction, _ref5, offset, matchWidthEl, containerAnimation) {
-	  var startColor = _ref5.startColor,
-	      endColor = _ref5.endColor,
-	      fontSize = _ref5.fontSize,
-	      indent = _ref5.indent,
-	      fontWeight = _ref5.fontWeight;
-
-	  var e = _doc.createElement("div"),
-	      useFixedPosition = _isViewport(container) || _getProxyProp(container, "pinType") === "fixed",
-	      isScroller = type.indexOf("scroller") !== -1,
-	      parent = useFixedPosition ? _body : container,
-	      isStart = type.indexOf("start") !== -1,
-	      color = isStart ? startColor : endColor,
-	      css = "border-color:" + color + ";font-size:" + fontSize + ";color:" + color + ";font-weight:" + fontWeight + ";pointer-events:none;white-space:nowrap;font-family:sans-serif,Arial;z-index:1000;padding:4px 8px;border-width:0;border-style:solid;";
-
-	  css += "position:" + ((isScroller || containerAnimation) && useFixedPosition ? "fixed;" : "absolute;");
-	  (isScroller || containerAnimation || !useFixedPosition) && (css += (direction === _vertical ? _right : _bottom) + ":" + (offset + parseFloat(indent)) + "px;");
-	  matchWidthEl && (css += "box-sizing:border-box;text-align:left;width:" + matchWidthEl.offsetWidth + "px;");
-	  e._isStart = isStart;
-	  e.setAttribute("class", "gsap-marker-" + type + (name ? " marker-" + name : ""));
-	  e.style.cssText = css;
-	  e.innerText = name || name === 0 ? type + "-" + name : type;
-	  parent.children[0] ? parent.insertBefore(e, parent.children[0]) : parent.appendChild(e);
-	  e._offset = e["offset" + direction.op.d2];
-
-	  _positionMarker(e, 0, direction, isStart);
-
-	  return e;
-	},
-	    _positionMarker = function _positionMarker(marker, start, direction, flipped) {
-	  var vars = {
-	    display: "block"
-	  },
-	      side = direction[flipped ? "os2" : "p2"],
-	      oppositeSide = direction[flipped ? "p2" : "os2"];
-	  marker._isFlipped = flipped;
-	  vars[direction.a + "Percent"] = flipped ? -100 : 0;
-	  vars[direction.a] = flipped ? "1px" : 0;
-	  vars["border" + side + _Width] = 1;
-	  vars["border" + oppositeSide + _Width] = 0;
-	  vars[direction.p] = start + "px";
-	  gsap.set(marker, vars);
-	},
-	    _triggers = [],
-	    _ids = {},
-	    _sync = function _sync() {
-	  return _getTime() - _lastScrollTime > 20 && _updateAll();
-	},
-	    _onScroll = function _onScroll() {
-	  var time = _getTime();
-
-	  if (_lastScrollTime !== time) {
-	    _updateAll();
-
-	    _lastScrollTime || _dispatch("scrollStart");
-	    _lastScrollTime = time;
-	  } else if (!_request) {
-	    _request = _raf(_updateAll);
-	  }
-	},
-	    _onResize = function _onResize() {
-	  return !_refreshing && !_ignoreResize && !_doc.fullscreenElement && _resizeDelay.restart(true);
-	},
-	    _listeners = {},
-	    _emptyArray = [],
-	    _media = [],
-	    _creatingMedia,
-	    _lastMediaTick,
-	    _onMediaChange = function _onMediaChange(e) {
-	  var tick = gsap.ticker.frame,
-	      matches = [],
-	      i = 0,
-	      index;
-
-	  if (_lastMediaTick !== tick || _startup) {
-	    _revertAll();
-
-	    for (; i < _media.length; i += 4) {
-	      index = _win.matchMedia(_media[i]).matches;
-
-	      if (index !== _media[i + 3]) {
-	        _media[i + 3] = index;
-	        index ? matches.push(i) : _revertAll(1, _media[i]) || _isFunction(_media[i + 2]) && _media[i + 2]();
-	      }
-	    }
-
-	    _revertRecorded();
-
-	    for (i = 0; i < matches.length; i++) {
-	      index = matches[i];
-	      _creatingMedia = _media[index];
-	      _media[index + 2] = _media[index + 1](e);
-	    }
-
-	    _creatingMedia = 0;
-	    _coreInitted && _refreshAll(0, 1);
-	    _lastMediaTick = tick;
-
-	    _dispatch("matchMedia");
-	  }
-	},
-	    _softRefresh = function _softRefresh() {
-	  return _removeListener(ScrollTrigger, "scrollEnd", _softRefresh) || _refreshAll(true);
-	},
-	    _dispatch = function _dispatch(type) {
-	  return _listeners[type] && _listeners[type].map(function (f) {
-	    return f();
-	  }) || _emptyArray;
-	},
-	    _savedStyles = [],
-	    _revertRecorded = function _revertRecorded(media) {
-	  for (var i = 0; i < _savedStyles.length; i += 5) {
-	    if (!media || _savedStyles[i + 4] === media) {
-	      _savedStyles[i].style.cssText = _savedStyles[i + 1];
-	      _savedStyles[i].getBBox && _savedStyles[i].setAttribute("transform", _savedStyles[i + 2] || "");
-	      _savedStyles[i + 3].uncache = 1;
-	    }
-	  }
-	},
-	    _revertAll = function _revertAll(kill, media) {
-	  var trigger;
-
-	  for (_i = 0; _i < _triggers.length; _i++) {
-	    trigger = _triggers[_i];
-
-	    if (!media || trigger.media === media) {
-	      if (kill) {
-	        trigger.kill(1);
-	      } else {
-	        trigger.revert();
-	      }
-	    }
-	  }
-
-	  media && _revertRecorded(media);
-	  media || _dispatch("revert");
-	},
-	    _clearScrollMemory = function _clearScrollMemory() {
-	  return _scrollers.forEach(function (obj) {
-	    return typeof obj === "function" && (obj.rec = 0);
-	  });
-	},
-	    _refreshingAll,
-	    _refreshAll = function _refreshAll(force, skipRevert) {
-	  if (_lastScrollTime && !force) {
-	    _addListener(ScrollTrigger, "scrollEnd", _softRefresh);
-
-	    return;
-	  }
-
-	  _refreshingAll = true;
-
-	  var refreshInits = _dispatch("refreshInit");
-
-	  _sort && ScrollTrigger.sort();
-	  skipRevert || _revertAll();
-
-	  _triggers.forEach(function (t) {
-	    return t.refresh();
-	  });
-
-	  refreshInits.forEach(function (result) {
-	    return result && result.render && result.render(-1);
-	  });
-
-	  _clearScrollMemory();
-
-	  _resizeDelay.pause();
-
-	  _refreshingAll = false;
-
-	  _dispatch("refresh");
-	},
-	    _lastScroll = 0,
-	    _direction = 1,
-	    _updateAll = function _updateAll() {
-	  if (!_refreshingAll) {
-	    var l = _triggers.length,
-	        time = _getTime(),
-	        recordVelocity = time - _time1 >= 50,
-	        scroll = l && _triggers[0].scroll();
-
-	    _direction = _lastScroll > scroll ? -1 : 1;
-	    _lastScroll = scroll;
-
-	    if (recordVelocity) {
-	      if (_lastScrollTime && !_pointerIsDown && time - _lastScrollTime > 200) {
-	        _lastScrollTime = 0;
-
-	        _dispatch("scrollEnd");
-	      }
-
-	      _time2 = _time1;
-	      _time1 = time;
-	    }
-
-	    if (_direction < 0) {
-	      _i = l;
-
-	      while (_i-- > 0) {
-	        _triggers[_i] && _triggers[_i].update(0, recordVelocity);
-	      }
-
-	      _direction = 1;
-	    } else {
-	      for (_i = 0; _i < l; _i++) {
-	        _triggers[_i] && _triggers[_i].update(0, recordVelocity);
-	      }
-	    }
-
-	    _request = 0;
-	  }
-	},
-	    _propNamesToCopy = [_left, _top, _bottom, _right, _margin + _Bottom, _margin + _Right, _margin + _Top, _margin + _Left, "display", "flexShrink", "float", "zIndex", "grid-column-start", "grid-column-end", "grid-row-start", "grid-row-end", "grid-area", "justify-self", "align-self", "place-self"],
-	    _stateProps = _propNamesToCopy.concat([_width, _height, "boxSizing", "max" + _Width, "max" + _Height, "position", _margin, _padding, _padding + _Top, _padding + _Right, _padding + _Bottom, _padding + _Left]),
-	    _swapPinOut = function _swapPinOut(pin, spacer, state) {
-	  _setState(state);
-
-	  var cache = pin._gsap;
-
-	  if (cache.spacerIsNative) {
-	    _setState(cache.spacerState);
-	  } else if (pin.parentNode === spacer) {
-	    var parent = spacer.parentNode;
-
-	    if (parent) {
-	      parent.insertBefore(pin, spacer);
-	      parent.removeChild(spacer);
-	    }
-	  }
-	},
-	    _swapPinIn = function _swapPinIn(pin, spacer, cs, spacerState) {
-	  if (pin.parentNode !== spacer) {
-	    var i = _propNamesToCopy.length,
-	        spacerStyle = spacer.style,
-	        pinStyle = pin.style,
-	        p;
-
-	    while (i--) {
-	      p = _propNamesToCopy[i];
-	      spacerStyle[p] = cs[p];
-	    }
-
-	    spacerStyle.position = cs.position === "absolute" ? "absolute" : "relative";
-	    cs.display === "inline" && (spacerStyle.display = "inline-block");
-	    pinStyle[_bottom] = pinStyle[_right] = "auto";
-	    spacerStyle.overflow = "visible";
-	    spacerStyle.boxSizing = "border-box";
-	    spacerStyle[_width] = _getSize(pin, _horizontal) + _px;
-	    spacerStyle[_height] = _getSize(pin, _vertical) + _px;
-	    spacerStyle[_padding] = pinStyle[_margin] = pinStyle[_top] = pinStyle[_left] = "0";
-
-	    _setState(spacerState);
-
-	    pinStyle[_width] = pinStyle["max" + _Width] = cs[_width];
-	    pinStyle[_height] = pinStyle["max" + _Height] = cs[_height];
-	    pinStyle[_padding] = cs[_padding];
-	    pin.parentNode.insertBefore(spacer, pin);
-	    spacer.appendChild(pin);
-	  }
-	},
-	    _capsExp = /([A-Z])/g,
-	    _setState = function _setState(state) {
-	  if (state) {
-	    var style = state.t.style,
-	        l = state.length,
-	        i = 0,
-	        p,
-	        value;
-	    (state.t._gsap || gsap.core.getCache(state.t)).uncache = 1;
-
-	    for (; i < l; i += 2) {
-	      value = state[i + 1];
-	      p = state[i];
-
-	      if (value) {
-	        style[p] = value;
-	      } else if (style[p]) {
-	        style.removeProperty(p.replace(_capsExp, "-$1").toLowerCase());
-	      }
-	    }
-	  }
-	},
-	    _getState = function _getState(element) {
-	  var l = _stateProps.length,
-	      style = element.style,
-	      state = [],
-	      i = 0;
-
-	  for (; i < l; i++) {
-	    state.push(_stateProps[i], style[_stateProps[i]]);
-	  }
-
-	  state.t = element;
-	  return state;
-	},
-	    _copyState = function _copyState(state, override, omitOffsets) {
-	  var result = [],
-	      l = state.length,
-	      i = omitOffsets ? 8 : 0,
-	      p;
-
-	  for (; i < l; i += 2) {
-	    p = state[i];
-	    result.push(p, p in override ? override[p] : state[i + 1]);
-	  }
-
-	  result.t = state.t;
-	  return result;
-	},
-	    _winOffsets = {
-	  left: 0,
-	  top: 0
-	},
-	    _parsePosition = function _parsePosition(value, trigger, scrollerSize, direction, scroll, marker, markerScroller, self, scrollerBounds, borderWidth, useFixedPosition, scrollerMax, containerAnimation) {
-	  _isFunction(value) && (value = value(self));
-
-	  if (_isString(value) && value.substr(0, 3) === "max") {
-	    value = scrollerMax + (value.charAt(4) === "=" ? _offsetToPx("0" + value.substr(3), scrollerSize) : 0);
-	  }
-
-	  var time = containerAnimation ? containerAnimation.time() : 0,
-	      p1,
-	      p2,
-	      element;
-	  containerAnimation && containerAnimation.seek(0);
-
-	  if (!_isNumber(value)) {
-	    _isFunction(trigger) && (trigger = trigger(self));
-	    var offsets = value.split(" "),
-	        bounds,
-	        localOffset,
-	        globalOffset,
-	        display;
-	    element = _getTarget(trigger) || _body;
-	    bounds = _getBounds(element) || {};
-
-	    if ((!bounds || !bounds.left && !bounds.top) && _getComputedStyle(element).display === "none") {
-	      display = element.style.display;
-	      element.style.display = "block";
-	      bounds = _getBounds(element);
-	      display ? element.style.display = display : element.style.removeProperty("display");
-	    }
-
-	    localOffset = _offsetToPx(offsets[0], bounds[direction.d]);
-	    globalOffset = _offsetToPx(offsets[1] || "0", scrollerSize);
-	    value = bounds[direction.p] - scrollerBounds[direction.p] - borderWidth + localOffset + scroll - globalOffset;
-	    markerScroller && _positionMarker(markerScroller, globalOffset, direction, scrollerSize - globalOffset < 20 || markerScroller._isStart && globalOffset > 20);
-	    scrollerSize -= scrollerSize - globalOffset;
-	  } else if (markerScroller) {
-	    _positionMarker(markerScroller, scrollerSize, direction, true);
-	  }
-
-	  if (marker) {
-	    var position = value + scrollerSize,
-	        isStart = marker._isStart;
-	    p1 = "scroll" + direction.d2;
-
-	    _positionMarker(marker, position, direction, isStart && position > 20 || !isStart && (useFixedPosition ? Math.max(_body[p1], _docEl[p1]) : marker.parentNode[p1]) <= position + 1);
-
-	    if (useFixedPosition) {
-	      scrollerBounds = _getBounds(markerScroller);
-	      useFixedPosition && (marker.style[direction.op.p] = scrollerBounds[direction.op.p] - direction.op.m - marker._offset + _px);
-	    }
-	  }
-
-	  if (containerAnimation && element) {
-	    p1 = _getBounds(element);
-	    containerAnimation.seek(scrollerMax);
-	    p2 = _getBounds(element);
-	    containerAnimation._caScrollDist = p1[direction.p] - p2[direction.p];
-	    value = value / containerAnimation._caScrollDist * scrollerMax;
-	  }
-
-	  containerAnimation && containerAnimation.seek(time);
-	  return containerAnimation ? value : Math.round(value);
-	},
-	    _prefixExp = /(?:webkit|moz|length|cssText|inset)/i,
-	    _reparent = function _reparent(element, parent, top, left) {
-	  if (element.parentNode !== parent) {
-	    var style = element.style,
-	        p,
-	        cs;
-
-	    if (parent === _body) {
-	      element._stOrig = style.cssText;
-	      cs = _getComputedStyle(element);
-
-	      for (p in cs) {
-	        if (!+p && !_prefixExp.test(p) && cs[p] && typeof style[p] === "string" && p !== "0") {
-	          style[p] = cs[p];
-	        }
-	      }
-
-	      style.top = top;
-	      style.left = left;
-	    } else {
-	      style.cssText = element._stOrig;
-	    }
-
-	    gsap.core.getCache(element).uncache = 1;
-	    parent.appendChild(element);
-	  }
-	},
-	    _getTweenCreator = function _getTweenCreator(scroller, direction) {
-	  var getScroll = _getScrollFunc(scroller, direction),
-	      prop = "_scroll" + direction.p2,
-	      lastScroll1,
-	      lastScroll2,
-	      getTween = function getTween(scrollTo, vars, initialValue, change1, change2) {
-	    var tween = getTween.tween,
-	        onComplete = vars.onComplete,
-	        modifiers = {};
-	    tween && tween.kill();
-	    lastScroll1 = Math.round(initialValue);
-	    vars[prop] = scrollTo;
-	    vars.modifiers = modifiers;
-
-	    modifiers[prop] = function (value) {
-	      value = _round(getScroll());
-
-	      if (value !== lastScroll1 && value !== lastScroll2 && Math.abs(value - lastScroll1) > 2) {
-	        tween.kill();
-	        getTween.tween = 0;
-	      } else {
-	        value = initialValue + change1 * tween.ratio + change2 * tween.ratio * tween.ratio;
-	      }
-
-	      lastScroll2 = lastScroll1;
-	      return lastScroll1 = _round(value);
-	    };
-
-	    vars.onComplete = function () {
-	      getTween.tween = 0;
-	      onComplete && onComplete.call(tween);
-	    };
-
-	    tween = getTween.tween = gsap.to(scroller, vars);
-	    return tween;
-	  };
-
-	  scroller[prop] = getScroll;
-	  scroller.addEventListener("wheel", function () {
-	    return getTween.tween && getTween.tween.kill() && (getTween.tween = 0);
-	  }, {
-	    passive: true
-	  });
-	  return getTween;
-	};
-
-	_horizontal.op = _vertical;
-	var ScrollTrigger = function () {
-	  function ScrollTrigger(vars, animation) {
-	    _coreInitted || ScrollTrigger.register(gsap) || console.warn("Please gsap.registerPlugin(ScrollTrigger)");
-	    this.init(vars, animation);
-	  }
-
-	  var _proto = ScrollTrigger.prototype;
-
-	  _proto.init = function init(vars, animation) {
-	    this.progress = this.start = 0;
-	    this.vars && this.kill(1);
-
-	    if (!_enabled) {
-	      this.update = this.refresh = this.kill = _passThrough;
-	      return;
-	    }
-
-	    vars = _setDefaults(_isString(vars) || _isNumber(vars) || vars.nodeType ? {
-	      trigger: vars
-	    } : vars, _defaults);
-
-	    var _vars = vars,
-	        onUpdate = _vars.onUpdate,
-	        toggleClass = _vars.toggleClass,
-	        id = _vars.id,
-	        onToggle = _vars.onToggle,
-	        onRefresh = _vars.onRefresh,
-	        scrub = _vars.scrub,
-	        trigger = _vars.trigger,
-	        pin = _vars.pin,
-	        pinSpacing = _vars.pinSpacing,
-	        invalidateOnRefresh = _vars.invalidateOnRefresh,
-	        anticipatePin = _vars.anticipatePin,
-	        onScrubComplete = _vars.onScrubComplete,
-	        onSnapComplete = _vars.onSnapComplete,
-	        once = _vars.once,
-	        snap = _vars.snap,
-	        pinReparent = _vars.pinReparent,
-	        pinSpacer = _vars.pinSpacer,
-	        containerAnimation = _vars.containerAnimation,
-	        fastScrollEnd = _vars.fastScrollEnd,
-	        preventOverlaps = _vars.preventOverlaps,
-	        direction = vars.horizontal || vars.containerAnimation && vars.horizontal !== false ? _horizontal : _vertical,
-	        isToggle = !scrub && scrub !== 0,
-	        scroller = _getTarget(vars.scroller || _win),
-	        scrollerCache = gsap.core.getCache(scroller),
-	        isViewport = _isViewport(scroller),
-	        useFixedPosition = ("pinType" in vars ? vars.pinType : _getProxyProp(scroller, "pinType") || isViewport && "fixed") === "fixed",
-	        callbacks = [vars.onEnter, vars.onLeave, vars.onEnterBack, vars.onLeaveBack],
-	        toggleActions = isToggle && vars.toggleActions.split(" "),
-	        markers = "markers" in vars ? vars.markers : _defaults.markers,
-	        borderWidth = isViewport ? 0 : parseFloat(_getComputedStyle(scroller)["border" + direction.p2 + _Width]) || 0,
-	        self = this,
-	        onRefreshInit = vars.onRefreshInit && function () {
-	      return vars.onRefreshInit(self);
-	    },
-	        getScrollerSize = _getSizeFunc(scroller, isViewport, direction),
-	        getScrollerOffsets = _getOffsetsFunc(scroller, isViewport),
-	        lastSnap = 0,
-	        scrollFunc = _getScrollFunc(scroller, direction),
-	        tweenTo,
-	        pinCache,
-	        snapFunc,
-	        scroll1,
-	        scroll2,
-	        start,
-	        end,
-	        markerStart,
-	        markerEnd,
-	        markerStartTrigger,
-	        markerEndTrigger,
-	        markerVars,
-	        change,
-	        pinOriginalState,
-	        pinActiveState,
-	        pinState,
-	        spacer,
-	        offset,
-	        pinGetter,
-	        pinSetter,
-	        pinStart,
-	        pinChange,
-	        spacingStart,
-	        spacerState,
-	        markerStartSetter,
-	        markerEndSetter,
-	        cs,
-	        snap1,
-	        snap2,
-	        scrubTween,
-	        scrubSmooth,
-	        snapDurClamp,
-	        snapDelayedCall,
-	        prevProgress,
-	        prevScroll,
-	        prevAnimProgress,
-	        caMarkerSetter;
-
-	    self.media = _creatingMedia;
-	    anticipatePin *= 45;
-	    self.scroller = scroller;
-	    self.scroll = containerAnimation ? containerAnimation.time.bind(containerAnimation) : scrollFunc;
-	    scroll1 = scrollFunc();
-	    self.vars = vars;
-	    animation = animation || vars.animation;
-	    "refreshPriority" in vars && (_sort = 1);
-	    scrollerCache.tweenScroll = scrollerCache.tweenScroll || {
-	      top: _getTweenCreator(scroller, _vertical),
-	      left: _getTweenCreator(scroller, _horizontal)
-	    };
-	    self.tweenTo = tweenTo = scrollerCache.tweenScroll[direction.p];
-
-	    if (animation) {
-	      animation.vars.lazy = false;
-	      animation._initted || animation.vars.immediateRender !== false && vars.immediateRender !== false && animation.render(0, true, true);
-	      self.animation = animation.pause();
-	      animation.scrollTrigger = self;
-	      scrubSmooth = _isNumber(scrub) && scrub;
-	      scrubSmooth && (scrubTween = gsap.to(animation, {
-	        ease: "power3",
-	        duration: scrubSmooth,
-	        onComplete: function onComplete() {
-	          return onScrubComplete && onScrubComplete(self);
-	        }
-	      }));
-	      snap1 = 0;
-	      id || (id = animation.vars.id);
-	    }
-
-	    _triggers.push(self);
-
-	    if (snap) {
-	      if (!_isObject(snap) || snap.push) {
-	        snap = {
-	          snapTo: snap
-	        };
-	      }
-
-	      "scrollBehavior" in _body.style && gsap.set(isViewport ? [_body, _docEl] : scroller, {
-	        scrollBehavior: "auto"
-	      });
-	      snapFunc = _isFunction(snap.snapTo) ? snap.snapTo : snap.snapTo === "labels" ? _getClosestLabel(animation) : snap.snapTo === "labelsDirectional" ? _getLabelAtDirection(animation) : snap.directional !== false ? function (value, st) {
-	        return _snapDirectional(snap.snapTo)(value, st.direction);
-	      } : gsap.utils.snap(snap.snapTo);
-	      snapDurClamp = snap.duration || {
-	        min: 0.1,
-	        max: 2
-	      };
-	      snapDurClamp = _isObject(snapDurClamp) ? _clamp(snapDurClamp.min, snapDurClamp.max) : _clamp(snapDurClamp, snapDurClamp);
-	      snapDelayedCall = gsap.delayedCall(snap.delay || scrubSmooth / 2 || 0.1, function () {
-	        if (Math.abs(self.getVelocity()) < 10 && !_pointerIsDown && lastSnap !== scrollFunc()) {
-	          var totalProgress = animation && !isToggle ? animation.totalProgress() : self.progress,
-	              velocity = (totalProgress - snap2) / (_getTime() - _time2) * 1000 || 0,
-	              change1 = gsap.utils.clamp(-self.progress, 1 - self.progress, _abs(velocity / 2) * velocity / 0.185),
-	              naturalEnd = self.progress + (snap.inertia === false ? 0 : change1),
-	              endValue = _clamp(0, 1, snapFunc(naturalEnd, self)),
-	              scroll = scrollFunc(),
-	              endScroll = Math.round(start + endValue * change),
-	              _snap = snap,
-	              onStart = _snap.onStart,
-	              _onInterrupt = _snap.onInterrupt,
-	              _onComplete = _snap.onComplete,
-	              tween = tweenTo.tween;
-
-	          if (scroll <= end && scroll >= start && endScroll !== scroll) {
-	            if (tween && !tween._initted && tween.data <= _abs(endScroll - scroll)) {
-	              return;
-	            }
-
-	            if (snap.inertia === false) {
-	              change1 = endValue - self.progress;
-	            }
-
-	            tweenTo(endScroll, {
-	              duration: snapDurClamp(_abs(Math.max(_abs(naturalEnd - totalProgress), _abs(endValue - totalProgress)) * 0.185 / velocity / 0.05 || 0)),
-	              ease: snap.ease || "power3",
-	              data: _abs(endScroll - scroll),
-	              onInterrupt: function onInterrupt() {
-	                return snapDelayedCall.restart(true) && _onInterrupt && _onInterrupt(self);
-	              },
-	              onComplete: function onComplete() {
-	                lastSnap = scrollFunc();
-	                snap1 = snap2 = animation && !isToggle ? animation.totalProgress() : self.progress;
-	                onSnapComplete && onSnapComplete(self);
-	                _onComplete && _onComplete(self);
-	              }
-	            }, scroll, change1 * change, endScroll - scroll - change1 * change);
-	            onStart && onStart(self, tweenTo.tween);
-	          }
-	        } else if (self.isActive) {
-	          snapDelayedCall.restart(true);
-	        }
-	      }).pause();
-	    }
-
-	    id && (_ids[id] = self);
-	    trigger = self.trigger = _getTarget(trigger || pin);
-	    pin = pin === true ? trigger : _getTarget(pin);
-	    _isString(toggleClass) && (toggleClass = {
-	      targets: trigger,
-	      className: toggleClass
-	    });
-
-	    if (pin) {
-	      pinSpacing === false || pinSpacing === _margin || (pinSpacing = !pinSpacing && _getComputedStyle(pin.parentNode).display === "flex" ? false : _padding);
-	      self.pin = pin;
-	      vars.force3D !== false && gsap.set(pin, {
-	        force3D: true
-	      });
-	      pinCache = gsap.core.getCache(pin);
-
-	      if (!pinCache.spacer) {
-	        if (pinSpacer) {
-	          pinSpacer = _getTarget(pinSpacer);
-	          pinSpacer && !pinSpacer.nodeType && (pinSpacer = pinSpacer.current || pinSpacer.nativeElement);
-	          pinCache.spacerIsNative = !!pinSpacer;
-	          pinSpacer && (pinCache.spacerState = _getState(pinSpacer));
-	        }
-
-	        pinCache.spacer = spacer = pinSpacer || _doc.createElement("div");
-	        spacer.classList.add("pin-spacer");
-	        id && spacer.classList.add("pin-spacer-" + id);
-	        pinCache.pinState = pinOriginalState = _getState(pin);
-	      } else {
-	        pinOriginalState = pinCache.pinState;
-	      }
-
-	      self.spacer = spacer = pinCache.spacer;
-	      cs = _getComputedStyle(pin);
-	      spacingStart = cs[pinSpacing + direction.os2];
-	      pinGetter = gsap.getProperty(pin);
-	      pinSetter = gsap.quickSetter(pin, direction.a, _px);
-
-	      _swapPinIn(pin, spacer, cs);
-
-	      pinState = _getState(pin);
-	    }
-
-	    if (markers) {
-	      markerVars = _isObject(markers) ? _setDefaults(markers, _markerDefaults) : _markerDefaults;
-	      markerStartTrigger = _createMarker("scroller-start", id, scroller, direction, markerVars, 0);
-	      markerEndTrigger = _createMarker("scroller-end", id, scroller, direction, markerVars, 0, markerStartTrigger);
-	      offset = markerStartTrigger["offset" + direction.op.d2];
-	      markerStart = _createMarker("start", id, scroller, direction, markerVars, offset, 0, containerAnimation);
-	      markerEnd = _createMarker("end", id, scroller, direction, markerVars, offset, 0, containerAnimation);
-	      containerAnimation && (caMarkerSetter = gsap.quickSetter([markerStart, markerEnd], direction.a, _px));
-
-	      if (!useFixedPosition && !(_proxies.length && _getProxyProp(scroller, "fixedMarkers") === true)) {
-	        _makePositionable(isViewport ? _body : scroller);
-
-	        gsap.set([markerStartTrigger, markerEndTrigger], {
-	          force3D: true
-	        });
-	        markerStartSetter = gsap.quickSetter(markerStartTrigger, direction.a, _px);
-	        markerEndSetter = gsap.quickSetter(markerEndTrigger, direction.a, _px);
-	      }
-	    }
-
-	    if (containerAnimation) {
-	      var oldOnUpdate = containerAnimation.vars.onUpdate,
-	          oldParams = containerAnimation.vars.onUpdateParams;
-	      containerAnimation.eventCallback("onUpdate", function () {
-	        self.update(0, 0, 1);
-	        oldOnUpdate && oldOnUpdate.apply(oldParams || []);
-	      });
-	    }
-
-	    self.previous = function () {
-	      return _triggers[_triggers.indexOf(self) - 1];
-	    };
-
-	    self.next = function () {
-	      return _triggers[_triggers.indexOf(self) + 1];
-	    };
-
-	    self.revert = function (revert) {
-	      var r = revert !== false || !self.enabled,
-	          prevRefreshing = _refreshing;
-
-	      if (r !== self.isReverted) {
-	        if (r) {
-	          self.scroll.rec || (self.scroll.rec = scrollFunc());
-	          prevScroll = Math.max(scrollFunc(), self.scroll.rec || 0);
-	          prevProgress = self.progress;
-	          prevAnimProgress = animation && animation.progress();
-	        }
-
-	        markerStart && [markerStart, markerEnd, markerStartTrigger, markerEndTrigger].forEach(function (m) {
-	          return m.style.display = r ? "none" : "block";
-	        });
-	        r && (_refreshing = 1);
-	        self.update(r);
-	        _refreshing = prevRefreshing;
-	        pin && (r ? _swapPinOut(pin, spacer, pinOriginalState) : (!pinReparent || !self.isActive) && _swapPinIn(pin, spacer, _getComputedStyle(pin), spacerState));
-	        self.isReverted = r;
-	      }
-	    };
-
-	    self.refresh = function (soft, force) {
-	      if ((_refreshing || !self.enabled) && !force) {
-	        return;
-	      }
-
-	      if (pin && soft && _lastScrollTime) {
-	        _addListener(ScrollTrigger, "scrollEnd", _softRefresh);
-
-	        return;
-	      }
-
-	      _refreshing = 1;
-	      scrubTween && scrubTween.pause();
-	      invalidateOnRefresh && animation && animation.progress(0).invalidate();
-	      self.isReverted || self.revert();
-
-	      var size = getScrollerSize(),
-	          scrollerBounds = getScrollerOffsets(),
-	          max = containerAnimation ? containerAnimation.duration() : _maxScroll(scroller, direction),
-	          offset = 0,
-	          otherPinOffset = 0,
-	          parsedEnd = vars.end,
-	          parsedEndTrigger = vars.endTrigger || trigger,
-	          parsedStart = vars.start || (vars.start === 0 || !trigger ? 0 : pin ? "0 0" : "0 100%"),
-	          pinnedContainer = vars.pinnedContainer && _getTarget(vars.pinnedContainer),
-	          triggerIndex = trigger && Math.max(0, _triggers.indexOf(self)) || 0,
-	          i = triggerIndex,
-	          cs,
-	          bounds,
-	          scroll,
-	          isVertical,
-	          override,
-	          curTrigger,
-	          curPin,
-	          oppositeScroll,
-	          initted,
-	          revertedPins;
-
-	      while (i--) {
-	        curTrigger = _triggers[i];
-	        curTrigger.end || curTrigger.refresh(0, 1) || (_refreshing = 1);
-	        curPin = curTrigger.pin;
-
-	        if (curPin && (curPin === trigger || curPin === pin) && !curTrigger.isReverted) {
-	          revertedPins || (revertedPins = []);
-	          revertedPins.unshift(curTrigger);
-	          curTrigger.revert();
-	        }
-	      }
-
-	      _isFunction(parsedStart) && (parsedStart = parsedStart(self));
-	      start = _parsePosition(parsedStart, trigger, size, direction, scrollFunc(), markerStart, markerStartTrigger, self, scrollerBounds, borderWidth, useFixedPosition, max, containerAnimation) || (pin ? -0.001 : 0);
-	      _isFunction(parsedEnd) && (parsedEnd = parsedEnd(self));
-
-	      if (_isString(parsedEnd) && !parsedEnd.indexOf("+=")) {
-	        if (~parsedEnd.indexOf(" ")) {
-	          parsedEnd = (_isString(parsedStart) ? parsedStart.split(" ")[0] : "") + parsedEnd;
-	        } else {
-	          offset = _offsetToPx(parsedEnd.substr(2), size);
-	          parsedEnd = _isString(parsedStart) ? parsedStart : start + offset;
-	          parsedEndTrigger = trigger;
-	        }
-	      }
-
-	      end = Math.max(start, _parsePosition(parsedEnd || (parsedEndTrigger ? "100% 0" : max), parsedEndTrigger, size, direction, scrollFunc() + offset, markerEnd, markerEndTrigger, self, scrollerBounds, borderWidth, useFixedPosition, max, containerAnimation)) || -0.001;
-	      change = end - start || (start -= 0.01) && 0.001;
-	      offset = 0;
-	      i = triggerIndex;
-
-	      while (i--) {
-	        curTrigger = _triggers[i];
-	        curPin = curTrigger.pin;
-
-	        if (curPin && curTrigger.start - curTrigger._pinPush < start && !containerAnimation) {
-	          cs = curTrigger.end - curTrigger.start;
-	          (curPin === trigger || curPin === pinnedContainer) && !_isNumber(parsedStart) && (offset += cs);
-	          curPin === pin && (otherPinOffset += cs);
-	        }
-	      }
-
-	      start += offset;
-	      end += offset;
-	      self._pinPush = otherPinOffset;
-
-	      if (markerStart && offset) {
-	        cs = {};
-	        cs[direction.a] = "+=" + offset;
-	        pinnedContainer && (cs[direction.p] = "-=" + scrollFunc());
-	        gsap.set([markerStart, markerEnd], cs);
-	      }
-
-	      if (pin) {
-	        cs = _getComputedStyle(pin);
-	        isVertical = direction === _vertical;
-	        scroll = scrollFunc();
-	        pinStart = parseFloat(pinGetter(direction.a)) + otherPinOffset;
-	        !max && end > 1 && ((isViewport ? _body : scroller).style["overflow-" + direction.a] = "scroll");
-
-	        _swapPinIn(pin, spacer, cs);
-
-	        pinState = _getState(pin);
-	        bounds = _getBounds(pin, true);
-	        oppositeScroll = useFixedPosition && _getScrollFunc(scroller, isVertical ? _horizontal : _vertical)();
-
-	        if (pinSpacing) {
-	          spacerState = [pinSpacing + direction.os2, change + otherPinOffset + _px];
-	          spacerState.t = spacer;
-	          i = pinSpacing === _padding ? _getSize(pin, direction) + change + otherPinOffset : 0;
-	          i && spacerState.push(direction.d, i + _px);
-
-	          _setState(spacerState);
-
-	          useFixedPosition && scrollFunc(prevScroll);
-	        }
-
-	        if (useFixedPosition) {
-	          override = {
-	            top: bounds.top + (isVertical ? scroll - start : oppositeScroll) + _px,
-	            left: bounds.left + (isVertical ? oppositeScroll : scroll - start) + _px,
-	            boxSizing: "border-box",
-	            position: "fixed"
-	          };
-	          override[_width] = override["max" + _Width] = Math.ceil(bounds.width) + _px;
-	          override[_height] = override["max" + _Height] = Math.ceil(bounds.height) + _px;
-	          override[_margin] = override[_margin + _Top] = override[_margin + _Right] = override[_margin + _Bottom] = override[_margin + _Left] = "0";
-	          override[_padding] = cs[_padding];
-	          override[_padding + _Top] = cs[_padding + _Top];
-	          override[_padding + _Right] = cs[_padding + _Right];
-	          override[_padding + _Bottom] = cs[_padding + _Bottom];
-	          override[_padding + _Left] = cs[_padding + _Left];
-	          pinActiveState = _copyState(pinOriginalState, override, pinReparent);
-	        }
-
-	        if (animation) {
-	          initted = animation._initted;
-
-	          _suppressOverwrites(1);
-
-	          animation.render(animation.duration(), true, true);
-	          pinChange = pinGetter(direction.a) - pinStart + change + otherPinOffset;
-	          change !== pinChange && pinActiveState.splice(pinActiveState.length - 2, 2);
-	          animation.render(0, true, true);
-	          initted || animation.invalidate();
-
-	          _suppressOverwrites(0);
-	        } else {
-	          pinChange = change;
-	        }
-	      } else if (trigger && scrollFunc() && !containerAnimation) {
-	        bounds = trigger.parentNode;
-
-	        while (bounds && bounds !== _body) {
-	          if (bounds._pinOffset) {
-	            start -= bounds._pinOffset;
-	            end -= bounds._pinOffset;
-	          }
-
-	          bounds = bounds.parentNode;
-	        }
-	      }
-
-	      revertedPins && revertedPins.forEach(function (t) {
-	        return t.revert(false);
-	      });
-	      self.start = start;
-	      self.end = end;
-	      scroll1 = scroll2 = scrollFunc();
-
-	      if (!containerAnimation) {
-	        scroll1 < prevScroll && scrollFunc(prevScroll);
-	        self.scroll.rec = 0;
-	      }
-
-	      self.revert(false);
-	      _refreshing = 0;
-	      animation && isToggle && animation._initted && animation.progress() !== prevAnimProgress && animation.progress(prevAnimProgress, true).render(animation.time(), true, true);
-
-	      if (prevProgress !== self.progress) {
-	        animation && !isToggle && animation.totalProgress(prevProgress, true);
-	        self.progress = prevProgress;
-	        self.update(0, 0, 1);
-	      }
-
-	      pin && pinSpacing && (spacer._pinOffset = Math.round(self.progress * pinChange));
-	      onRefresh && onRefresh(self);
-	    };
-
-	    self.getVelocity = function () {
-	      return (scrollFunc() - scroll2) / (_getTime() - _time2) * 1000 || 0;
-	    };
-
-	    self.endAnimation = function () {
-	      _endAnimation(self.callbackAnimation);
-
-	      if (animation) {
-	        scrubTween ? scrubTween.progress(1) : !animation.paused() ? _endAnimation(animation, animation.reversed()) : isToggle || _endAnimation(animation, self.direction < 0, 1);
-	      }
-	    };
-
-	    self.getTrailing = function (name) {
-	      var i = _triggers.indexOf(self),
-	          a = self.direction > 0 ? _triggers.slice(0, i).reverse() : _triggers.slice(i + 1);
-
-	      return _isString(name) ? a.filter(function (t) {
-	        return t.vars.preventOverlaps === name;
-	      }) : a;
-	    };
-
-	    self.update = function (reset, recordVelocity, forceFake) {
-	      if (containerAnimation && !forceFake && !reset) {
-	        return;
-	      }
-
-	      var scroll = self.scroll(),
-	          p = reset ? 0 : (scroll - start) / change,
-	          clipped = p < 0 ? 0 : p > 1 ? 1 : p || 0,
-	          prevProgress = self.progress,
-	          isActive,
-	          wasActive,
-	          toggleState,
-	          action,
-	          stateChanged,
-	          toggled,
-	          isAtMax,
-	          isTakingAction;
-
-	      if (recordVelocity) {
-	        scroll2 = scroll1;
-	        scroll1 = containerAnimation ? scrollFunc() : scroll;
-
-	        if (snap) {
-	          snap2 = snap1;
-	          snap1 = animation && !isToggle ? animation.totalProgress() : clipped;
-	        }
-	      }
-
-	      anticipatePin && !clipped && pin && !_refreshing && !_startup && _lastScrollTime && start < scroll + (scroll - scroll2) / (_getTime() - _time2) * anticipatePin && (clipped = 0.0001);
-
-	      if (clipped !== prevProgress && self.enabled) {
-	        isActive = self.isActive = !!clipped && clipped < 1;
-	        wasActive = !!prevProgress && prevProgress < 1;
-	        toggled = isActive !== wasActive;
-	        stateChanged = toggled || !!clipped !== !!prevProgress;
-	        self.direction = clipped > prevProgress ? 1 : -1;
-	        self.progress = clipped;
-
-	        if (stateChanged && !_refreshing) {
-	          toggleState = clipped && !prevProgress ? 0 : clipped === 1 ? 1 : prevProgress === 1 ? 2 : 3;
-
-	          if (isToggle) {
-	            action = !toggled && toggleActions[toggleState + 1] !== "none" && toggleActions[toggleState + 1] || toggleActions[toggleState];
-	            isTakingAction = animation && (action === "complete" || action === "reset" || action in animation);
-	          }
-	        }
-
-	        preventOverlaps && toggled && (isTakingAction || scrub || !animation) && (_isFunction(preventOverlaps) ? preventOverlaps(self) : self.getTrailing(preventOverlaps).forEach(function (t) {
-	          return t.endAnimation();
-	        }));
-
-	        if (!isToggle) {
-	          if (scrubTween && !_refreshing && !_startup) {
-	            scrubTween.vars.totalProgress = clipped;
-	            scrubTween.invalidate().restart();
-	          } else if (animation) {
-	            animation.totalProgress(clipped, !!_refreshing);
-	          }
-	        }
-
-	        if (pin) {
-	          reset && pinSpacing && (spacer.style[pinSpacing + direction.os2] = spacingStart);
-
-	          if (!useFixedPosition) {
-	            pinSetter(pinStart + pinChange * clipped);
-	          } else if (stateChanged) {
-	            isAtMax = !reset && clipped > prevProgress && end + 1 > scroll && scroll + 1 >= _maxScroll(scroller, direction);
-
-	            if (pinReparent) {
-	              if (!reset && (isActive || isAtMax)) {
-	                var bounds = _getBounds(pin, true),
-	                    _offset = scroll - start;
-
-	                _reparent(pin, _body, bounds.top + (direction === _vertical ? _offset : 0) + _px, bounds.left + (direction === _vertical ? 0 : _offset) + _px);
-	              } else {
-	                _reparent(pin, spacer);
-	              }
-	            }
-
-	            _setState(isActive || isAtMax ? pinActiveState : pinState);
-
-	            pinChange !== change && clipped < 1 && isActive || pinSetter(pinStart + (clipped === 1 && !isAtMax ? pinChange : 0));
-	          }
-	        }
-
-	        snap && !tweenTo.tween && !_refreshing && !_startup && snapDelayedCall.restart(true);
-	        toggleClass && (toggled || once && clipped && (clipped < 1 || !_limitCallbacks)) && _toArray(toggleClass.targets).forEach(function (el) {
-	          return el.classList[isActive || once ? "add" : "remove"](toggleClass.className);
-	        });
-	        onUpdate && !isToggle && !reset && onUpdate(self);
-
-	        if (stateChanged && !_refreshing) {
-	          if (isToggle) {
-	            if (isTakingAction) {
-	              if (action === "complete") {
-	                animation.pause().totalProgress(1);
-	              } else if (action === "reset") {
-	                animation.restart(true).pause();
-	              } else if (action === "restart") {
-	                animation.restart(true);
-	              } else {
-	                animation[action]();
-	              }
-	            }
-
-	            onUpdate && onUpdate(self);
-	          }
-
-	          if (toggled || !_limitCallbacks) {
-	            onToggle && toggled && _callback(self, onToggle);
-	            callbacks[toggleState] && _callback(self, callbacks[toggleState]);
-	            once && (clipped === 1 ? self.kill(false, 1) : callbacks[toggleState] = 0);
-
-	            if (!toggled) {
-	              toggleState = clipped === 1 ? 1 : 3;
-	              callbacks[toggleState] && _callback(self, callbacks[toggleState]);
-	            }
-	          }
-
-	          if (fastScrollEnd && !isActive && Math.abs(self.getVelocity()) > (_isNumber(fastScrollEnd) ? fastScrollEnd : 2500)) {
-	            _endAnimation(self.callbackAnimation);
-
-	            scrubTween ? scrubTween.progress(1) : _endAnimation(animation, !clipped, 1);
-	          }
-	        } else if (isToggle && onUpdate && !_refreshing) {
-	          onUpdate(self);
-	        }
-	      }
-
-	      if (markerEndSetter) {
-	        var n = containerAnimation ? scroll / containerAnimation.duration() * (containerAnimation._caScrollDist || 0) : scroll;
-	        markerStartSetter(n + (markerStartTrigger._isFlipped ? 1 : 0));
-	        markerEndSetter(n);
-	      }
-
-	      caMarkerSetter && caMarkerSetter(-scroll / containerAnimation.duration() * (containerAnimation._caScrollDist || 0));
-	    };
-
-	    self.enable = function (reset, refresh) {
-	      if (!self.enabled) {
-	        self.enabled = true;
-
-	        _addListener(scroller, "resize", _onResize);
-
-	        _addListener(scroller, "scroll", _onScroll);
-
-	        onRefreshInit && _addListener(ScrollTrigger, "refreshInit", onRefreshInit);
-
-	        if (reset !== false) {
-	          self.progress = prevProgress = 0;
-	          scroll1 = scroll2 = lastSnap = scrollFunc();
-	        }
-
-	        refresh !== false && self.refresh();
-	      }
-	    };
-
-	    self.getTween = function (snap) {
-	      return snap && tweenTo ? tweenTo.tween : scrubTween;
-	    };
-
-	    self.disable = function (reset, allowAnimation) {
-	      if (self.enabled) {
-	        reset !== false && self.revert();
-	        self.enabled = self.isActive = false;
-	        allowAnimation || scrubTween && scrubTween.pause();
-	        prevScroll = 0;
-	        pinCache && (pinCache.uncache = 1);
-	        onRefreshInit && _removeListener(ScrollTrigger, "refreshInit", onRefreshInit);
-
-	        if (snapDelayedCall) {
-	          snapDelayedCall.pause();
-	          tweenTo.tween && tweenTo.tween.kill() && (tweenTo.tween = 0);
-	        }
-
-	        if (!isViewport) {
-	          var i = _triggers.length;
-
-	          while (i--) {
-	            if (_triggers[i].scroller === scroller && _triggers[i] !== self) {
-	              return;
-	            }
-	          }
-
-	          _removeListener(scroller, "resize", _onResize);
-
-	          _removeListener(scroller, "scroll", _onScroll);
-	        }
-	      }
-	    };
-
-	    self.kill = function (revert, allowAnimation) {
-	      self.disable(revert, allowAnimation);
-	      scrubTween && scrubTween.kill();
-	      id && delete _ids[id];
-
-	      var i = _triggers.indexOf(self);
-
-	      _triggers.splice(i, 1);
-
-	      i === _i && _direction > 0 && _i--;
-	      i = 0;
-
-	      _triggers.forEach(function (t) {
-	        return t.scroller === self.scroller && (i = 1);
-	      });
-
-	      i || (self.scroll.rec = 0);
-
-	      if (animation) {
-	        animation.scrollTrigger = null;
-	        revert && animation.render(-1);
-	        allowAnimation || animation.kill();
-	      }
-
-	      markerStart && [markerStart, markerEnd, markerStartTrigger, markerEndTrigger].forEach(function (m) {
-	        return m.parentNode && m.parentNode.removeChild(m);
-	      });
-
-	      if (pin) {
-	        pinCache && (pinCache.uncache = 1);
-	        i = 0;
-
-	        _triggers.forEach(function (t) {
-	          return t.pin === pin && i++;
-	        });
-
-	        i || (pinCache.spacer = 0);
-	      }
-	    };
-
-	    self.enable(false, false);
-	    !animation || !animation.add || change ? self.refresh() : gsap.delayedCall(0.01, function () {
-	      return start || end || self.refresh();
-	    }) && (change = 0.01) && (start = end = 0);
-	  };
-
-	  ScrollTrigger.register = function register(core) {
-	    if (!_coreInitted) {
-	      gsap = core || _getGSAP();
-
-	      if (_windowExists() && window.document) {
-	        _win = window;
-	        _doc = document;
-	        _docEl = _doc.documentElement;
-	        _body = _doc.body;
-	      }
-
-	      if (gsap) {
-	        _toArray = gsap.utils.toArray;
-	        _clamp = gsap.utils.clamp;
-	        _suppressOverwrites = gsap.core.suppressOverwrites || _passThrough;
-	        gsap.core.globals("ScrollTrigger", ScrollTrigger);
-
-	        if (_body) {
-	          _raf = _win.requestAnimationFrame || function (f) {
-	            return setTimeout(f, 16);
-	          };
-
-	          _addListener(_win, "wheel", _onScroll);
-
-	          _root = [_win, _doc, _docEl, _body];
-
-	          _addListener(_doc, "scroll", _onScroll);
-
-	          var bodyStyle = _body.style,
-	              border = bodyStyle.borderTopStyle,
-	              bounds;
-	          bodyStyle.borderTopStyle = "solid";
-	          bounds = _getBounds(_body);
-	          _vertical.m = Math.round(bounds.top + _vertical.sc()) || 0;
-	          _horizontal.m = Math.round(bounds.left + _horizontal.sc()) || 0;
-	          border ? bodyStyle.borderTopStyle = border : bodyStyle.removeProperty("border-top-style");
-	          _syncInterval = setInterval(_sync, 200);
-	          gsap.delayedCall(0.5, function () {
-	            return _startup = 0;
-	          });
-
-	          _addListener(_doc, "touchcancel", _passThrough);
-
-	          _addListener(_body, "touchstart", _passThrough);
-
-	          _multiListener(_addListener, _doc, "pointerdown,touchstart,mousedown", function () {
-	            return _pointerIsDown = 1;
-	          });
-
-	          _multiListener(_addListener, _doc, "pointerup,touchend,mouseup", function () {
-	            return _pointerIsDown = 0;
-	          });
-
-	          _transformProp = gsap.utils.checkPrefix("transform");
-
-	          _stateProps.push(_transformProp);
-
-	          _coreInitted = _getTime();
-	          _resizeDelay = gsap.delayedCall(0.2, _refreshAll).pause();
-	          _autoRefresh = [_doc, "visibilitychange", function () {
-	            var w = _win.innerWidth,
-	                h = _win.innerHeight;
-
-	            if (_doc.hidden) {
-	              _prevWidth = w;
-	              _prevHeight = h;
-	            } else if (_prevWidth !== w || _prevHeight !== h) {
-	              _onResize();
-	            }
-	          }, _doc, "DOMContentLoaded", _refreshAll, _win, "load", function () {
-	            return _lastScrollTime || _refreshAll();
-	          }, _win, "resize", _onResize];
-
-	          _iterateAutoRefresh(_addListener);
-	        }
-	      }
-	    }
-
-	    return _coreInitted;
-	  };
-
-	  ScrollTrigger.defaults = function defaults(config) {
-	    for (var p in config) {
-	      _defaults[p] = config[p];
-	    }
-	  };
-
-	  ScrollTrigger.kill = function kill() {
-	    _enabled = 0;
-
-	    _triggers.slice(0).forEach(function (trigger) {
-	      return trigger.kill(1);
-	    });
-	  };
-
-	  ScrollTrigger.config = function config(vars) {
-	    "limitCallbacks" in vars && (_limitCallbacks = !!vars.limitCallbacks);
-	    var ms = vars.syncInterval;
-	    ms && clearInterval(_syncInterval) || (_syncInterval = ms) && setInterval(_sync, ms);
-
-	    if ("autoRefreshEvents" in vars) {
-	      _iterateAutoRefresh(_removeListener) || _iterateAutoRefresh(_addListener, vars.autoRefreshEvents || "none");
-	      _ignoreResize = (vars.autoRefreshEvents + "").indexOf("resize") === -1;
-	    }
-	  };
-
-	  ScrollTrigger.scrollerProxy = function scrollerProxy(target, vars) {
-	    var t = _getTarget(target),
-	        i = _scrollers.indexOf(t),
-	        isViewport = _isViewport(t);
-
-	    if (~i) {
-	      _scrollers.splice(i, isViewport ? 6 : 2);
-	    }
-
-	    isViewport ? _proxies.unshift(_win, vars, _body, vars, _docEl, vars) : _proxies.unshift(t, vars);
-	  };
-
-	  ScrollTrigger.matchMedia = function matchMedia(vars) {
-	    var mq, p, i, func, result;
-
-	    for (p in vars) {
-	      i = _media.indexOf(p);
-	      func = vars[p];
-	      _creatingMedia = p;
-
-	      if (p === "all") {
-	        func();
-	      } else {
-	        mq = _win.matchMedia(p);
-
-	        if (mq) {
-	          mq.matches && (result = func());
-
-	          if (~i) {
-	            _media[i + 1] = _combineFunc(_media[i + 1], func);
-	            _media[i + 2] = _combineFunc(_media[i + 2], result);
-	          } else {
-	            i = _media.length;
-
-	            _media.push(p, func, result);
-
-	            mq.addListener ? mq.addListener(_onMediaChange) : mq.addEventListener("change", _onMediaChange);
-	          }
-
-	          _media[i + 3] = mq.matches;
-	        }
-	      }
-
-	      _creatingMedia = 0;
-	    }
-
-	    return _media;
-	  };
-
-	  ScrollTrigger.clearMatchMedia = function clearMatchMedia(query) {
-	    query || (_media.length = 0);
-	    query = _media.indexOf(query);
-	    query >= 0 && _media.splice(query, 4);
-	  };
-
-	  ScrollTrigger.isInViewport = function isInViewport(element, ratio, horizontal) {
-	    var bounds = (_isString(element) ? _getTarget(element) : element).getBoundingClientRect(),
-	        offset = bounds[horizontal ? _width : _height] * ratio || 0;
-	    return horizontal ? bounds.right - offset > 0 && bounds.left + offset < _win.innerWidth : bounds.bottom - offset > 0 && bounds.top + offset < _win.innerHeight;
-	  };
-
-	  ScrollTrigger.positionInViewport = function positionInViewport(element, referencePoint, horizontal) {
-	    _isString(element) && (element = _getTarget(element));
-	    var bounds = element.getBoundingClientRect(),
-	        size = bounds[horizontal ? _width : _height],
-	        offset = referencePoint == null ? size / 2 : referencePoint in _keywords ? _keywords[referencePoint] * size : ~referencePoint.indexOf("%") ? parseFloat(referencePoint) * size / 100 : parseFloat(referencePoint) || 0;
-	    return horizontal ? (bounds.left + offset) / _win.innerWidth : (bounds.top + offset) / _win.innerHeight;
-	  };
-
-	  return ScrollTrigger;
-	}();
-	ScrollTrigger.version = "3.8.0";
-
-	ScrollTrigger.saveStyles = function (targets) {
-	  return targets ? _toArray(targets).forEach(function (target) {
-	    if (target && target.style) {
-	      var i = _savedStyles.indexOf(target);
-
-	      i >= 0 && _savedStyles.splice(i, 5);
-
-	      _savedStyles.push(target, target.style.cssText, target.getBBox && target.getAttribute("transform"), gsap.core.getCache(target), _creatingMedia);
-	    }
-	  }) : _savedStyles;
-	};
-
-	ScrollTrigger.revert = function (soft, media) {
-	  return _revertAll(!soft, media);
-	};
-
-	ScrollTrigger.create = function (vars, animation) {
-	  return new ScrollTrigger(vars, animation);
-	};
-
-	ScrollTrigger.refresh = function (safe) {
-	  return safe ? _onResize() : (_coreInitted || ScrollTrigger.register()) && _refreshAll(true);
-	};
-
-	ScrollTrigger.update = _updateAll;
-	ScrollTrigger.clearScrollMemory = _clearScrollMemory;
-
-	ScrollTrigger.maxScroll = function (element, horizontal) {
-	  return _maxScroll(element, horizontal ? _horizontal : _vertical);
-	};
-
-	ScrollTrigger.getScrollFunc = function (element, horizontal) {
-	  return _getScrollFunc(_getTarget(element), horizontal ? _horizontal : _vertical);
-	};
-
-	ScrollTrigger.getById = function (id) {
-	  return _ids[id];
-	};
-
-	ScrollTrigger.getAll = function () {
-	  return _triggers.slice(0);
-	};
-
-	ScrollTrigger.isScrolling = function () {
-	  return !!_lastScrollTime;
-	};
-
-	ScrollTrigger.snapDirectional = _snapDirectional;
-
-	ScrollTrigger.addEventListener = function (type, callback) {
-	  var a = _listeners[type] || (_listeners[type] = []);
-	  ~a.indexOf(callback) || a.push(callback);
-	};
-
-	ScrollTrigger.removeEventListener = function (type, callback) {
-	  var a = _listeners[type],
-	      i = a && a.indexOf(callback);
-	  i >= 0 && a.splice(i, 1);
-	};
-
-	ScrollTrigger.batch = function (targets, vars) {
-	  var result = [],
-	      varsCopy = {},
-	      interval = vars.interval || 0.016,
-	      batchMax = vars.batchMax || 1e9,
-	      proxyCallback = function proxyCallback(type, callback) {
-	    var elements = [],
-	        triggers = [],
-	        delay = gsap.delayedCall(interval, function () {
-	      callback(elements, triggers);
-	      elements = [];
-	      triggers = [];
-	    }).pause();
-	    return function (self) {
-	      elements.length || delay.restart(true);
-	      elements.push(self.trigger);
-	      triggers.push(self);
-	      batchMax <= elements.length && delay.progress(1);
-	    };
-	  },
-	      p;
-
-	  for (p in vars) {
-	    varsCopy[p] = p.substr(0, 2) === "on" && _isFunction(vars[p]) && p !== "onRefreshInit" ? proxyCallback(p, vars[p]) : vars[p];
-	  }
-
-	  if (_isFunction(batchMax)) {
-	    batchMax = batchMax();
-
-	    _addListener(ScrollTrigger, "refresh", function () {
-	      return batchMax = vars.batchMax();
-	    });
-	  }
-
-	  _toArray(targets).forEach(function (target) {
-	    var config = {};
-
-	    for (p in varsCopy) {
-	      config[p] = varsCopy[p];
-	    }
-
-	    config.trigger = target;
-	    result.push(ScrollTrigger.create(config));
-	  });
-
-	  return result;
-	};
-
-	ScrollTrigger.sort = function (func) {
-	  return _triggers.sort(func || function (a, b) {
-	    return (a.vars.refreshPriority || 0) * -1e6 + a.start - (b.start + (b.vars.refreshPriority || 0) * -1e6);
-	  });
-	};
-
-	_getGSAP() && gsap.registerPlugin(ScrollTrigger);
-
-	exports.ScrollTrigger = ScrollTrigger;
-	exports.default = ScrollTrigger;
-
-	Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-},{}],2:[function(require,module,exports){
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = global || self, factory(global.window = global.window || {}));
-}(this, (function (exports) { 'use strict';
-
+	var _trimExp = /(^\s+|\s+$)/g;
 	var emojiExp = /([\uD800-\uDBFF][\uDC00-\uDFFF](?:[\u200D\uFE0F][\uD800-\uDBFF][\uDC00-\uDFFF]){2,}|\uD83D\uDC69(?:\u200D(?:(?:\uD83D\uDC69\u200D)?\uD83D\uDC67|(?:\uD83D\uDC69\u200D)?\uD83D\uDC66)|\uD83C[\uDFFB-\uDFFF])|\uD83D\uDC69\u200D(?:\uD83D\uDC69\u200D)?\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC69\u200D(?:\uD83D\uDC69\u200D)?\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]\uFE0F|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC6F\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3C-\uDD3E\uDDD6-\uDDDF])\u200D[\u2640\u2642]\uFE0F|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uFE0F\u200D[\u2640\u2642]|(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642])\uFE0F|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC69\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708]))\uFE0F|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83D\uDC69\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69]))|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74|\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67)\uDB40\uDC7F|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC66\u200D\uD83D\uDC66|(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]))|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|\uD83D\uDC68(?:\u200D(?:(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC67|(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC66)|\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDD1-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])?|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF8]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD4C\uDD50-\uDD6B\uDD80-\uDD97\uDDC0\uDDD0-\uDDE6])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u2660\u2663\u2665\u2666\u2668\u267B\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF8]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD4C\uDD50-\uDD6B\uDD80-\uDD97\uDDC0\uDDD0-\uDDE6])\uFE0F)/;
 	function getText(e) {
 	  var type = e.nodeType,
@@ -1859,9 +25,66 @@
 
 	  return result;
 	}
+	function splitInnerHTML(element, delimiter, trim, preserveSpaces) {
+	  var node = element.firstChild,
+	      result = [],
+	      s;
+
+	  while (node) {
+	    if (node.nodeType === 3) {
+	      s = (node.nodeValue + "").replace(/^\n+/g, "");
+
+	      if (!preserveSpaces) {
+	        s = s.replace(/\s+/g, " ");
+	      }
+
+	      result.push.apply(result, emojiSafeSplit(s, delimiter, trim, preserveSpaces));
+	    } else if ((node.nodeName + "").toLowerCase() === "br") {
+	      result[result.length - 1] += "<br>";
+	    } else {
+	      result.push(node.outerHTML);
+	    }
+
+	    node = node.nextSibling;
+	  }
+
+	  return result;
+	}
+	function emojiSafeSplit(text, delimiter, trim, preserveSpaces) {
+	  text += "";
+
+	  if (trim) {
+	    text = text.replace(_trimExp, "");
+	  }
+
+	  if (delimiter && delimiter !== "") {
+	    return text.replace(/>/g, "&gt;").replace(/</g, "&lt;").split(delimiter);
+	  }
+
+	  var result = [],
+	      l = text.length,
+	      i = 0,
+	      j,
+	      character;
+
+	  for (; i < l; i++) {
+	    character = text.charAt(i);
+
+	    if (character.charCodeAt(0) >= 0xD800 && character.charCodeAt(0) <= 0xDBFF || text.charCodeAt(i + 1) >= 0xFE00 && text.charCodeAt(i + 1) <= 0xFE0F) {
+	      j = ((text.substr(i, 12).split(emojiExp) || [])[1] || "").length || 2;
+	      character = text.substr(i, j);
+	      result.emoji = 1;
+	      i += j - 1;
+	    }
+
+	    result.push(character === ">" ? "&gt;" : character === "<" ? "&lt;" : preserveSpaces && character === " " && (text.charAt(i - 1) === " " || text.charAt(i + 1) === " ") ? "&nbsp;" : character);
+	  }
+
+	  return result;
+	}
 
 	/*!
-	 * SplitText: 3.8.0
+	 * TextPlugin 3.8.0
 	 * https://greensock.com
 	 *
 	 * @license Copyright 2008-2021, GreenSock. All rights reserved.
@@ -1870,569 +93,167 @@
 	 * @author: Jack Doyle, jack@greensock.com
 	*/
 
-	var _doc,
-	    _win,
-	    _coreInitted,
-	    _stripExp = /(?:\r|\n|\t\t)/g,
-	    _multipleSpacesExp = /(?:\s\s+)/g,
-	    _initCore = function _initCore() {
-	  _doc = document;
-	  _win = window;
-	  _coreInitted = 1;
-	},
-	    _getComputedStyle = function _getComputedStyle(element) {
-	  return _win.getComputedStyle(element);
-	},
-	    _isArray = Array.isArray,
-	    _slice = [].slice,
-	    _toArray = function _toArray(value, leaveStrings) {
-	  var type;
-	  return _isArray(value) ? value : (type = typeof value) === "string" && !leaveStrings && value ? _slice.call(_doc.querySelectorAll(value), 0) : value && type === "object" && "length" in value ? _slice.call(value, 0) : value ? [value] : [];
-	},
-	    _isAbsolute = function _isAbsolute(vars) {
-	  return vars.position === "absolute" || vars.absolute === true;
-	},
-	    _findSpecialChars = function _findSpecialChars(text, chars) {
-	  var i = chars.length,
-	      s;
-
-	  while (--i > -1) {
-	    s = chars[i];
-
-	    if (text.substr(0, s.length) === s) {
-	      return s.length;
-	    }
-	  }
-	},
-	    _divStart = " style='position:relative;display:inline-block;'",
-	    _cssClassFunc = function _cssClassFunc(cssClass, tag) {
-	  if (cssClass === void 0) {
-	    cssClass = "";
-	  }
-
-	  var iterate = ~cssClass.indexOf("++"),
-	      num = 1;
-
-	  if (iterate) {
-	    cssClass = cssClass.split("++").join("");
-	  }
-
-	  return function () {
-	    return "<" + tag + _divStart + (cssClass ? " class='" + cssClass + (iterate ? num++ : "") + "'>" : ">");
-	  };
-	},
-	    _swapText = function _swapText(element, oldText, newText) {
-	  var type = element.nodeType;
-
-	  if (type === 1 || type === 9 || type === 11) {
-	    for (element = element.firstChild; element; element = element.nextSibling) {
-	      _swapText(element, oldText, newText);
-	    }
-	  } else if (type === 3 || type === 4) {
-	    element.nodeValue = element.nodeValue.split(oldText).join(newText);
-	  }
-	},
-	    _pushReversed = function _pushReversed(a, merge) {
-	  var i = merge.length;
-
-	  while (--i > -1) {
-	    a.push(merge[i]);
-	  }
-	},
-	    _isBeforeWordDelimiter = function _isBeforeWordDelimiter(e, root, wordDelimiter) {
-	  var next;
-
-	  while (e && e !== root) {
-	    next = e._next || e.nextSibling;
-
-	    if (next) {
-	      return next.textContent.charAt(0) === wordDelimiter;
-	    }
-
-	    e = e.parentNode || e._parent;
-	  }
-	},
-	    _deWordify = function _deWordify(e) {
-	  var children = _toArray(e.childNodes),
-	      l = children.length,
-	      i,
-	      child;
-
-	  for (i = 0; i < l; i++) {
-	    child = children[i];
-
-	    if (child._isSplit) {
-	      _deWordify(child);
-	    } else {
-	      if (i && child.previousSibling && child.previousSibling.nodeType === 3) {
-	        child.previousSibling.nodeValue += child.nodeType === 3 ? child.nodeValue : child.firstChild.nodeValue;
-	        e.removeChild(child);
-	      } else if (child.nodeType !== 3) {
-	        e.insertBefore(child.firstChild, child);
-	        e.removeChild(child);
-	      }
-	    }
-	  }
-	},
-	    _getStyleAsNumber = function _getStyleAsNumber(name, computedStyle) {
-	  return parseFloat(computedStyle[name]) || 0;
-	},
-	    _setPositionsAfterSplit = function _setPositionsAfterSplit(element, vars, allChars, allWords, allLines, origWidth, origHeight) {
-	  var cs = _getComputedStyle(element),
-	      paddingLeft = _getStyleAsNumber("paddingLeft", cs),
-	      lineOffsetY = -999,
-	      borderTopAndBottom = _getStyleAsNumber("borderBottomWidth", cs) + _getStyleAsNumber("borderTopWidth", cs),
-	      borderLeftAndRight = _getStyleAsNumber("borderLeftWidth", cs) + _getStyleAsNumber("borderRightWidth", cs),
-	      padTopAndBottom = _getStyleAsNumber("paddingTop", cs) + _getStyleAsNumber("paddingBottom", cs),
-	      padLeftAndRight = _getStyleAsNumber("paddingLeft", cs) + _getStyleAsNumber("paddingRight", cs),
-	      lineThreshold = _getStyleAsNumber("fontSize", cs) * (vars.lineThreshold || 0.2),
-	      textAlign = cs.textAlign,
-	      charArray = [],
-	      wordArray = [],
-	      lineArray = [],
-	      wordDelimiter = vars.wordDelimiter || " ",
-	      tag = vars.tag ? vars.tag : vars.span ? "span" : "div",
-	      types = vars.type || vars.split || "chars,words,lines",
-	      lines = allLines && ~types.indexOf("lines") ? [] : null,
-	      words = ~types.indexOf("words"),
-	      chars = ~types.indexOf("chars"),
-	      absolute = _isAbsolute(vars),
-	      linesClass = vars.linesClass,
-	      iterateLine = ~(linesClass || "").indexOf("++"),
-	      spaceNodesToRemove = [],
-	      isFlex = cs.display === "flex",
-	      prevInlineDisplay = element.style.display,
-	      i,
-	      j,
-	      l,
-	      node,
-	      nodes,
-	      isChild,
-	      curLine,
-	      addWordSpaces,
-	      style,
-	      lineNode,
-	      lineWidth,
-	      offset;
-
-	  iterateLine && (linesClass = linesClass.split("++").join(""));
-	  isFlex && (element.style.display = "block");
-	  j = element.getElementsByTagName("*");
-	  l = j.length;
-	  nodes = [];
-
-	  for (i = 0; i < l; i++) {
-	    nodes[i] = j[i];
-	  }
-
-	  if (lines || absolute) {
-	    for (i = 0; i < l; i++) {
-	      node = nodes[i];
-	      isChild = node.parentNode === element;
-
-	      if (isChild || absolute || chars && !words) {
-	        offset = node.offsetTop;
-
-	        if (lines && isChild && Math.abs(offset - lineOffsetY) > lineThreshold && (node.nodeName !== "BR" || i === 0)) {
-	          curLine = [];
-	          lines.push(curLine);
-	          lineOffsetY = offset;
-	        }
-
-	        if (absolute) {
-	          node._x = node.offsetLeft;
-	          node._y = offset;
-	          node._w = node.offsetWidth;
-	          node._h = node.offsetHeight;
-	        }
-
-	        if (lines) {
-	          if (node._isSplit && isChild || !chars && isChild || words && isChild || !words && node.parentNode.parentNode === element && !node.parentNode._isSplit) {
-	            curLine.push(node);
-	            node._x -= paddingLeft;
-
-	            if (_isBeforeWordDelimiter(node, element, wordDelimiter)) {
-	              node._wordEnd = true;
-	            }
-	          }
-
-	          if (node.nodeName === "BR" && (node.nextSibling && node.nextSibling.nodeName === "BR" || i === 0)) {
-	            lines.push([]);
-	          }
-	        }
-	      }
-	    }
-	  }
-
-	  for (i = 0; i < l; i++) {
-	    node = nodes[i];
-	    isChild = node.parentNode === element;
-
-	    if (node.nodeName === "BR") {
-	      if (lines || absolute) {
-	        node.parentNode && node.parentNode.removeChild(node);
-	        nodes.splice(i--, 1);
-	        l--;
-	      } else if (!words) {
-	        element.appendChild(node);
-	      }
-
-	      continue;
-	    }
-
-	    if (absolute) {
-	      style = node.style;
-
-	      if (!words && !isChild) {
-	        node._x += node.parentNode._x;
-	        node._y += node.parentNode._y;
-	      }
-
-	      style.left = node._x + "px";
-	      style.top = node._y + "px";
-	      style.position = "absolute";
-	      style.display = "block";
-	      style.width = node._w + 1 + "px";
-	      style.height = node._h + "px";
-	    }
-
-	    if (!words && chars) {
-	      if (node._isSplit) {
-	        node._next = j = node.nextSibling;
-	        node.parentNode.appendChild(node);
-
-	        while (j && j.nodeType === 3 && j.textContent === " ") {
-	          node._next = j.nextSibling;
-	          node.parentNode.appendChild(j);
-	          j = j.nextSibling;
-	        }
-	      } else if (node.parentNode._isSplit) {
-	        node._parent = node.parentNode;
-
-	        if (!node.previousSibling && node.firstChild) {
-	          node.firstChild._isFirst = true;
-	        }
-
-	        if (node.nextSibling && node.nextSibling.textContent === " " && !node.nextSibling.nextSibling) {
-	          spaceNodesToRemove.push(node.nextSibling);
-	        }
-
-	        node._next = node.nextSibling && node.nextSibling._isFirst ? null : node.nextSibling;
-	        node.parentNode.removeChild(node);
-	        nodes.splice(i--, 1);
-	        l--;
-	      } else if (!isChild) {
-	        offset = !node.nextSibling && _isBeforeWordDelimiter(node.parentNode, element, wordDelimiter);
-	        node.parentNode._parent && node.parentNode._parent.appendChild(node);
-	        offset && node.parentNode.appendChild(_doc.createTextNode(" "));
-
-	        if (tag === "span") {
-	          node.style.display = "inline";
-	        }
-
-	        charArray.push(node);
-	      }
-	    } else if (node.parentNode._isSplit && !node._isSplit && node.innerHTML !== "") {
-	      wordArray.push(node);
-	    } else if (chars && !node._isSplit) {
-	      if (tag === "span") {
-	        node.style.display = "inline";
-	      }
-
-	      charArray.push(node);
-	    }
-	  }
-
-	  i = spaceNodesToRemove.length;
-
-	  while (--i > -1) {
-	    spaceNodesToRemove[i].parentNode.removeChild(spaceNodesToRemove[i]);
-	  }
-
-	  if (lines) {
-	    if (absolute) {
-	      lineNode = _doc.createElement(tag);
-	      element.appendChild(lineNode);
-	      lineWidth = lineNode.offsetWidth + "px";
-	      offset = lineNode.offsetParent === element ? 0 : element.offsetLeft;
-	      element.removeChild(lineNode);
-	    }
-
-	    style = element.style.cssText;
-	    element.style.cssText = "display:none;";
-
-	    while (element.firstChild) {
-	      element.removeChild(element.firstChild);
-	    }
-
-	    addWordSpaces = wordDelimiter === " " && (!absolute || !words && !chars);
-
-	    for (i = 0; i < lines.length; i++) {
-	      curLine = lines[i];
-	      lineNode = _doc.createElement(tag);
-	      lineNode.style.cssText = "display:block;text-align:" + textAlign + ";position:" + (absolute ? "absolute;" : "relative;");
-
-	      if (linesClass) {
-	        lineNode.className = linesClass + (iterateLine ? i + 1 : "");
-	      }
-
-	      lineArray.push(lineNode);
-	      l = curLine.length;
-
-	      for (j = 0; j < l; j++) {
-	        if (curLine[j].nodeName !== "BR") {
-	          node = curLine[j];
-	          lineNode.appendChild(node);
-	          addWordSpaces && node._wordEnd && lineNode.appendChild(_doc.createTextNode(" "));
-
-	          if (absolute) {
-	            if (j === 0) {
-	              lineNode.style.top = node._y + "px";
-	              lineNode.style.left = paddingLeft + offset + "px";
-	            }
-
-	            node.style.top = "0px";
-
-	            if (offset) {
-	              node.style.left = node._x - offset + "px";
-	            }
-	          }
-	        }
-	      }
-
-	      if (l === 0) {
-	        lineNode.innerHTML = "&nbsp;";
-	      } else if (!words && !chars) {
-	        _deWordify(lineNode);
-
-	        _swapText(lineNode, String.fromCharCode(160), " ");
-	      }
-
-	      if (absolute) {
-	        lineNode.style.width = lineWidth;
-	        lineNode.style.height = node._h + "px";
-	      }
-
-	      element.appendChild(lineNode);
-	    }
-
-	    element.style.cssText = style;
-	  }
-
-	  if (absolute) {
-	    if (origHeight > element.clientHeight) {
-	      element.style.height = origHeight - padTopAndBottom + "px";
-
-	      if (element.clientHeight < origHeight) {
-	        element.style.height = origHeight + borderTopAndBottom + "px";
-	      }
-	    }
-
-	    if (origWidth > element.clientWidth) {
-	      element.style.width = origWidth - padLeftAndRight + "px";
-
-	      if (element.clientWidth < origWidth) {
-	        element.style.width = origWidth + borderLeftAndRight + "px";
-	      }
-	    }
-	  }
-
-	  isFlex && (prevInlineDisplay ? element.style.display = prevInlineDisplay : element.style.removeProperty("display"));
-
-	  _pushReversed(allChars, charArray);
-
-	  words && _pushReversed(allWords, wordArray);
-
-	  _pushReversed(allLines, lineArray);
-	},
-	    _splitRawText = function _splitRawText(element, vars, wordStart, charStart) {
-	  var tag = vars.tag ? vars.tag : vars.span ? "span" : "div",
-	      types = vars.type || vars.split || "chars,words,lines",
-	      chars = ~types.indexOf("chars"),
-	      absolute = _isAbsolute(vars),
-	      wordDelimiter = vars.wordDelimiter || " ",
-	      space = wordDelimiter !== " " ? "" : absolute ? "&#173; " : " ",
-	      wordEnd = "</" + tag + ">",
-	      wordIsOpen = 1,
-	      specialChars = vars.specialChars ? typeof vars.specialChars === "function" ? vars.specialChars : _findSpecialChars : null,
-	      text,
-	      splitText,
-	      i,
-	      j,
-	      l,
-	      character,
-	      hasTagStart,
-	      testResult,
-	      container = _doc.createElement("div"),
-	      parent = element.parentNode;
-
-	  parent.insertBefore(container, element);
-	  container.textContent = element.nodeValue;
-	  parent.removeChild(element);
-	  element = container;
-	  text = getText(element);
-	  hasTagStart = text.indexOf("<") !== -1;
-
-	  if (vars.reduceWhiteSpace !== false) {
-	    text = text.replace(_multipleSpacesExp, " ").replace(_stripExp, "");
-	  }
-
-	  if (hasTagStart) {
-	    text = text.split("<").join("{{LT}}");
-	  }
-
-	  l = text.length;
-	  splitText = (text.charAt(0) === " " ? space : "") + wordStart();
-
-	  for (i = 0; i < l; i++) {
-	    character = text.charAt(i);
-
-	    if (specialChars && (testResult = specialChars(text.substr(i), vars.specialChars))) {
-	      character = text.substr(i, testResult || 1);
-	      splitText += chars && character !== " " ? charStart() + character + "</" + tag + ">" : character;
-	      i += testResult - 1;
-	    } else if (character === wordDelimiter && text.charAt(i - 1) !== wordDelimiter && i) {
-	      splitText += wordIsOpen ? wordEnd : "";
-	      wordIsOpen = 0;
-
-	      while (text.charAt(i + 1) === wordDelimiter) {
-	        splitText += space;
-	        i++;
-	      }
-
-	      if (i === l - 1) {
-	        splitText += space;
-	      } else if (text.charAt(i + 1) !== ")") {
-	        splitText += space + wordStart();
-	        wordIsOpen = 1;
-	      }
-	    } else if (character === "{" && text.substr(i, 6) === "{{LT}}") {
-	      splitText += chars ? charStart() + "{{LT}}" + "</" + tag + ">" : "{{LT}}";
-	      i += 5;
-	    } else if (character.charCodeAt(0) >= 0xD800 && character.charCodeAt(0) <= 0xDBFF || text.charCodeAt(i + 1) >= 0xFE00 && text.charCodeAt(i + 1) <= 0xFE0F) {
-	      j = ((text.substr(i, 12).split(emojiExp) || [])[1] || "").length || 2;
-	      splitText += chars && character !== " " ? charStart() + text.substr(i, j) + "</" + tag + ">" : text.substr(i, j);
-	      i += j - 1;
-	    } else {
-	      splitText += chars && character !== " " ? charStart() + character + "</" + tag + ">" : character;
-	    }
-	  }
-
-	  element.outerHTML = splitText + (wordIsOpen ? wordEnd : "");
-	  hasTagStart && _swapText(parent, "{{LT}}", "<");
-	},
-	    _split = function _split(element, vars, wordStart, charStart) {
-	  var children = _toArray(element.childNodes),
-	      l = children.length,
-	      absolute = _isAbsolute(vars),
-	      i,
-	      child;
-
-	  if (element.nodeType !== 3 || l > 1) {
-	    vars.absolute = false;
-
-	    for (i = 0; i < l; i++) {
-	      child = children[i];
-	      child._next = child._isFirst = child._parent = child._wordEnd = null;
-
-	      if (child.nodeType !== 3 || /\S+/.test(child.nodeValue)) {
-	        if (absolute && child.nodeType !== 3 && _getComputedStyle(child).display === "inline") {
-	          child.style.display = "inline-block";
-	          child.style.position = "relative";
-	        }
-
-	        child._isSplit = true;
-
-	        _split(child, vars, wordStart, charStart);
-	      }
-	    }
-
-	    vars.absolute = absolute;
-	    element._isSplit = true;
-	    return;
-	  }
-
-	  _splitRawText(element, vars, wordStart, charStart);
+	var gsap,
+	    _tempDiv,
+	    _getGSAP = function _getGSAP() {
+	  return gsap || typeof window !== "undefined" && (gsap = window.gsap) && gsap.registerPlugin && gsap;
 	};
 
-	var SplitText = function () {
-	  function SplitText(element, vars) {
-	    _coreInitted || _initCore();
-	    this.elements = _toArray(element);
-	    this.chars = [];
-	    this.words = [];
-	    this.lines = [];
-	    this._originals = [];
-	    this.vars = vars || {};
-	     this.split(vars);
-	  }
+	var TextPlugin = {
+	  version: "3.8.0",
+	  name: "text",
+	  init: function init(target, value, tween) {
+	    var i = target.nodeName.toUpperCase(),
+	        data = this,
+	        _short,
+	        text,
+	        original,
+	        j,
+	        condensedText,
+	        condensedOriginal,
+	        aggregate,
+	        s;
 
-	  var _proto = SplitText.prototype;
+	    data.svg = target.getBBox && (i === "TEXT" || i === "TSPAN");
 
-	  _proto.split = function split(vars) {
-	    this.isSplit && this.revert();
-	    this.vars = vars = vars || this.vars;
-	    this._originals.length = this.chars.length = this.words.length = this.lines.length = 0;
+	    if (!("innerHTML" in target) && !data.svg) {
+	      return false;
+	    }
 
-	    var i = this.elements.length,
-	        tag = vars.tag ? vars.tag : vars.span ? "span" : "div",
-	        wordStart = _cssClassFunc(vars.wordsClass, tag),
-	        charStart = _cssClassFunc(vars.charsClass, tag),
-	        origHeight,
-	        origWidth,
-	        e;
+	    data.target = target;
+
+	    if (typeof value !== "object") {
+	      value = {
+	        value: value
+	      };
+	    }
+
+	    if (!("value" in value)) {
+	      data.text = data.original = [""];
+	      return;
+	    }
+
+	    data.delimiter = value.delimiter || "";
+	    original = splitInnerHTML(target, data.delimiter, false, value.preserveSpaces);
+
+	    if (!_tempDiv) {
+	      _tempDiv = document.createElement("div");
+	    }
+
+	    _tempDiv.innerHTML = value.value;
+	    text = splitInnerHTML(_tempDiv, data.delimiter);
+	    data.from = tween._from;
+
+	    if (data.from) {
+	      i = original;
+	      original = text;
+	      text = i;
+	    }
+
+	    data.hasClass = !!(value.newClass || value.oldClass);
+	    data.newClass = value.newClass;
+	    data.oldClass = value.oldClass;
+	    i = original.length - text.length;
+	    _short = i < 0 ? original : text;
+	    data.fillChar = value.fillChar || (value.padSpace ? "&nbsp;" : "");
+
+	    if (i < 0) {
+	      i = -i;
+	    }
 
 	    while (--i > -1) {
-	      e = this.elements[i];
-	      this._originals[i] = e.innerHTML;
-	      origHeight = e.clientHeight;
-	      origWidth = e.clientWidth;
-
-	      _split(e, vars, wordStart, charStart);
-
-	      _setPositionsAfterSplit(e, vars, this.chars, this.words, this.lines, origWidth, origHeight);
+	      _short.push(data.fillChar);
 	    }
 
-	    this.chars.reverse();
-	    this.words.reverse();
-	    this.lines.reverse();
-	    this.isSplit = true;
-	    return this;
-	  };
+	    if (value.type === "diff") {
+	      j = 0;
+	      condensedText = [];
+	      condensedOriginal = [];
+	      aggregate = "";
 
-	  _proto.revert = function revert() {
-	    var originals = this._originals;
+	      for (i = 0; i < text.length; i++) {
+	        s = text[i];
 
-	    if (!originals) {
-	      throw "revert() call wasn't scoped properly.";
+	        if (s === original[i]) {
+	          aggregate += s;
+	        } else {
+	          condensedText[j] = aggregate + s;
+	          condensedOriginal[j++] = aggregate + original[i];
+	          aggregate = "";
+	        }
+	      }
+
+	      text = condensedText;
+	      original = condensedOriginal;
+
+	      if (aggregate) {
+	        text.push(aggregate);
+	        original.push(aggregate);
+	      }
 	    }
 
-	    this.elements.forEach(function (e, i) {
-	      return e.innerHTML = originals[i];
-	    });
-	    this.chars = [];
-	    this.words = [];
-	    this.lines = [];
-	    this.isSplit = false;
-	    return this;
-	  };
+	    if (value.speed) {
+	      tween.duration(Math.min(0.05 / value.speed * _short.length, value.maxDuration || 9999));
+	    }
 
-	  SplitText.create = function create(element, vars) {
-	    return new SplitText(element, vars);
-	  };
+	    this.original = original;
+	    this.text = text;
 
-	  return SplitText;
-	}();
-	SplitText.version = "3.8.0";
+	    this._props.push("text");
+	  },
+	  render: function render(ratio, data) {
+	    if (ratio > 1) {
+	      ratio = 1;
+	    } else if (ratio < 0) {
+	      ratio = 0;
+	    }
 
-	exports.SplitText = SplitText;
-	exports.default = SplitText;
+	    if (data.from) {
+	      ratio = 1 - ratio;
+	    }
+
+	    var text = data.text,
+	        hasClass = data.hasClass,
+	        newClass = data.newClass,
+	        oldClass = data.oldClass,
+	        delimiter = data.delimiter,
+	        target = data.target,
+	        fillChar = data.fillChar,
+	        original = data.original,
+	        l = text.length,
+	        i = ratio * l + 0.5 | 0,
+	        applyNew,
+	        applyOld,
+	        str;
+
+	    if (hasClass) {
+	      applyNew = newClass && i;
+	      applyOld = oldClass && i !== l;
+	      str = (applyNew ? "<span class='" + newClass + "'>" : "") + text.slice(0, i).join(delimiter) + (applyNew ? "</span>" : "") + (applyOld ? "<span class='" + oldClass + "'>" : "") + delimiter + original.slice(i).join(delimiter) + (applyOld ? "</span>" : "");
+	    } else {
+	      str = text.slice(0, i).join(delimiter) + delimiter + original.slice(i).join(delimiter);
+	    }
+
+	    if (data.svg) {
+	      target.textContent = str;
+	    } else {
+	      target.innerHTML = fillChar === "&nbsp;" && ~str.indexOf("  ") ? str.split("  ").join("&nbsp;&nbsp;") : str;
+	    }
+	  }
+	};
+	TextPlugin.splitInnerHTML = splitInnerHTML;
+	TextPlugin.emojiSafeSplit = emojiSafeSplit;
+	TextPlugin.getText = getText;
+	_getGSAP() && gsap.registerPlugin(TextPlugin);
+
+	exports.TextPlugin = TextPlugin;
+	exports.default = TextPlugin;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -7391,7 +5212,7 @@
 
 })));
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -58479,7 +56300,7 @@
 
 })));
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -58581,7 +56402,7 @@ var ScrollMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollMarquee;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],6:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59108,7 +56929,116 @@ var ThreeScrollytelling = /*#__PURE__*/function () {
 
 exports.default = ThreeScrollytelling;
 
-},{"./ScrollMarquee":5,"gsap":"gsap","gsap/dist/ScrollTrigger":1,"three/examples/jsm/loaders/DRACOLoader":"three/examples/jsm/loaders/DRACOLoader"}],7:[function(require,module,exports){
+},{"./ScrollMarquee":4,"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger","three/examples/jsm/loaders/DRACOLoader":"three/examples/jsm/loaders/DRACOLoader"}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = require("gsap");
+
+var _TextPlugin = require("gsap/dist/TextPlugin");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+_gsap.gsap.registerPlugin(_TextPlugin.TextPlugin);
+
+var AimeConcept = /*#__PURE__*/function () {
+  function AimeConcept() {
+    _classCallCheck(this, AimeConcept);
+
+    this.DOM = {
+      component: ".js-aime-concept",
+      titleLine1: ".js-aime-concept-title-line-1",
+      titleLine2: ".js-aime-concept-title-line-2",
+      blurCircle: ".js-aime-concept-circle-blur",
+      gradientCircle: ".js-aime-concept-circle-gradient",
+      states: {
+        isActive: "is-active"
+      }
+    };
+    this.component = document.querySelector(this.DOM.component);
+  }
+  /**
+   * Init
+   */
+
+
+  _createClass(AimeConcept, [{
+    key: "init",
+    value: function init() {
+      if (this.component !== null) {
+        this.setup();
+      }
+    }
+  }, {
+    key: "setup",
+    value: function setup() {
+      console.log("Aime");
+      var titleLine1 = this.component.querySelector(this.DOM.titleLine1);
+      var titleLine2 = this.component.querySelector(this.DOM.titleLine2);
+      var blurCircle = this.component.querySelector(this.DOM.blurCircle);
+      var gradientCircle = this.component.querySelector(this.DOM.gradientCircle);
+
+      var tl = _gsap.gsap.timeline({
+        paused: true
+      });
+
+      var circleTl = _gsap.gsap.timeline({// paused: true,
+      });
+
+      tl.to(titleLine2, {
+        duration: 0.7,
+        delay: 2,
+        text: "M",
+        ease: "power2"
+      }).to(titleLine2, {
+        duration: 0.7,
+        text: "Messaging",
+        ease: "power2"
+      }).to(titleLine1, {
+        duration: 1,
+        text: "A",
+        ease: "power2"
+      }, "-=0.5").to(titleLine1, {
+        duration: 0,
+        text: "AI",
+        ease: "power2"
+      });
+      circleTl.add("start").fromTo(blurCircle, {
+        rotate: 0,
+        xPercent: -50,
+        yPercent: -25
+      }, {
+        rotate: 365,
+        xPercent: 0,
+        yPercent: 0,
+        duration: 2
+      }).fromTo(gradientCircle, {
+        rotate: 0,
+        xPercent: 35,
+        yPercent: 0
+      }, {
+        rotate: 365,
+        xPercent: 0,
+        yPercent: 0,
+        duration: 2
+      }, "start");
+    }
+  }]);
+
+  return AimeConcept;
+}();
+
+exports.default = AimeConcept;
+
+},{"gsap":"gsap","gsap/dist/TextPlugin":1}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59288,7 +57218,7 @@ var AnimatedGradient = /*#__PURE__*/function () {
 
 exports.default = AnimatedGradient;
 
-},{"./Core/Camera":8,"./Core/Lights":9,"./Core/Renderer":10,"./Core/Scene":11,"./Plane":12,"detect-gpu":"detect-gpu","three":4}],8:[function(require,module,exports){
+},{"./Core/Camera":8,"./Core/Lights":9,"./Core/Renderer":10,"./Core/Scene":11,"./Plane":12,"detect-gpu":"detect-gpu","three":3}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59317,7 +57247,7 @@ var Camera = function Camera(_ref) {
 
 exports.default = Camera;
 
-},{"three":4}],9:[function(require,module,exports){
+},{"three":3}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59357,7 +57287,7 @@ var Lights = /*#__PURE__*/function () {
 
 exports.default = Lights;
 
-},{"three":4}],10:[function(require,module,exports){
+},{"three":3}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59388,7 +57318,7 @@ var Renderer = function Renderer(_ref) {
 
 exports.default = Renderer;
 
-},{"three":4}],11:[function(require,module,exports){
+},{"three":3}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59412,7 +57342,7 @@ var Scene = function Scene(_ref) {
 
 exports.default = Scene;
 
-},{"three":4}],12:[function(require,module,exports){
+},{"three":3}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59579,7 +57509,7 @@ var Shape = /*#__PURE__*/function () {
 
 exports.default = Shape;
 
-},{"./shaders/fragment":13,"./shaders/vertex":14,"gsap":"gsap","three":4}],13:[function(require,module,exports){
+},{"./shaders/fragment":13,"./shaders/vertex":14,"gsap":"gsap","three":3}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59723,7 +57653,7 @@ var BrushTextScroll = /*#__PURE__*/function () {
 
 exports.default = BrushTextScroll;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":1,"gsap/dist/SplitText":2}],16:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger","gsap/dist/SplitText":"gsap/dist/SplitText"}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59894,7 +57824,7 @@ var ContentAnimation = /*#__PURE__*/function () {
 
 exports.default = ContentAnimation;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],18:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -60169,7 +58099,7 @@ var ImageSequence = /*#__PURE__*/function () {
 
 exports.default = ImageSequence;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":1,"is_js":"is_js"}],19:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger","is_js":"is_js"}],19:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -60825,7 +58755,7 @@ var PanningGallery = /*#__PURE__*/function () {
 
 exports.default = PanningGallery;
 
-},{"gsap/dist/SplitText":2,"gsap/dist/gsap":3}],22:[function(require,module,exports){
+},{"gsap/dist/SplitText":"gsap/dist/SplitText","gsap/dist/gsap":2}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -61380,7 +59310,7 @@ var PetPakAwwwards = /*#__PURE__*/function () {
 
 exports.default = PetPakAwwwards;
 
-},{"../examples/3dScrollytelling/ScrollMarquee":5,"gsap":"gsap","gsap/dist/ScrollTrigger":1}],23:[function(require,module,exports){
+},{"../examples/3dScrollytelling/ScrollMarquee":4,"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -61489,7 +59419,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":1}],24:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -61596,6 +59526,8 @@ var _BrushTextScroll = _interopRequireDefault(require("./examples/BrushTextScrol
 var _MagneticHotspots = _interopRequireDefault(require("./examples/MagneticHotspots/MagneticHotspots"));
 
 var _PetPakAwwwards = _interopRequireDefault(require("./examples/PetPakAwwwards"));
+
+var _AimeConcept = _interopRequireDefault(require("./examples/AimeConcept/AimeConcept"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -61744,8 +59676,15 @@ ready(function () {
 
   var petPakAwwwards = new _PetPakAwwwards.default();
   petPakAwwwards.init();
+  /**
+   * Aime Concept
+   * @type {AimeConcept}
+   */
+
+  var aimeConcept = new _AimeConcept.default();
+  aimeConcept.init();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/PetPakAwwwards":22,"./examples/ScrollingMarquee/ScrollingMarquee":23,"./examples/TemplateExample/TemplateComponent":24}]},{},[25])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AimeConcept/AimeConcept":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/PetPakAwwwards":22,"./examples/ScrollingMarquee/ScrollingMarquee":23,"./examples/TemplateExample/TemplateComponent":24}]},{},[25])
 
 //# sourceMappingURL=bundle.js.map

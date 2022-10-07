@@ -1,0 +1,90 @@
+@include font-face("Trash", "trashplusregular");
+
+$off-black: #0F0F0F;
+$gray: #C1C1C1;
+
+.c-aime-concept {
+    position: relative;
+    overflow: hidden;
+
+    &__header {
+        @include fluidValue("padding-left", "s-40");
+        @include fluidValue("padding-right", "s-40");
+        @include fluidValue("padding-top", "s-24");
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    &__nav {
+        @include fluidValue("font-size", "s-16");
+        @include fluidValue("gap", "s-40");
+
+        display: flex;
+        align-items: center;
+        font-family: Plain, sans-serif;
+        color: $white;
+    }
+
+    &__logo {
+        .u-icon {
+            @include fluidValue("width", null, 110px);
+        }
+    }
+
+    &__main {
+        @include fluidValue("padding", null, 20px);
+        @include fluidValue("padding-top", null, 220px);
+        @include fluidValue("padding-bottom", null, 220px);
+
+        min-height: 100vh;
+        background-color: $off-black;
+        //display: flex;
+        //flex-direction: column;
+        //justify-content: center;
+    }
+
+    &__title {
+        font-family: Trash, serif;
+        color: $gray;
+        font-size: get-vw(251px);
+        line-height: 0.85;
+        letter-spacing: -0.05em;
+        z-index: 1;
+        position: relative;
+
+        span{
+            display: block;
+        }
+    }
+
+    &__circle {
+        position: absolute;
+        width: get-vw(384px);
+        height: get-vw(384px);
+        border-radius: 50%;
+        display: inline-block;
+
+        &--blur {
+            @include fluidValue("top", null, 250px);
+
+            backdrop-filter: blur(27px);
+            left: calc(50% - #{get-vw(192px)});
+            background: rgba(217, 217, 217, 0.07);
+            z-index: 2;
+        }
+
+        &--gradient {
+            @include fluidValue("top", null, 250px);
+
+            background: radial-gradient(circle at 85%, rgba(89, 138, 211, 1) 2%, rgba(187, 200, 35, 1) 90%);
+            left: calc(50% - #{get-vw(192px)});
+            z-index: 0;
+        }
+    }
+}

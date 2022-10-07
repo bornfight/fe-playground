@@ -23,6 +23,7 @@ import AnimatedGradient from "./examples/AnimatedGradient/AnimatedGradient";
 import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
 import MagneticHotspots from "./examples/MagneticHotspots/MagneticHotspots";
 import PetPakAwwwards from "./examples/PetPakAwwwards";
+import AimeConcept from "./examples/AimeConcept/AimeConcept";
 
 /**
  * Check if document is ready cross-browser
@@ -162,4 +163,11 @@ ready(() => {
      */
     const petPakAwwwards = new PetPakAwwwards();
     petPakAwwwards.init();
+
+    /**
+     * Aime Concept
+     * @type {AimeConcept}
+     */
+    const aimeConcept = new AimeConcept();
+    aimeConcept.init();
 });

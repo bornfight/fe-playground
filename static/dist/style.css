@@ -2780,6 +2780,174 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   .e-petpak-cssda .c-button__next-img {
     display: none; } }
 
+@font-face {
+  font-family: "Trash";
+  src: url("../fonts/trashplusregular.woff2?1") format("woff2"), url("../fonts/trashplusregular.woff?1") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; }
+
+.c-aime-concept {
+  position: relative;
+  overflow: hidden; }
+
+.c-aime-concept__header {
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 16px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; }
+
+@media (min-width: 480px) {
+  .c-aime-concept__header {
+    padding-left: calc(1.66667vw + 16px); } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__header {
+    padding-left: 40px; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__header {
+    padding-left: 2.77778vw; } }
+
+@media (min-width: 480px) {
+  .c-aime-concept__header {
+    padding-right: calc(1.66667vw + 16px); } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__header {
+    padding-right: 40px; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__header {
+    padding-right: 2.77778vw; } }
+
+@media (min-width: 480px) {
+  .c-aime-concept__header {
+    padding-top: calc(0.83333vw + 12px); } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__header {
+    padding-top: 24px; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__header {
+    padding-top: 1.66667vw; } }
+
+.c-aime-concept__nav {
+  font-size: 12px;
+  gap: 24px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  font-family: Plain, sans-serif;
+  color: #ffffff; }
+
+@media (min-width: 480px) {
+  .c-aime-concept__nav {
+    font-size: calc(0.41667vw + 10px); } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__nav {
+    font-size: 16px; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__nav {
+    font-size: 1.11111vw; } }
+
+@media (min-width: 480px) {
+  .c-aime-concept__nav {
+    gap: calc(1.66667vw + 16px); } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__nav {
+    gap: 40px; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__nav {
+    gap: 2.77778vw; } }
+
+.c-aime-concept__logo .u-icon {
+  width: 110px; }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__logo .u-icon {
+    width: 7.63889vw; } }
+
+.c-aime-concept__main {
+  padding: 20px;
+  padding-top: 220px;
+  padding-bottom: 220px;
+  min-height: 100vh;
+  background-color: #0F0F0F; }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__main {
+    padding: 1.38889vw; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__main {
+    padding-top: 15.27778vw; } }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__main {
+    padding-bottom: 15.27778vw; } }
+
+.c-aime-concept__title {
+  font-family: Trash, serif;
+  color: #C1C1C1;
+  font-size: 17.43056vw;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  z-index: 1;
+  position: relative; }
+
+.c-aime-concept__title span {
+  display: block; }
+
+.c-aime-concept__circle {
+  position: absolute;
+  width: 26.66667vw;
+  height: 26.66667vw;
+  border-radius: 50%;
+  display: inline-block; }
+
+.c-aime-concept__circle--blur {
+  top: 250px;
+  -webkit-backdrop-filter: blur(27px);
+          backdrop-filter: blur(27px);
+  left: calc(50% - 13.33333vw);
+  background: rgba(217, 217, 217, 0.07);
+  z-index: 2; }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__circle--blur {
+    top: 17.36111vw; } }
+
+.c-aime-concept__circle--gradient {
+  top: 250px;
+  background: radial-gradient(circle at 85%, #598ad3 2%, #bbc823 90%);
+  left: calc(50% - 13.33333vw);
+  z-index: 0; }
+
+@media (min-width: 1440px) {
+  .c-aime-concept__circle--gradient {
+    top: 17.36111vw; } }
+
 /**
  * Components
  */
