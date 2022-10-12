@@ -50,7 +50,7 @@ $gray: #C1C1C1;
     }
 
     &__title {
-        font-family: Trash, serif;
+        font-family: Trash, sans-serif;
         color: $gray;
         font-size: get-vw(251px);
         line-height: 0.85;
@@ -122,4 +122,25 @@ $gray: #C1C1C1;
         height: 100%;
     }
 
+    &__footer{
+        @include fluidValue("padding-left", "s-40");
+        @include fluidValue("padding-right", "s-40");
+        @include fluidValue("padding-bottom", "s-12");
+
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        color: $white;
+        font-family: Trash, sans-serif;
+        @include fluidValue("font-size", "s-12");
+
+        a{
+            text-decoration: underline;
+
+            @include hover{
+                opacity: 0.5;
+            }
+        }
+    }
 }
