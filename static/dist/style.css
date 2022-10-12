@@ -2890,10 +2890,20 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 
 .c-aime-concept__main {
   padding: 20px;
-  padding-top: 220px;
-  padding-bottom: 220px;
+  padding-top: 180px;
+  padding-bottom: 180px;
   min-height: 100vh;
-  background-color: #0F0F0F; }
+  background-color: #0F0F0F;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
 
 @media (min-width: 1440px) {
   .c-aime-concept__main {
@@ -2901,11 +2911,11 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 
 @media (min-width: 1440px) {
   .c-aime-concept__main {
-    padding-top: 15.27778vw; } }
+    padding-top: 12.5vw; } }
 
 @media (min-width: 1440px) {
   .c-aime-concept__main {
-    padding-bottom: 15.27778vw; } }
+    padding-bottom: 12.5vw; } }
 
 .c-aime-concept__title {
   font-family: Trash, serif;
@@ -2932,7 +2942,25 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   background: rgba(217, 217, 217, 0.07);
   z-index: 2;
   right: 0;
-  bottom: 0; }
+  bottom: 0;
+  -webkit-transition: -webkit-backdrop-filter 0.25s;
+  transition: -webkit-backdrop-filter 0.25s;
+  transition: backdrop-filter 0.25s;
+  transition: backdrop-filter 0.25s, -webkit-backdrop-filter 0.25s; }
+
+@media (hover: none) {
+  .c-aime-concept__circle--blur {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
+  .c-aime-concept__circle--blur:active {
+    /* 1 */
+    -webkit-backdrop-filter: blur(7px);
+            backdrop-filter: blur(7px); } }
+
+@media (hover: hover), all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .c-aime-concept__circle--blur:hover {
+    /* 2 */
+    -webkit-backdrop-filter: blur(7px);
+            backdrop-filter: blur(7px); } }
 
 .c-aime-concept__circle--gradient {
   background: radial-gradient(circle at 85%, #598ad3 2%, #bbc823 90%);
@@ -2946,10 +2974,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   left: 0;
   width: 50vw;
   height: 50vh;
-  border: 1px solid red;
   -webkit-transform-origin: bottom right;
           transform-origin: bottom right;
-  z-index: 2; }
+  z-index: 0; }
 
 .c-aime-concept__circle-2-wrapper {
   position: absolute;
@@ -2957,10 +2984,16 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   bottom: 0;
   width: 50vw;
   height: 50vh;
-  border: 1px solid red;
   -webkit-transform-origin: top left;
           transform-origin: top left;
-  z-index: 0; }
+  z-index: 2; }
+
+.c-aime-concept__circle-wrapper-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; }
 
 /**
  * Components

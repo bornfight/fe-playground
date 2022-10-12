@@ -7,4 +7,5 @@ export const plugins = [
     "is_js",
     "detect-gpu",
     "pixi.js",
+    "gsap/CustomEase",
 ];

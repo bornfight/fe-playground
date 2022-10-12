@@ -39,14 +39,14 @@ $gray: #C1C1C1;
 
     &__main {
         @include fluidValue("padding", null, 20px);
-        @include fluidValue("padding-top", null, 220px);
-        @include fluidValue("padding-bottom", null, 220px);
+        @include fluidValue("padding-top", null, 180px);
+        @include fluidValue("padding-bottom", null, 180px);
 
         min-height: 100vh;
         background-color: $off-black;
-        //display: flex;
-        //flex-direction: column;
-        //justify-content: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     &__title {
@@ -58,7 +58,7 @@ $gray: #C1C1C1;
         z-index: 1;
         position: relative;
 
-        span{
+        span {
             display: block;
         }
     }
@@ -74,9 +74,13 @@ $gray: #C1C1C1;
             backdrop-filter: blur(27px);
             background: rgba(217, 217, 217, 0.07);
             z-index: 2;
-
             right: 0;
             bottom: 0;
+            transition: backdrop-filter 0.25s;
+
+            @include hover{
+                backdrop-filter: blur(7px);
+            }
         }
 
         &--gradient {
@@ -88,25 +92,34 @@ $gray: #C1C1C1;
         }
     }
 
-    &__circle-1-wrapper{
+    &__circle-1-wrapper {
         position: absolute;
         top: 0;
         left: 0;
         width: 50vw;
         height: 50vh;
-        border: 1px solid red;
+        //border: 1px solid red;
         transform-origin: bottom right;
-        z-index: 2;
+        z-index: 0;
     }
 
-    &__circle-2-wrapper{
+    &__circle-2-wrapper {
         position: absolute;
         right: 0;
         bottom: 0;
         width: 50vw;
         height: 50vh;
-        border: 1px solid red;
+        //border: 1px solid red;
         transform-origin: top left;
-        z-index: 0;
+        z-index: 2;
     }
+
+    &__circle-wrapper-inner{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
 }

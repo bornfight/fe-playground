@@ -56958,9 +56958,11 @@ var AimeConcept = /*#__PURE__*/function () {
       titleLine1: ".js-aime-concept-title-line-1",
       titleLine2: ".js-aime-concept-title-line-2",
       blurCircle: ".js-aime-concept-circle-blur",
-      blurCircleWrapper: ".js-aime-concept-circle-blur-wrapper",
       gradientCircle: ".js-aime-concept-circle-gradient",
+      blurCircleWrapper: ".js-aime-concept-circle-blur-wrapper",
+      blurCircleWrapperInner: ".js-aime-concept-circle-blur-wrapper-inner",
       gradientCircleWrapper: ".js-aime-concept-circle-gradient-wrapper",
+      gradientCircleWrapperInner: ".js-aime-concept-circle-gradient-wrapper-inner",
       states: {
         isActive: "is-active"
       }
@@ -56982,7 +56984,8 @@ var AimeConcept = /*#__PURE__*/function () {
   }, {
     key: "setup",
     value: function setup() {
-      console.log("Aime");
+      var _this = this;
+
       var titleLine1 = this.component.querySelector(this.DOM.titleLine1);
       var titleLine2 = this.component.querySelector(this.DOM.titleLine2);
       var blurCircle = this.component.querySelector(this.DOM.blurCircle);
@@ -56991,13 +56994,16 @@ var AimeConcept = /*#__PURE__*/function () {
       var gradientCircleWrapper = this.component.querySelector(this.DOM.gradientCircleWrapper);
 
       var tl = _gsap.gsap.timeline({
-        delay: 2 // paused: true,
+        delay: 0.5 // paused: true,
 
       });
 
       var circleTl = _gsap.gsap.timeline({
         // paused: true,
-        delay: 2
+        delay: 0.5,
+        onComplete: function onComplete() {
+          return _this.mouseMoveSetup(gradientCircle, blurCircle);
+        }
       });
 
       tl.to(titleLine2, {
@@ -57011,71 +57017,80 @@ var AimeConcept = /*#__PURE__*/function () {
         ease: "power2"
       }).to(titleLine1, {
         duration: 1,
-        text: "A",
+        text: "AI",
         ease: "power2"
       }, "-=0.5").to(titleLine1, {
         duration: 0,
         text: "AI",
         ease: "power2"
       });
-      circleTl.add("start").fromTo(blurCircleWrapper, {
+      circleTl.add("start").fromTo([blurCircleWrapper, gradientCircleWrapper], {
         rotate: 0
       }, {
         rotate: 180,
-        duration: 2,
-        ease: "power2.in"
+        duration: 1,
+        ease: "sine.in"
       }, "start").fromTo(blurCircle, {
-        rotate: 0,
-        xPercent: 0,
-        yPercent: 0
+        xPercent: 20,
+        yPercent: 40
       }, {
-        rotate: 180,
         xPercent: 48,
         yPercent: 48,
-        duration: 2,
-        ease: "power2.in"
+        duration: 1,
+        ease: "sine.in"
       }, "start").fromTo(gradientCircle, {
         rotate: 0,
-        xPercent: 0,
-        yPercent: 0
+        xPercent: -20,
+        yPercent: -40
       }, {
         rotate: 180,
         xPercent: -48,
         yPercent: -48,
-        duration: 2,
-        ease: "power2.in"
-      }, "start").to(gradientCircleWrapper, {
-        rotate: 180,
-        duration: 2,
-        ease: "power2.in"
+        duration: 1,
+        ease: "sine.in"
       }, "start").add("half") // .addPause()
-      .to(blurCircleWrapper, {
-        rotate: 360,
-        duration: 2,
-        ease: "power2.out"
+      .to([blurCircleWrapper, gradientCircleWrapper], {
+        rotate: 720,
+        duration: 3,
+        ease: "power1.out"
       }, "half").to(blurCircle, {
         rotate: 0,
-        xPercent: -20,
+        xPercent: -40,
         yPercent: 50,
-        duration: 2,
-        ease: "power2.out"
+        duration: 2.4,
+        ease: "back.out(1.8)"
       }, "half").to(gradientCircle, {
         rotate: 0,
-        xPercent: 20,
+        xPercent: 40,
         yPercent: -50,
-        duration: 2,
-        ease: "power2.out"
-      }, "half").to(gradientCircleWrapper, {
-        rotate: 360,
-        duration: 2,
-        ease: "power2.out"
-      }, "half").to(blurCircle, {
-        opacity: 0.5,
-        duration: 1,
-        ease: "power2.out"
-      }, "-=1").set(gradientCircleWrapper, {
+        duration: 2.4,
+        ease: "back.out(1.8)"
+      }, "half").set(gradientCircleWrapper, {
+        zIndex: 0
+      }, "half+=1").set(blurCircleWrapper, {
         zIndex: 2
       }, "-=1");
+    }
+  }, {
+    key: "mouseMoveSetup",
+    value: function mouseMoveSetup(gradientCircle, blurCircle) {
+      var gradientCircleWrapperInner = this.component.querySelector(this.DOM.gradientCircleWrapperInner);
+      var blurCircleWrapperInner = this.component.querySelector(this.DOM.blurCircleWrapperInner);
+      var gradientCircleRect = gradientCircle.getBoundingClientRect();
+      var blurCircleRect = blurCircle.getBoundingClientRect();
+      document.addEventListener("mousemove", function (e) {
+        _gsap.gsap.to(gradientCircleWrapperInner, {
+          x: (e.clientX - gradientCircleRect.left) / gradientCircleRect.left * -40,
+          y: (e.clientY - gradientCircleRect.top) / gradientCircleRect.top * -40
+        });
+
+        _gsap.gsap.to(blurCircleWrapperInner, {
+          x: (e.clientX - blurCircleRect.left) / blurCircleRect.left * -10,
+          y: (e.clientY - blurCircleRect.top) / blurCircleRect.top * -10
+        });
+
+        console.log((e.clientX - gradientCircleRect.left) / gradientCircleRect.left * -100);
+      });
     }
   }]);
 
