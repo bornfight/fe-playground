@@ -1,0 +1,168 @@
+@include font-face("Trash", "trashplusregular");
+
+$off-black: #0F0F0F;
+$gray: #C1C1C1;
+
+.c-aime-concept {
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+
+    &__header {
+        @include fluidValue("padding-left", "s-40");
+        @include fluidValue("padding-right", "s-40");
+        @include fluidValue("padding-top", "s-24");
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    &__nav {
+        @include fluidValue("font-size", "s-16");
+        @include fluidValue("gap", "s-40");
+
+        display: flex;
+        align-items: center;
+        font-family: Plain, sans-serif;
+        color: $white;
+    }
+
+    &__logo {
+        .u-icon {
+            @include fluidValue("width", null, 110px);
+        }
+    }
+
+    &__main {
+        @include fluidValue("padding", null, 20px);
+        @include fluidValue("padding-top", null, 120px);
+        @include fluidValue("padding-bottom", null, 120px);
+
+        min-height: 100vh;
+        background-color: $off-black;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    &__title {
+        font-family: Trash, sans-serif;
+        color: $gray;
+        font-size: get-vw(251px);
+        line-height: 0.85;
+        letter-spacing: -0.05em;
+        z-index: 1;
+        position: relative;
+        pointer-events: none;
+
+        span {
+            display: block;
+        }
+    }
+
+    &__circle {
+        position: absolute;
+        width: get-vw(384px);
+        height: get-vw(384px);
+        border-radius: 50%;
+        display: inline-block;
+
+        &--blur {
+            backdrop-filter: blur(27px);
+            background: rgba(217, 217, 217, 0.07);
+            z-index: 2;
+            right: 0;
+            bottom: 0;
+            transition: backdrop-filter 0.25s;
+            will-change: backdrop-filter;
+
+            @include hover{
+                backdrop-filter: blur(7px);
+            }
+        }
+
+        &--gradient {
+            background: radial-gradient(circle at 85%, rgba(89, 138, 211, 1) 1%, rgba(187, 200, 35, 1) 90%);
+            background-size: 150% 150%;
+            background-position: center;
+            z-index: 0;
+            left: 0;
+            top: 0;
+            transition: background 0.25s;
+            will-change: background;
+            pointer-events: auto;
+
+            @include hover{
+                background-position: 0 0;
+            }
+
+        }
+    }
+
+    &__circle-1-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50vw;
+        height: 50vh;
+        //border: 1px solid red;
+        transform-origin: bottom right;
+        z-index: 0;
+    }
+
+    &__circle-2-wrapper {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 50vw;
+        height: 50vh;
+        //border: 1px solid red;
+        transform-origin: top left;
+        z-index: 2;
+    }
+
+    &__circle-wrapper-inner{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    &__footer{
+        @include fluidValue("padding-left", "s-40");
+        @include fluidValue("padding-right", "s-40");
+        @include fluidValue("padding-bottom", "s-12");
+
+        position: absolute;
+        display: flex;
+        justify-content: space-between;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        color: $white;
+        font-family: Trash, sans-serif;
+        @include fluidValue("font-size", "s-12");
+
+        a{
+            text-decoration: underline;
+
+            @include hover{
+                opacity: 0.5;
+            }
+        }
+
+        button{
+            cursor: pointer;
+
+            @include hover{
+                opacity: 0.5;
+            }
+        }
+    }
+}
