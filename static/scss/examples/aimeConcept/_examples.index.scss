@@ -58,6 +58,7 @@ $gray: #C1C1C1;
         letter-spacing: -0.05em;
         z-index: 1;
         position: relative;
+        pointer-events: none;
 
         span {
             display: block;
@@ -86,15 +87,18 @@ $gray: #C1C1C1;
         }
 
         &--gradient {
-            background: radial-gradient(circle at 85%, rgba(89, 138, 211, 1) 2%, rgba(187, 200, 35, 1) 90%);
+            background: radial-gradient(circle at 85%, rgba(89, 138, 211, 1) 1%, rgba(187, 200, 35, 1) 90%);
+            background-size: 150% 150%;
+            background-position: center;
             z-index: 0;
             left: 0;
             top: 0;
-            transition: background-position 0.25s;
-            will-change: backdrop-filter;
+            transition: background 0.25s;
+            will-change: background;
+            pointer-events: auto;
 
             @include hover{
-                background-position: 10% 50%
+                background-position: 0 0;
             }
 
         }
