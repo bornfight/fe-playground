@@ -40,22 +40,23 @@ export default class AimeConcept {
         const gradientCircle = this.component.querySelector(this.DOM.gradientCircle);
         const gradientCircleWrapper = this.component.querySelector(this.DOM.gradientCircleWrapper);
 
-        let tl = gsap.timeline({
+        this.tl = gsap.timeline({
             delay: 0.5,
             // paused: true,
         });
-        let circleTl = gsap.timeline({
+        this.circleTl = gsap.timeline({
             // paused: true,
             delay: 0.5,
             onComplete: () => this.mouseMoveSetup(gradientCircle, blurCircle),
         });
 
-        tl.to(titleLine2, {
-            duration: 0.7,
-            delay: 2,
-            text: "M",
-            ease: "power2",
-        })
+        this.tl
+            .to(titleLine2, {
+                duration: 0.7,
+                delay: 2,
+                text: "M",
+                ease: "power2",
+            })
             .to(titleLine2, {
                 duration: 0.7,
                 text: "Messaging",
@@ -76,7 +77,7 @@ export default class AimeConcept {
                 ease: "power2",
             });
 
-        circleTl
+        this.circleTl
             .add("start")
             .fromTo(
                 [blurCircleWrapper, gradientCircleWrapper],
@@ -175,7 +176,8 @@ export default class AimeConcept {
 
         const gradientCircleRect = gradientCircle.getBoundingClientRect();
         const blurCircleRect = blurCircle.getBoundingClientRect();
-        document.addEventListener("mousemove", (e) => {
+
+        const onMouseMove = (e) => {
             gsap.to(gradientCircleWrapperInner, {
                 x: ((e.clientX - gradientCircleRect.left) / gradientCircleRect.left) * -40,
                 y: ((e.clientY - gradientCircleRect.top) / gradientCircleRect.top) * -40,
@@ -185,6 +187,20 @@ export default class AimeConcept {
                 x: ((e.clientX - blurCircleRect.left) / blurCircleRect.left) * -10,
                 y: ((e.clientY - blurCircleRect.top) / blurCircleRect.top) * -10,
             });
-        });
+        };
+        document.addEventListener("mousemove", onMouseMove);
+
+        const button = document.querySelector(".js-aime-replay");
+        const onButtonClick = () => {
+            document.removeEventListener("mousemove", onMouseMove);
+            gsap.set([gradientCircleWrapperInner, blurCircleWrapperInner], {
+                clearProps: true,
+            });
+
+            this.tl.play(0);
+            this.circleTl.play(0);
+            button.removeEventListener("click", onButtonClick);
+        };
+        button.addEventListener("click", onButtonClick);
     }
 }

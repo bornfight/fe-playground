@@ -6,6 +6,7 @@ $gray: #C1C1C1;
 .c-aime-concept {
     position: relative;
     overflow: hidden;
+    user-select: none;
 
     &__header {
         @include fluidValue("padding-left", "s-40");
@@ -39,8 +40,8 @@ $gray: #C1C1C1;
 
     &__main {
         @include fluidValue("padding", null, 20px);
-        @include fluidValue("padding-top", null, 180px);
-        @include fluidValue("padding-bottom", null, 180px);
+        @include fluidValue("padding-top", null, 120px);
+        @include fluidValue("padding-bottom", null, 120px);
 
         min-height: 100vh;
         background-color: $off-black;
@@ -77,6 +78,7 @@ $gray: #C1C1C1;
             right: 0;
             bottom: 0;
             transition: backdrop-filter 0.25s;
+            will-change: backdrop-filter;
 
             @include hover{
                 backdrop-filter: blur(7px);
@@ -84,11 +86,17 @@ $gray: #C1C1C1;
         }
 
         &--gradient {
-
             background: radial-gradient(circle at 85%, rgba(89, 138, 211, 1) 2%, rgba(187, 200, 35, 1) 90%);
             z-index: 0;
             left: 0;
             top: 0;
+            transition: background-position 0.25s;
+            will-change: backdrop-filter;
+
+            @include hover{
+                background-position: 10% 50%
+            }
+
         }
     }
 
@@ -128,6 +136,8 @@ $gray: #C1C1C1;
         @include fluidValue("padding-bottom", "s-12");
 
         position: absolute;
+        display: flex;
+        justify-content: space-between;
         left: 0;
         bottom: 0;
         width: 100%;
@@ -137,6 +147,14 @@ $gray: #C1C1C1;
 
         a{
             text-decoration: underline;
+
+            @include hover{
+                opacity: 0.5;
+            }
+        }
+
+        button{
+            cursor: pointer;
 
             @include hover{
                 opacity: 0.5;
