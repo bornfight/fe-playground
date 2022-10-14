@@ -24,6 +24,7 @@ import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
 import MagneticHotspots from "./examples/MagneticHotspots/MagneticHotspots";
 import PetPakAwwwards from "./examples/PetPakAwwwards";
 import AimeConcept from "./examples/AimeConcept/AimeConcept";
+import WatchConfigurator from "./examples/3dWatchConfigurator/WatchConfigurator";
 
 /**
  * Check if document is ready cross-browser
@@ -170,4 +171,11 @@ ready(() => {
      */
     const aimeConcept = new AimeConcept();
     aimeConcept.init();
+
+    /**
+     * WatchConfigurator
+     * @type {WatchConfigurator}
+     */
+    const watchConfigurator = new WatchConfigurator();
+    watchConfigurator.init();
 });

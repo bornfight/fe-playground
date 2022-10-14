@@ -3124,6 +3124,16 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
     opacity: 0.5; } }
 
 /**
+ * 3d Watch Configurator
+ */
+.c-watch-configurator canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; }
+
+/**
  * Components
  */
 .c-footer .o-container {
