@@ -43,6 +43,7 @@ export default class WatchConfigurator {
             this.initModel();
             this.animate();
             this.initTable();
+            this.mouseMove();
 
             this.gui = new dat.GUI();
 
@@ -51,13 +52,26 @@ export default class WatchConfigurator {
         }
     }
 
+    mouseMove() {
+        window.addEventListener("mousemove", (ev) => {
+            let mouseX = ev.clientX;
+            let mouseY = ev.clientY;
+
+            gsap.to(this.camera.position, {
+                y: -4 - (mouseY - window.innerHeight / 2) / 400,
+                x: 8 + (mouseX - window.innerWidth / 2) / 400,
+            });
+        });
+    }
+
     /**
      * camera setup
      */
     initCamera() {
         this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 0.5, 100);
-        this.camera.position.set(6, -6, 10);
-        this.camera.rotation.set(0.5, 0.4, 0.55);
+        this.camera.position.set(8, -4, 12);
+        // this.camera.rotation.set(0.5, 0.4, 0.55);
+        this.camera.lookAt(0, 0, 0);
     }
 
     /**
@@ -129,9 +143,11 @@ export default class WatchConfigurator {
             displacementBias: 0.3,
         });
 
-        const geometry = new THREE.PlaneBufferGeometry(20, 20, 500, 500);
+        const geometry = new THREE.PlaneBufferGeometry(30, 30, 500, 500);
         const plane = new THREE.Mesh(geometry, material);
         plane.position.z = -0.7;
+        plane.rotation.y = 0.3;
+        plane.rotation.x = -0.3;
         plane.receiveShadow = true;
         this.scene.add(plane);
     }
@@ -170,8 +186,6 @@ export default class WatchConfigurator {
                     }
                 });
 
-                gltf.scene.rotation.y = -Math.PI / 2;
-
                 gsap.to(gltf.scene.children.find((item) => item.name === "Minutes").rotation, {
                     x: -Math.PI * 2,
                     duration: 10,
@@ -185,6 +199,9 @@ export default class WatchConfigurator {
                     ease: "none",
                     repeat: -1,
                 });
+
+                gltf.scene.rotation.y = -Math.PI / 2 + 0.3;
+                gltf.scene.rotation.x = -0.3;
 
                 this.scene.add(gltf.scene);
             },

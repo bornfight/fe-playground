@@ -57003,12 +57003,28 @@ var WatchConfigurator = /*#__PURE__*/function () {
         this.initModel();
         this.animate();
         this.initTable();
+        this.mouseMove();
         this.gui = new dat.GUI(); // handle resize
 
         window.addEventListener("resize", function () {
           return _this.onWindowResize();
         }, false);
       }
+    }
+  }, {
+    key: "mouseMove",
+    value: function mouseMove() {
+      var _this2 = this;
+
+      window.addEventListener("mousemove", function (ev) {
+        var mouseX = ev.clientX;
+        var mouseY = ev.clientY;
+
+        _gsap.default.to(_this2.camera.position, {
+          y: -4 - (mouseY - window.innerHeight / 2) / 400,
+          x: 8 + (mouseX - window.innerWidth / 2) / 400
+        });
+      });
     }
     /**
      * camera setup
@@ -57018,8 +57034,9 @@ var WatchConfigurator = /*#__PURE__*/function () {
     key: "initCamera",
     value: function initCamera() {
       this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 0.5, 100);
-      this.camera.position.set(6, -6, 10);
-      this.camera.rotation.set(0.5, 0.4, 0.55);
+      this.camera.position.set(8, -4, 12); // this.camera.rotation.set(0.5, 0.4, 0.55);
+
+      this.camera.lookAt(0, 0, 0);
     }
     /**
      * scene setup
@@ -57091,9 +57108,11 @@ var WatchConfigurator = /*#__PURE__*/function () {
         displacementScale: 0.25,
         displacementBias: 0.3
       });
-      var geometry = new THREE.PlaneBufferGeometry(20, 20, 500, 500);
+      var geometry = new THREE.PlaneBufferGeometry(30, 30, 500, 500);
       var plane = new THREE.Mesh(geometry, material);
       plane.position.z = -0.7;
+      plane.rotation.y = 0.3;
+      plane.rotation.x = -0.3;
       plane.receiveShadow = true;
       this.scene.add(plane);
     }
@@ -57104,7 +57123,7 @@ var WatchConfigurator = /*#__PURE__*/function () {
   }, {
     key: "initModel",
     value: function initModel() {
-      var _this2 = this;
+      var _this3 = this;
 
       var loader = new _GLTFLoader.GLTFLoader(); // loader
 
@@ -57121,7 +57140,7 @@ var WatchConfigurator = /*#__PURE__*/function () {
             console.log(node.name);
 
             if (node.name === "Hours" || node.name === "Minutes") {
-              node.material.color.set(_this2.config.colors.needles);
+              node.material.color.set(_this3.config.colors.needles);
             }
 
             if (node.name === "Screen") {
@@ -57130,7 +57149,6 @@ var WatchConfigurator = /*#__PURE__*/function () {
             }
           }
         });
-        gltf.scene.rotation.y = -Math.PI / 2;
 
         _gsap.default.to(gltf.scene.children.find(function (item) {
           return item.name === "Minutes";
@@ -57150,7 +57168,10 @@ var WatchConfigurator = /*#__PURE__*/function () {
           repeat: -1
         });
 
-        _this2.scene.add(gltf.scene);
+        gltf.scene.rotation.y = -Math.PI / 2 + 0.3;
+        gltf.scene.rotation.x = -0.3;
+
+        _this3.scene.add(gltf.scene);
       }, function (xhr) {
         console.log(xhr.loaded / xhr.total * 100 + "% loaded");
         /**/
@@ -57176,13 +57197,13 @@ var WatchConfigurator = /*#__PURE__*/function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.renderer.render(this.scene, this.camera);
 
       if (this.renderer != null) {
         requestAnimationFrame(function () {
-          return _this3.animate();
+          return _this4.animate();
         });
       }
     }
