@@ -1,0 +1,50 @@
+/**
+ * Font Weight Viewer
+ */
+
+.c-weight-viewer {
+    background: $black;
+    color: $white;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 10vh;
+    padding-bottom: 10vh;
+
+    &__inner {
+        text-align: center;
+        position: relative;
+        user-select: none;
+        padding-right: percentage(1/24);
+        padding-left: percentage(1/24);
+        width: 100%;
+        flex: 1 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__areas-wrapper {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        display: flex;
+    }
+
+    &__single-area {
+        flex-grow: 1;
+        flex-basis: 0;
+        opacity: 0;
+    }
+
+    &__content-type {
+        height: 100%;
+        font-size: 25vw;
+        line-height: 1em;
+    }
+}

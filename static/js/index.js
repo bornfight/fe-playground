@@ -24,6 +24,7 @@ import BrushTextScroll from "./examples/BrushTextScroll/BrushTextScroll";
 import MagneticHotspots from "./examples/MagneticHotspots/MagneticHotspots";
 import PetPakAwwwards from "./examples/PetPakAwwwards";
 import AimeConcept from "./examples/AimeConcept/AimeConcept";
+import WeightViewer from "./examples/WeightViewer/WeightViewer";
 
 /**
  * Check if document is ready cross-browser
@@ -170,4 +171,11 @@ ready(() => {
      */
     const aimeConcept = new AimeConcept();
     aimeConcept.init();
+
+    /**
+     * WeightViewer
+     * @type {WeightViewer}
+     */
+    const weightViewer = new WeightViewer();
+    weightViewer.init();
 });
