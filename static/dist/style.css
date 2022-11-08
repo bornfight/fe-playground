@@ -3596,6 +3596,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .is-yellow-color .c-type-setter__color-switch__single--red {
   border: 0; }
 
+.is-red-color .c-type-setter__color-switch__single--red {
+  pointer-events: none; }
+
 .c-type-setter__color-switch__single--yellow {
   background: #e1ff2f; }
 
@@ -3607,6 +3610,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   .is-yellow-color .c-type-setter__color-switch__single--yellow,
   .is-black-color .c-type-setter__color-switch__single--yellow {
     border: 1px solid #111111; } }
+
+.is-yellow-color .c-type-setter__color-switch__single--yellow {
+  pointer-events: none; }
 
 .c-type-setter__color-switch__single--white {
   background: #111111;
@@ -3622,6 +3628,9 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .is-red-color .c-type-setter__color-switch__single--white {
   border-color: #ffffff; }
 
+.is-white-color .c-type-setter__color-switch__single--white {
+  pointer-events: none; }
+
 .c-type-setter__color-switch__single--black {
   background: #f6f6f6; }
 
@@ -3633,6 +3642,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
     border: 1px solid #f6f6f6; } }
 
 .is-black-color .c-type-setter__color-switch__single--black {
+  pointer-events: none;
   border: 0.06944vw solid #111111; }
 
 @media (max-width: 1440px) {

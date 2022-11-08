@@ -410,6 +410,10 @@
                 .is-yellow-color & {
                     border: 0;
                 }
+
+                .is-red-color & {
+                    pointer-events: none;
+                }
             }
 
             &--yellow {
@@ -422,6 +426,10 @@
                     @include mq(xl) {
                         border: 1px solid #111111;
                     }
+                }
+
+                .is-yellow-color & {
+                    pointer-events: none;
                 }
             }
 
@@ -440,6 +448,10 @@
                 .is-red-color & {
                     border-color: $white;
                 }
+
+                .is-white-color & {
+                    pointer-events: none;
+                }
             }
 
             &--black {
@@ -454,6 +466,7 @@
                 }
 
                 .is-black-color & {
+                    pointer-events: none;
                     border: get-vw(1px) solid #111111;
 
                     @include mq(xl) {
