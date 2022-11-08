@@ -25,6 +25,7 @@ import MagneticHotspots from "./examples/MagneticHotspots/MagneticHotspots";
 import PetPakAwwwards from "./examples/PetPakAwwwards";
 import AimeConcept from "./examples/AimeConcept/AimeConcept";
 import WeightViewer from "./examples/WeightViewer/WeightViewer";
+import TypeSetter from "./examples/TypeSetter/TypeSetter";
 
 /**
  * Check if document is ready cross-browser
@@ -178,4 +179,11 @@ ready(() => {
      */
     const weightViewer = new WeightViewer();
     weightViewer.init();
+
+    /**
+     * TypeSetter
+     * @type {TypeSetter}
+     */
+    const typeSetter = new TypeSetter();
+    typeSetter.init();
 });

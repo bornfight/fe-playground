@@ -1,0 +1,485 @@
+/**
+ * Type Setter
+ */
+
+.c-type-setter {
+    position: relative;
+    padding: get-vw(70px) percentage(1/24) get-vw(70px);
+    transition: background-color 0.3s, color 0.3s;
+    background: #111111;
+    color: #f6f6f6;
+
+    @include mq(xl) {
+        padding: 70px percentage(1/24) 70px;
+    }
+
+    @include mq(md) {
+        padding-bottom: 50px;
+        padding-top: 30px;
+        border-top: 1px solid #3d3d3d;
+    }
+
+    &:first-child {
+        @include mq(md) {
+            border-top: 0;
+        }
+    }
+
+    @include mq(sm) {
+        padding-bottom: 30px;
+        padding-top: 20px;
+    }
+
+    $this: &;
+
+    @media (hover: hover) {
+        &:hover {
+            #{$this}__menu {
+                transition: opacity 0.3s ease-in-out;
+                opacity: 1;
+            }
+        }
+    }
+
+    &.is-red-color {
+        color: #f40000;
+        background-color: #360f34;
+    }
+
+    &.is-yellow-color {
+        color: #111111;
+        background-color: #e1ff2f;
+    }
+
+    &.is-white-color {
+        color: #f6f6f6;
+        background-color: #111111;
+    }
+
+    &.is-black-color {
+        color: #111111;
+        background-color: #f6f6f6;
+    }
+
+    &__menu {
+        margin-bottom: get-vw(20px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        opacity: 0.3;
+        transition: opacity 0.2s ease-in-out;
+
+        @include mq(xl) {
+            margin-bottom: rem(20px);
+        }
+
+        @include mq(md) {
+            opacity: 0.8;
+        }
+    }
+
+    &__select-wrapper {
+    }
+
+    &__button-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    &__price {
+        padding: get-vw(10px) 0;
+        display: inline-block;
+
+        @include mq(xl) {
+            padding: 10px 0;
+        }
+    }
+
+    &__input-wrapper {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+
+        @include mq(sm) {
+            width: 100%;
+        }
+    }
+
+    &__input-single {
+        padding: get-vw(10px) get-vw(70px) get-vw(10px) 0;
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        position: relative;
+
+        @include mq(xl) {
+            padding: 10px 70px 10px 0;
+        }
+
+        @include mq(lg) {
+            padding: 10px 60px 10px 0;
+        }
+
+        @include mq(md) {
+            padding: 10px 50px 10px 0;
+        }
+
+        @include mq(sm) {
+            width: auto;
+            margin-right: 0;
+            padding-right: 0px;
+        }
+
+        &--alignment {
+            align-items: flex-end;
+            padding: get-vw(10px) get-vw(30px) get-vw(10px) 0;
+
+            @include mq(xl) {
+                padding: 10px 30px 10px 0;
+            }
+        }
+    }
+
+    &__input-value {
+        -webkit-appearance: none;
+        background-color: transparent;
+        color: inherit;
+        border: 0;
+        outline: 0;
+        box-shadow: 0 0 0;
+        border-radius: 0;
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: get-vw(-60px);
+        width: auto;
+        padding: 0;
+        min-width: get-vw(30px);
+
+        @include mq(xl) {
+            min-width: 30px;
+            margin-left: -60px;
+        }
+
+        @include mq(lg) {
+            margin-left: -50px;
+        }
+
+        @include mq(md) {
+            position: static;
+            margin-left: 10px;
+            transform: none;
+        }
+    }
+
+    &__input-label {
+        margin-right: get-vw(10px);
+
+        @include mq(xl) {
+            margin-right: rem(10px);
+        }
+    }
+
+    &__range-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: get-vw(90px);
+        height: get-vw(1px);
+        margin-top: get-vw(2px);
+        background: $white;
+        outline: none;
+
+        @include mq(xl) {
+            width: rem(90px);
+            height: 1px;
+            margin-top: 2px;
+        }
+
+        .is-red-color & {
+            background-color: #f40000;
+        }
+
+        .is-yellow-color & {
+            background-color: #111111;
+        }
+
+        .is-black-color & {
+            background-color: #111111;
+        }
+
+        &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: get-vw(10px);
+            height: get-vw(10px);
+            background: $white;
+            cursor: pointer;
+            border: 0;
+            border-radius: 100%;
+
+            @include mq(xl) {
+                width: rem(10px);
+                height: rem(10px);
+            }
+
+            .is-red-color & {
+                background-color: #f40000;
+            }
+
+            .is-yellow-color & {
+                background-color: #111111;
+            }
+
+            .is-black-color & {
+                background-color: #111111;
+            }
+        }
+
+        &::-moz-range-thumb {
+            width: get-vw(10px);
+            height: get-vw(10px);
+            background: $white;
+            cursor: pointer;
+            border-radius: 100%;
+            border: 0;
+
+            @include mq(xl) {
+                width: rem(10px);
+                height: rem(10px);
+            }
+
+            .is-red-color & {
+                background-color: #f40000;
+            }
+
+            .is-yellow-color & {
+                background-color: #111111;
+            }
+
+            .is-black-color & {
+                background-color: #111111;
+            }
+        }
+    }
+
+    &__align-icon {
+        font-size: get-vw(16px);
+        margin-right: get-vw(10px);
+        margin-top: get-vw(2px);
+        cursor: pointer;
+        line-height: 0;
+        transition: color 0.2s ease-out;
+
+        &.is-active {
+            color: #e1ff2f;
+        }
+
+        @include mq(xl) {
+            font-size: rem(16px);
+            margin-right: rem(10px);
+            margin-top: 2px;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    &__preview {
+        padding: get-vw(15px) 0;
+
+        @include mq(xl) {
+            padding: rem(15px) 0;
+        }
+    }
+
+    // modifiers
+    &--listed {
+        &:first-of-type {
+            padding-top: get-vw(130px);
+
+            @include mq(xl) {
+                padding-top: 130px;
+            }
+
+            @include mq(md) {
+                padding-top: 50px;
+            }
+
+            @include mq(sm) {
+                padding-top: 30px;
+            }
+        }
+
+        .c-type-setter {
+            &__input-wrapper {
+                margin-right: 0;
+                width: 100%;
+            }
+
+            &__select-wrapper {
+                display: inline-flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: flex-start;
+                flex: 1 0 0;
+
+                @include mq(lg-alt) {
+                    flex: auto;
+                }
+            }
+        }
+    }
+
+    // overrides
+    .c-color-switch {
+        @include mq(sm) {
+            display: none;
+        }
+    }
+
+    &.is-black-color {
+        .c-type-setter__align-icon.is-active {
+            color: #f40000;
+        }
+    }
+
+    &.is-yellow-color {
+        .c-type-setter__align-icon.is-active {
+            color: #f40000;
+        }
+    }
+
+    &.is-red-color {
+    }
+
+    &.is-white-color {
+    }
+
+    &__color-switch {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        z-index: 1;
+        top: 0;
+        left: 0;
+
+        &__inner {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding-left: get-vw(5px);
+
+            @include mq(xl) {
+                padding-left: 5px;
+            }
+        }
+
+        &__single {
+            width: get-vw(15px);
+            height: get-vw(15px);
+            margin-right: get-vw(7px);
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 1;
+            transition: opacity 0.2s;
+
+            &:last-child {
+                margin-right: 0;
+            }
+
+            @include mq(xl) {
+                width: 15px;
+                height: 15px;
+                margin-right: 7px;
+            }
+
+            &--red {
+                background: #360f34;
+                border: get-vw(1px) solid $white;
+
+                @include mq(xl) {
+                    border: 1px solid $white;
+                }
+
+                .is-yellow-color & {
+                    border: 0;
+                }
+            }
+
+            &--yellow {
+                background: #e1ff2f;
+
+                .is-yellow-color &,
+                .is-black-color & {
+                    border: get-vw(1px) solid #111111;
+
+                    @include mq(xl) {
+                        border: 1px solid #111111;
+                    }
+                }
+            }
+
+            &--white {
+                background: #111111;
+                border: get-vw(1px) solid $white;
+
+                @include mq(xl) {
+                    border: 1px solid $white;
+                }
+
+                .is-yellow-color & {
+                    border: 0;
+                }
+
+                .is-red-color & {
+                    border-color: $white;
+                }
+            }
+
+            &--black {
+                background: #f6f6f6;
+
+                .is-white-color & {
+                    border: get-vw(1px) solid #f6f6f6;
+
+                    @include mq(xl) {
+                        border: 1px solid #f6f6f6;
+                    }
+                }
+
+                .is-black-color & {
+                    border: get-vw(1px) solid #111111;
+
+                    @include mq(xl) {
+                        border: 1px solid #111111;
+                    }
+                }
+
+                .is-yellow-color & {
+                    border: get-vw(1px) solid #111111;
+
+                    @include mq(xl) {
+                        border: 1px solid #111111;
+                    }
+                }
+            }
+        }
+    }
+
+    select {
+        background-color: transparent;
+        color: inherit;
+        border-radius: 0;
+        &:active,
+        &:focus {
+            box-shadow: unset;
+            outline: none;
+        }
+    }
+}

@@ -59592,6 +59592,246 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var ColorSwitch = /*#__PURE__*/function () {
+  function ColorSwitch() {
+    _classCallCheck(this, ColorSwitch);
+  }
+
+  _createClass(ColorSwitch, [{
+    key: "init",
+    value: function init(wrapper) {
+      this.switchRed = wrapper.querySelector(".js-switch-red");
+      this.switchWhite = wrapper.querySelector(".js-switch-white");
+      this.switchBlack = wrapper.querySelector(".js-switch-black");
+      this.switchYellow = wrapper.querySelector(".js-switch-yellow");
+
+      if (!this.switchRed || !this.switchWhite || !this.switchBlack || !this.switchYellow) {
+        return;
+      }
+
+      this.switchRed.addEventListener("click", function () {
+        wrapper.classList.remove("is-white-color");
+        wrapper.classList.remove("is-black-color");
+        wrapper.classList.remove("is-yellow-color");
+        wrapper.classList.add("is-red-color");
+      });
+      this.switchYellow.addEventListener("click", function () {
+        wrapper.classList.remove("is-white-color");
+        wrapper.classList.remove("is-black-color");
+        wrapper.classList.remove("is-red-color");
+        wrapper.classList.add("is-yellow-color");
+      });
+      this.switchWhite.addEventListener("click", function () {
+        wrapper.classList.remove("is-red-color");
+        wrapper.classList.remove("is-black-color");
+        wrapper.classList.remove("is-yellow-color");
+        wrapper.classList.add("is-white-color");
+      });
+      this.switchBlack.addEventListener("click", function () {
+        wrapper.classList.remove("is-red-color");
+        wrapper.classList.remove("is-white-color");
+        wrapper.classList.remove("is-yellow-color");
+        wrapper.classList.add("is-black-color");
+      });
+    }
+  }]);
+
+  return ColorSwitch;
+}();
+
+exports.default = ColorSwitch;
+
+},{}],26:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _ColorSwitch = _interopRequireDefault(require("./ColorSwitch"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var TypeSetter = /*#__PURE__*/function () {
+  function TypeSetter() {
+    _classCallCheck(this, TypeSetter);
+
+    this.DOM = {
+      wrapper: ".js-type-setter"
+    };
+    this.typetester = document.querySelectorAll(this.DOM.wrapper);
+  }
+
+  _createClass(TypeSetter, [{
+    key: "init",
+    value: function init() {
+      var _this = this;
+
+      // return if typtester dont exist
+      if (this.typetester.length === 0) {
+        return;
+      }
+
+      this.addFonts();
+      this.colorSwitcher = new _ColorSwitch.default();
+      var contextWidth = 1440;
+      Array.from(this.typetester).forEach(function (element) {
+        _this.colorSwitcher.init(element); // get typtester elements
+
+
+        var preview = element.querySelector(".js-preview");
+        var fontWeight = element.querySelector(".js-type-setter-font-weight");
+        var fontSize = element.querySelector(".js-font-size");
+        var fontSizeValue = fontSize.parentNode.querySelector(".js-input-value");
+        var lineHeight = element.querySelector(".js-line-height");
+        var lineHeightValue = lineHeight.parentNode.querySelector(".js-input-value");
+        var letterSpacing = element.querySelector(".js-letter-spacing");
+        var letterSpacingValue = letterSpacing.parentNode.querySelector(".js-input-value");
+        var alignLeft = element.querySelector(".js-align-left");
+        var alignCenter = element.querySelector(".js-align-center");
+        var alignRight = element.querySelector(".js-align-right");
+        var alignJustify = element.querySelector(".js-align-justify"); // apply defaults for typetester modul
+
+        preview.style.fontFamily = fontWeight[fontWeight.selectedIndex].dataset.fontName;
+        preview.style.fontSize = fontSize.value / contextWidth * 100 + "vw";
+        preview.style.lineHeight = lineHeight.value;
+        preview.style.letterSpacing = letterSpacing.value + "px"; // catch paste events and paste them without formatting
+
+        preview.addEventListener("paste", function (e) {
+          e.preventDefault();
+          var text = (e.originalEvent || e).clipboardData.getData("text/plain");
+          document.execCommand("insertHTML", false, text);
+        }); // catch change on font weight dropdown and apply styles
+
+        fontWeight.addEventListener("change", function () {
+          preview.style.fontFamily = fontWeight[fontWeight.selectedIndex].dataset.fontName;
+        }); // catch change on font size slider and apply styles
+
+        fontSize.addEventListener("input", function () {
+          preview.style.fontSize = fontSize.value / contextWidth * 100 + "vw";
+          fontSizeValue.value = fontSize.value;
+        });
+        fontSizeValue.addEventListener("input", function () {
+          if (parseInt(fontSizeValue.value) > parseInt(fontSize.max)) {
+            fontSizeValue.value = fontSize.max;
+          }
+
+          if (parseInt(fontSizeValue.value) < parseInt(fontSize.min)) {
+            fontSizeValue.value = fontSize.min;
+          }
+
+          preview.style.fontSize = fontSizeValue.value / contextWidth * 100 + "vw";
+          fontSize.value = fontSizeValue.value;
+        }); // catch change on line height slider and apply styles
+
+        lineHeight.addEventListener("input", function () {
+          preview.style.lineHeight = lineHeight.value;
+          lineHeightValue.value = lineHeight.value;
+        });
+        lineHeightValue.addEventListener("input", function () {
+          if (parseInt(lineHeightValue.value) > parseInt(lineHeight.max)) {
+            lineHeightValue.value = lineHeight.max;
+          }
+
+          if (parseInt(lineHeightValue.value) < parseInt(lineHeight.min)) {
+            lineHeightValue.value = lineHeight.min;
+          }
+
+          preview.style.lineHeight = lineHeightValue.value;
+          lineHeight.value = lineHeightValue.value;
+        }); // catch change on letter spacing slider and apply styles
+
+        letterSpacing.addEventListener("input", function () {
+          preview.style.letterSpacing = letterSpacing.value + "px";
+          letterSpacingValue.value = letterSpacing.value;
+        });
+        letterSpacingValue.addEventListener("input", function () {
+          if (parseInt(letterSpacingValue.value) > parseInt(letterSpacing.max)) {
+            letterSpacingValue.value = lineHeight.max;
+          }
+
+          if (parseInt(letterSpacingValue.value) < parseInt(letterSpacing.min)) {
+            letterSpacingValue.value = letterSpacing.min;
+          }
+
+          preview.style.letterSpacing = letterSpacingValue.value + "px";
+          letterSpacing.value = letterSpacingValue.value;
+        }); // catch click on align left icon and apply style
+
+        alignLeft.addEventListener("click", function () {
+          preview.style.textAlign = "left";
+          removeAlignActiveClasses();
+          alignLeft.classList.add("is-active");
+        }); // catch click on align center icon and apply style
+
+        alignCenter.addEventListener("click", function () {
+          preview.style.textAlign = "center";
+          removeAlignActiveClasses();
+          alignCenter.classList.add("is-active");
+        }); // catch click on align right icon and apply style
+
+        alignRight.addEventListener("click", function () {
+          preview.style.textAlign = "right";
+          removeAlignActiveClasses();
+          alignRight.classList.add("is-active");
+        }); // catch click on align justify icon and apply style
+
+        alignJustify.addEventListener("click", function () {
+          preview.style.textAlign = "justify";
+          removeAlignActiveClasses();
+          alignJustify.classList.add("is-active");
+        });
+
+        function removeAlignActiveClasses() {
+          alignJustify.classList.remove("is-active");
+          alignRight.classList.remove("is-active");
+          alignCenter.classList.remove("is-active");
+          alignLeft.classList.remove("is-active");
+        }
+      });
+    }
+  }, {
+    key: "addFonts",
+    value: function addFonts() {
+      if (!window.fontData) return;
+      var newStyle = document.createElement("style");
+      var style = "";
+
+      for (var i = 0; i < window.fontData.length; i++) {
+        style += "@font-face {font-family: \"".concat(window.fontData[i].fontName, "\";src: url('").concat(window.fontData[i].fileUrl, "') format('woff');}");
+      }
+
+      newStyle.appendChild(document.createTextNode(style));
+      document.head.appendChild(newStyle);
+    }
+  }]);
+
+  return TypeSetter;
+}();
+
+exports.default = TypeSetter;
+
+},{"./ColorSwitch":25}],27:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 var WeightViewer = /*#__PURE__*/function () {
   function WeightViewer() {
     _classCallCheck(this, WeightViewer);
@@ -59670,7 +59910,7 @@ var WeightViewer = /*#__PURE__*/function () {
 
 exports.default = WeightViewer;
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -59700,6 +59940,8 @@ var _PetPakAwwwards = _interopRequireDefault(require("./examples/PetPakAwwwards"
 var _AimeConcept = _interopRequireDefault(require("./examples/AimeConcept/AimeConcept"));
 
 var _WeightViewer = _interopRequireDefault(require("./examples/WeightViewer/WeightViewer"));
+
+var _TypeSetter = _interopRequireDefault(require("./examples/TypeSetter/TypeSetter"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -59862,8 +60104,15 @@ ready(function () {
 
   var weightViewer = new _WeightViewer.default();
   weightViewer.init();
+  /**
+   * TypeSetter
+   * @type {TypeSetter}
+   */
+
+  var typeSetter = new _TypeSetter.default();
+  typeSetter.init();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AimeConcept/AimeConcept":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/PetPakAwwwards":22,"./examples/ScrollingMarquee/ScrollingMarquee":23,"./examples/TemplateExample/TemplateComponent":24,"./examples/WeightViewer/WeightViewer":25}]},{},[26])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AimeConcept/AimeConcept":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/PetPakAwwwards":22,"./examples/ScrollingMarquee/ScrollingMarquee":23,"./examples/TemplateExample/TemplateComponent":24,"./examples/TypeSetter/TypeSetter":26,"./examples/WeightViewer/WeightViewer":27}]},{},[28])
 
 //# sourceMappingURL=bundle.js.map
