@@ -59675,10 +59675,7 @@ var TypeSetter = /*#__PURE__*/function () {
       var _this = this;
 
       // return if typtester dont exist
-      if (this.typetester.length === 0) {
-        return;
-      }
-
+      if (this.typetester.length < 1) return;
       this.addFonts();
       this.colorSwitcher = new _ColorSwitch.default();
       var contextWidth = 1440;

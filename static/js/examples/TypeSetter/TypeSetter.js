@@ -11,9 +11,7 @@ export default class TypeSetter {
 
     init() {
         // return if typtester dont exist
-        if (this.typetester.length === 0) {
-            return;
-        }
+        if (this.typetester.length < 1) return;
 
         this.addFonts();
 
