@@ -3127,8 +3127,8 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
  * Font Weight Viewer
  */
 .c-weight-viewer {
-  background: #000000;
-  color: #ffffff;
+  background: #e1ff2f;
+  color: #111111;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -3145,7 +3145,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
       -ms-flex-align: center;
           align-items: center;
   min-height: 100vh;
-  padding-top: 10vh;
   padding-bottom: 10vh; }
 
 .c-weight-viewer__inner {
@@ -3191,7 +3190,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 
 .c-weight-viewer__content-type {
   height: 100%;
-  font-size: 25vw;
+  font-size: 40vw;
   line-height: 1em; }
 
 /**
