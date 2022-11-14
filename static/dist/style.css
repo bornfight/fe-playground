@@ -3789,7 +3789,31 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .c-link-list {
   padding-bottom: 60px;
   padding-right: 20px;
-  width: 50%; }
+  width: 66.66667%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+@media (max-width: 1140px) {
+  .c-link-list {
+    width: 50%; } }
+
+.c-link-list:last-child {
+  display: block;
+  padding-top: 0;
+  width: 33.33333%; }
+
+@media (max-width: 1140px) {
+  .c-link-list:last-child {
+    width: 50%; } }
+
+.c-link-list:last-child .c-link-list__item {
+  width: 100%; }
 
 @media (max-width: 800px) {
   .c-link-list {
@@ -3801,6 +3825,16 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap; }
+
+.c-link-list__item {
+  width: 50%; }
+
+@media (max-width: 1140px) {
+  .c-link-list__item {
+    width: 100%; } }
+
+.c-link-list__item--full {
+  width: 100%; }
 
 /**
  * Pages
