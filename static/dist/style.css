@@ -3715,26 +3715,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .is-rotating-right .c-3d-spiral-timeline__buttons {
   pointer-events: none; }
 
-.c-3d-spiral-timeline__button {
-  background-color: transparent;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  color: #ffffff;
-  font-size: 15px; }
-
-@media (max-width: 1440px) {
-  .c-3d-spiral-timeline__button {
-    font-size: 13px; } }
-
-.c-3d-spiral-timeline__button--previous {
-  margin-right: 20px;
-  margin-left: auto; }
-
-.c-3d-spiral-timeline__button.swiper-button-disabled {
-  opacity: 0.2 !important;
-  pointer-events: none; }
-
 .c-3d-spiral-timeline__navigation {
   position: absolute;
   left: 30px;
@@ -3913,9 +3893,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   .c-3d-spiral-timeline .swiper-container {
     padding-right: 20px; } }
 
-.is-popup-opened .c-3d-spiral-timeline .swiper-container {
-  pointer-events: none !important; }
-
 .c-3d-spiral-timeline .swiper-container.is-big-offset {
   opacity: 0;
   -webkit-transition: opacity 0.05s;
@@ -3925,7 +3902,6 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   width: 100%;
   height: 100%;
   line-height: normal;
-  cursor: pointer;
   position: relative;
   z-index: 1; }
 
