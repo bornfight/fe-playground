@@ -7,8 +7,26 @@
         <link rel="stylesheet" href="../../static/dist/style.css" />
     </head>
     <body>
-        <div class="c-3d-spiral-timeline js-model-scroll">
-            3d-spiral-timeline
+        <div class="c-3d-spiral-timeline-wrapper" id="timeline-slider">
+            <div class="c-3d-spiral-timeline">
+                <div class="js-3d-spiral-timeline-slider swiper-container">
+                    <div class="swiper-wrapper js-3d-spiral-timeline-slider-wrapper"></div>
+                </div>
+                <div class="c-3d-spiral-timeline__canvas js-3d-spiral-timeline"></div>
+                <div class="c-3d-spiral-timeline__navigation">
+                    <div class="c-3d-spiral-timeline__pagination">
+                        <div class="js-3d-spiral-timeline-pagination"></div>
+
+                        <div class="c-3d-spiral-timeline__progress-line-wrapper">
+                            <div class="c-3d-spiral-timeline__progress-line js-3d-spiral-timeline-pagination-progress-line"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <i class="c-3d-spiral-timeline__scroll-indicator">
+                <i></i>
+            </i>
         </div>
 
         <script type="text/javascript" src="../../static/js/vendor/three.js"></script>

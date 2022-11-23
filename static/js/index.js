@@ -26,6 +26,7 @@ import PetPakAwwwards from "./examples/PetPakAwwwards";
 import AimeConcept from "./examples/AimeConcept/AimeConcept";
 import WeightViewer from "./examples/WeightViewer/WeightViewer";
 import TypeSetter from "./examples/TypeSetter/TypeSetter";
+import ThreeSpiralTimeline from "./examples/3dSpiralTimeline/ThreeSpiralTimeline";
 
 /**
  * Check if document is ready cross-browser
@@ -186,4 +187,10 @@ ready(() => {
      */
     const typeSetter = new TypeSetter();
     typeSetter.init();
+
+    /**
+     * ThreeSpiralTimeline
+     * @type {ThreeSpiralTimeline}
+     */
+    const threeSpiralTimeline = new ThreeSpiralTimeline();
 });

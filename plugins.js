@@ -8,4 +8,5 @@ export const plugins = [
     "detect-gpu",
     "pixi.js",
     "gsap/CustomEase",
+    "swiper"
 ];

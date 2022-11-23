@@ -1,0 +1,324 @@
+/**
+ * 3d Scrollytelling
+ */
+
+.c-3d-spiral-timeline {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+    height: calc(var(--vh, 1vh) * 100);
+    background-color: hsla(0, 0%, 41%, 1);
+    background-image: radial-gradient(at 40% 20%, hsla(0, 0%, 38%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(0, 0%, 17%, 1) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(0, 0%, 18%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 50%, hsla(0, 0%, 35%, 1) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(0, 0%, 21%, 1) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, hsla(0, 0%, 16%, 1) 0px, transparent 50%), radial-gradient(at 0% 0%, hsla(0, 0%, 46%, 1) 0px, transparent 50%);
+    color: $white;
+
+    &__canvas {
+        left: 0;
+        top: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 0 !important;
+        transition: 0.5s ease-out;
+
+        canvas {
+            transform: translate3d(0, 0, 0);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    &__buttons {
+        display: inline-flex;
+        flex-wrap: wrap;
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+
+        .is-rotating-left &,
+        .is-rotating-right & {
+            pointer-events: none;
+        }
+    }
+
+    &__button {
+        background-color: transparent;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        color: $white;
+        font-size: 15px;
+
+        @include mq(xl) {
+            font-size: 13px;
+        }
+
+        //modifiers
+        &--previous {
+            margin-right: 20px;
+            margin-left: auto;
+        }
+
+        &.swiper-button-disabled {
+            opacity: 0.2 !important;
+            pointer-events: none;
+        }
+    }
+
+    &__navigation {
+        position: absolute;
+        left: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+
+        @include mq(md) {
+            top: auto;
+            transform: none;
+            left: 15px;
+            bottom: 15px;
+        }
+
+        @include mq(sm) {
+            left: 5px;
+        }
+    }
+
+    &__pagination {
+        position: relative;
+        display: inline-block;
+        width: auto;
+        cursor: pointer;
+
+        // overrides
+        .swiper-pagination-bullets {
+            display: block;
+        }
+    }
+
+    &__pagination-bullet.swiper-pagination-bullet {
+        display: block;
+        padding: 10px;
+        height: auto;
+        width: auto;
+        border-radius: 0;
+        background-color: transparent;
+        cursor: pointer;
+        opacity: 0.3;
+        transition: opacity 0.3s;
+
+        @include mq(md) {
+            padding: 7px;
+        }
+
+        &:first-child {
+            padding-top: 0;
+        }
+
+        &:last-child {
+            padding-bottom: 0;
+        }
+
+        &.swiper-pagination-bullet-active {
+            pointer-events: none;
+            opacity: 1;
+        }
+
+        &.swiper-bullet-prev,
+        &.swiper-bullet-next {
+            opacity: 0.5;
+        }
+
+        @media (hover: hover) {
+            &:hover {
+                opacity: 0.8;
+                transition: opacity 0.6s;
+            }
+        }
+    }
+
+    &__progress-line-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        overflow: hidden;
+        width: 2px;
+        background-color: rgba($white, 0.2);
+    }
+
+    &__progress-line {
+        position: absolute;
+        left: 0;
+        bottom: 100%;
+        height: 100%;
+        width: 100%;
+        background-color: $white;
+    }
+
+    &scroll-indicator {
+        display: inline-block;
+        z-index: 99;
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        mix-blend-mode: difference;
+
+        .o-header-wrapper & {
+            position: absolute;
+        }
+
+        i {
+            width: 2px;
+            height: 50px;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            opacity: 0.8;
+
+            @include mq(lg) {
+                height: 25px;
+            }
+
+            &:after {
+                content: "";
+                position: absolute;
+                top: 0;
+                height: 100%;
+                width: 100%;
+                background-color: $white;
+                animation-name: scroll;
+                animation-duration: 1.5s;
+                animation-iteration-count: infinite;
+                animation-play-state: running;
+                animation-timing-function: ease-in;
+                transform: translateY(-105%);
+            }
+
+            &:last-child {
+                &:after {
+                    animation-delay: 0.8s;
+                }
+            }
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateY(-105%);
+            }
+            70% {
+                transform: translateY(105%);
+            }
+            100% {
+                transform: translateY(105%);
+            }
+        }
+
+        @include mq(md) {
+            left: auto;
+            right: 20px;
+        }
+    }
+
+    // overrides
+    .swiper-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        padding-left: 15%;
+        padding-right: 20%;
+        padding-bottom: 15%;
+        opacity: 1;
+        transition: opacity 0.6s;
+
+        @include mq(md) {
+            padding-left: 110px;
+            padding-right: percentage(2/24);
+        }
+
+        @include mq(sm) {
+            padding-right: 20px;
+        }
+
+        .is-popup-opened & {
+            pointer-events: none !important;
+        }
+
+        &.is-big-offset {
+            opacity: 0;
+            transition: opacity 0.05s;
+        }
+    }
+}
+
+.c-3d-spiral-timeline-item {
+    width: 100%;
+    height: 100%;
+    line-height: normal;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+
+    &__inner {
+        position: absolute;
+        width: 100%;
+        top: 65%;
+        left: 0;
+        margin-top: 100px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    &__inner-content {
+        max-width: 420px;
+        width: auto;
+    }
+
+    &__year {
+    }
+
+    &__title.u-a3 {
+        margin-bottom: 0;
+    }
+
+    &__text {
+    }
+
+    &__slide {
+        display: flex;
+        flex-wrap: wrap;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+
+        .slide-inner {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide-inner-image {
+            background-position: center;
+            background-size: cover;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    }
+}
+
+.c-3d-spiral-timeline-wrapper {
+}
