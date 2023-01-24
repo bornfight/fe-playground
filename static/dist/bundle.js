@@ -59410,6 +59410,238 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 _gsap.default.registerPlugin(_ScrollTrigger.default);
 
+var RotationalScroll = /*#__PURE__*/function () {
+  function RotationalScroll() {
+    _classCallCheck(this, RotationalScroll);
+
+    this.DOM = {
+      rotational: ".js-rotational",
+      rotationalWrap: ".js-rotational-wrap",
+      rotationalItem: ".js-item",
+      animatedContent: ".js-animated-content",
+      rotationalSpacer: ".js-rotational-spacer"
+    };
+    this.rotationalWrap = document.querySelector(this.DOM.rotationalWrap);
+    this.rotational = document.querySelector(this.DOM.rotational);
+    this.rotationItem = document.querySelectorAll(this.DOM.rotationalItem);
+    this.animatedContent = document.querySelectorAll(this.DOM.animatedContent);
+    this.rotationalSpacers = document.querySelectorAll(this.DOM.rotationalSpacer);
+    this.currentSlide = -1;
+  }
+
+  _createClass(RotationalScroll, [{
+    key: "init",
+    value: function init() {
+      var _this = this;
+
+      // this.rotationalController();
+      // this.zoomItem(0);
+      this.rotationalSpacers.forEach(function (item, index) {
+        _this.rotationalController2(item, index);
+      });
+    }
+  }, {
+    key: "rotationalController2",
+    value: function rotationalController2(item, index) {
+      var _this2 = this;
+
+      _gsap.default.fromTo(this.rotational, {
+        rotate: 90 * (index - 1)
+      }, {
+        rotate: 90 * index,
+        ease: "none",
+        scrollTrigger: {
+          trigger: item,
+          start: "top bottom",
+          end: "bottom bottom",
+          scrub: true,
+          snap: 1
+        },
+        onComplete: function onComplete() {
+          _this2.zoomItem(index);
+        },
+        onReverseComplete: function onReverseComplete() {
+          _this2.zoomItem(index - 1);
+        }
+      });
+    } // rotationalController() {
+    //     const timeline = gsap.timeline({
+    //         scrollTrigger: {
+    //             trigger: this.rotationalWrap,
+    //             star: "top top",
+    //             end: "bottom bottom",
+    //             scrub: 0.8,
+    //             // normalizeScroll: true,
+    //             snap: {
+    //                 snapTo: "labels",
+    //                 duration: { min: 0.2, max: 0.5 },
+    //                 delay: 0,
+    //                 ease: "power1.inOut",
+    //             },
+    //         },
+    //     });
+    //
+    //     timeline
+    //         .addLabel("zero")
+    //         .to(this.rotational, {
+    //             rotate: 0,
+    //             ease: "none",
+    //             onUpdate: () => {
+    //                 this.zoomItem(0);
+    //             },
+    //         })
+    //         .addLabel("first")
+    //         .to(this.rotational, {
+    //             rotate: 90,
+    //             ease: "none",
+    //             onUpdate: () => {
+    //                 this.zoomItem(1);
+    //             },
+    //         })
+    //         .addLabel("second")
+    //         .to(this.rotational, {
+    //             rotate: 180,
+    //             ease: "none",
+    //             onUpdate: () => {
+    //                 this.zoomItem(2);
+    //             },
+    //         })
+    //         .addLabel("third")
+    //         .to(this.rotational, {
+    //             rotate: 270,
+    //             ease: "none",
+    //             onUpdate: () => {
+    //                 this.zoomItem(3);
+    //             },
+    //         })
+    //         .addLabel("fourth");
+    //     // .to(this.rotational, {
+    //     //     rotate: 270,
+    //     //     ease: "none",
+    //     //     onUpdate: () => {
+    //     //         this.zoomItem(3);
+    //     //     },
+    //     // });
+    // }
+
+  }, {
+    key: "zoomItem",
+    value: function zoomItem(index) {
+      if (this.currentSlide !== index) {
+        if (this.rotationItem[this.currentSlide] !== null && this.rotationItem[this.currentSlide] !== undefined) {
+          this.onLeaveAnim(this.rotationItem[this.currentSlide]);
+        }
+
+        this.currentSlide = index;
+        this.rotationItem.forEach(function (item) {
+          item.classList.remove("active");
+        });
+
+        if (this.rotationItem[this.currentSlide] !== null && this.rotationItem[this.currentSlide] !== undefined) {
+          this.rotationItem[this.currentSlide].classList.add("active");
+          this.onEnterAnim(this.rotationItem[this.currentSlide]);
+        }
+      }
+    }
+  }, {
+    key: "onEnterAnim",
+    value: function onEnterAnim(currentSlide) {
+      this.animatedItems = currentSlide.querySelectorAll(".js-content-animated");
+      this.animatedItemsLeft = currentSlide.querySelectorAll(".js-content-animated-left");
+      this.animatedItemsRight = currentSlide.querySelectorAll(".js-content-animated-right");
+      this.animatedItemsFloat = currentSlide.querySelectorAll(".js-content-animated-float");
+
+      _gsap.default.fromTo(this.animatedItems, {
+        opacity: 0,
+        y: "50%",
+        duration: 1,
+        delay: 0.7
+      }, {
+        opacity: 1,
+        y: "0%",
+        stagger: 0.5
+      });
+
+      _gsap.default.fromTo(this.animatedItemsLeft, {
+        x: "0%"
+      }, {
+        x: "-80%",
+        duration: 15,
+        repeat: -1,
+        yoyo: true
+      });
+
+      _gsap.default.fromTo(this.animatedItemsRight, {
+        x: "0%"
+      }, {
+        x: "80%",
+        duration: 15,
+        repeat: -1,
+        yoyo: true
+      });
+
+      _gsap.default.fromTo(this.animatedItemsFloat, {
+        x: "200%"
+      }, {
+        x: "-700%",
+        duration: 15,
+        repeat: -1,
+        stagger: 2
+      });
+    }
+  }, {
+    key: "onLeaveAnim",
+    value: function onLeaveAnim(currentSlide) {
+      this.animatedItems = currentSlide.querySelectorAll(".js-content-animated");
+
+      _gsap.default.to(this.animatedItems, {
+        opacity: 0,
+        delay: 0.7
+      });
+
+      _gsap.default.to(this.animatedItemsLeft, {
+        x: "0%",
+        delay: 0.3
+      });
+
+      _gsap.default.to(this.animatedItemsRight, {
+        x: "0%",
+        delay: 0.3
+      });
+
+      _gsap.default.to(this.animatedItemsFloat, {
+        x: "200%"
+      });
+    }
+  }]);
+
+  return RotationalScroll;
+}();
+
+exports.default = RotationalScroll;
+
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],24:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _gsap = _interopRequireDefault(require("gsap"));
+
+var _ScrollTrigger = _interopRequireDefault(require("gsap/dist/ScrollTrigger"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+_gsap.default.registerPlugin(_ScrollTrigger.default);
+
 var ScrollingMarquee = /*#__PURE__*/function () {
   function ScrollingMarquee() {
     _classCallCheck(this, ScrollingMarquee);
@@ -59497,7 +59729,7 @@ var ScrollingMarquee = /*#__PURE__*/function () {
 
 exports.default = ScrollingMarquee;
 
-},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],24:[function(require,module,exports){
+},{"gsap":"gsap","gsap/dist/ScrollTrigger":"gsap/dist/ScrollTrigger"}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59578,7 +59810,7 @@ var TemplateComponent = /*#__PURE__*/function () {
 
 exports.default = TemplateComponent;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59641,7 +59873,7 @@ var ColorSwitch = /*#__PURE__*/function () {
 
 exports.default = ColorSwitch;
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59815,7 +60047,7 @@ var TypeSetter = /*#__PURE__*/function () {
 
 exports.default = TypeSetter;
 
-},{"./ColorSwitch":25}],27:[function(require,module,exports){
+},{"./ColorSwitch":26}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -59907,7 +60139,7 @@ var WeightViewer = /*#__PURE__*/function () {
 
 exports.default = WeightViewer;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 
 var _TemplateComponent = _interopRequireDefault(require("./examples/TemplateExample/TemplateComponent"));
@@ -59939,6 +60171,8 @@ var _AimeConcept = _interopRequireDefault(require("./examples/AimeConcept/AimeCo
 var _WeightViewer = _interopRequireDefault(require("./examples/WeightViewer/WeightViewer"));
 
 var _TypeSetter = _interopRequireDefault(require("./examples/TypeSetter/TypeSetter"));
+
+var _RotationalScroll = _interopRequireDefault(require("./examples/RotationalScroll/RotationalScroll"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -60108,8 +60342,15 @@ ready(function () {
 
   var typeSetter = new _TypeSetter.default();
   typeSetter.init();
+  /**
+   * RotationalScroll
+   * @type {RotationalScroll}
+   */
+
+  var rotationalScroll = new _RotationalScroll.default();
+  rotationalScroll.init();
 });
 
-},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AimeConcept/AimeConcept":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/PetPakAwwwards":22,"./examples/ScrollingMarquee/ScrollingMarquee":23,"./examples/TemplateExample/TemplateComponent":24,"./examples/TypeSetter/TypeSetter":26,"./examples/WeightViewer/WeightViewer":27}]},{},[28])
+},{"./examples/3dScrollytelling/ThreeScrollytelling":5,"./examples/AimeConcept/AimeConcept":6,"./examples/AnimatedGradient/AnimatedGradient":7,"./examples/BrushTextScroll/BrushTextScroll":15,"./examples/HoverClippingNavigation/HoverClippingNavigation":16,"./examples/ImageSequence/ContentAnimation":17,"./examples/ImageSequence/ImageSequence":18,"./examples/MagneticHotspots/MagneticHotspots":19,"./examples/MouseDrivenVerticalCarousel/MouseDrivenVerticalCarousel":20,"./examples/PanningGallery/PanningGallery":21,"./examples/PetPakAwwwards":22,"./examples/RotationalScroll/RotationalScroll":23,"./examples/ScrollingMarquee/ScrollingMarquee":24,"./examples/TemplateExample/TemplateComponent":25,"./examples/TypeSetter/TypeSetter":27,"./examples/WeightViewer/WeightViewer":28}]},{},[29])
 
 //# sourceMappingURL=bundle.js.map

@@ -26,6 +26,7 @@ import PetPakAwwwards from "./examples/PetPakAwwwards";
 import AimeConcept from "./examples/AimeConcept/AimeConcept";
 import WeightViewer from "./examples/WeightViewer/WeightViewer";
 import TypeSetter from "./examples/TypeSetter/TypeSetter";
+import RotationalScroll from "./examples/RotationalScroll/RotationalScroll";
 
 /**
  * Check if document is ready cross-browser
@@ -186,4 +187,11 @@ ready(() => {
      */
     const typeSetter = new TypeSetter();
     typeSetter.init();
+
+    /**
+     * RotationalScroll
+     * @type {RotationalScroll}
+     */
+    const rotationalScroll = new RotationalScroll();
+    rotationalScroll.init();
 });
