@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>FE Playground - 3d spiral timeline</title>
+        <link rel="stylesheet" href="../../static/dist/style.css" />
+    </head>
+    <body>
+        <div class="c-3d-spiral-timeline-wrapper" id="timeline-slider">
+            <div class="c-3d-spiral-timeline">
+                <div class="js-3d-spiral-timeline-slider swiper-container">
+                    <div class="swiper-wrapper js-3d-spiral-timeline-slider-wrapper"></div>
+                </div>
+                <div class="c-3d-spiral-timeline__canvas js-3d-spiral-timeline"></div>
+                <div class="c-3d-spiral-timeline__navigation">
+                    <div class="c-3d-spiral-timeline__pagination">
+                        <div class="js-3d-spiral-timeline-pagination"></div>
+
+                        <div class="c-3d-spiral-timeline__progress-line-wrapper">
+                            <div class="c-3d-spiral-timeline__progress-line js-3d-spiral-timeline-pagination-progress-line"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <i class="c-3d-spiral-timeline__scroll-indicator">
+                <i></i>
+            </i>
+        </div>
+
+        <script type="text/javascript" src="../../static/js/vendor/three.js"></script>
+        <script type="text/javascript" src="../../static/dist/vendor.js"></script>
+        <script type="text/javascript" src="../../static/dist/bundle.js"></script>
+    </body>
+</html>

@@ -3,15 +3,14 @@
  */
 
 .c-weight-viewer {
-    background: $black;
-    color: $white;
+    background: #e1ff2f;
+    color: #111111;
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding-top: 10vh;
     padding-bottom: 10vh;
 
     &__inner {
@@ -44,7 +43,7 @@
 
     &__content-type {
         height: 100%;
-        font-size: 25vw;
+        font-size: 40vw;
         line-height: 1em;
     }
 }

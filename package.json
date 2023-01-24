@@ -33,7 +33,8 @@
         "is_js": "^0.9.0",
         "pixi.js": "^6.5.2",
         "poly-fluid-sizing": "^1.1.0",
-        "three": "0.120.1"
+        "three": "0.120.1",
+        "swiper": "5.4.1"
     },
     "devDependencies": {
         "@babel/core": "^7.14.8",
