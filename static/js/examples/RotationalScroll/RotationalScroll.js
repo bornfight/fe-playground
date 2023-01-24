@@ -48,7 +48,7 @@ export default class RotationalScroll {
             },
             {
                 rotate: 90 * index,
-                ease: "none",
+                ease: "power1.inOut",
                 scrollTrigger: {
                     trigger: item,
                     start: "top bottom",
@@ -106,12 +106,12 @@ export default class RotationalScroll {
                 opacity: 0,
                 y: "50%",
                 duration: 1,
-                delay: 0.7,
             },
             {
                 opacity: 1,
                 y: "0%",
-                stagger: 0.5,
+                stagger: 0.3,
+                ease: "power1.out",
             },
         );
 
@@ -125,6 +125,7 @@ export default class RotationalScroll {
                 duration: 15,
                 repeat: -1,
                 yoyo: true,
+                ease: "power1.out",
             },
         );
 
@@ -138,6 +139,7 @@ export default class RotationalScroll {
                 duration: 15,
                 repeat: -1,
                 yoyo: true,
+                ease: "power1.out",
             },
         );
 
@@ -151,6 +153,7 @@ export default class RotationalScroll {
                 duration: 15,
                 repeat: -1,
                 stagger: 2,
+                ease: "power1.out",
             },
         );
     }
