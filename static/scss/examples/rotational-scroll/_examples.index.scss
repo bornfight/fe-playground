@@ -1,29 +1,12 @@
 
 .e-rotational-scroll {
     position: relative;
-    //margin-top: -5%;
-    //height: 320vh;
 
     &__spacer {
         height: 100vh;
         display: block;
         position: relative;
         width: 100%;
-        //
-        //&:nth-child(1){
-        //    background: red;
-        //}
-        //&:nth-child(2){
-        //    background: black;
-        //
-        //}
-        //&:nth-child(3){
-        //    background: violet;
-        //
-        //}
-        //&:nth-child(4){
-        //    background: green;
-        //}
     }
 
     &__wrap {

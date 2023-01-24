@@ -59418,34 +59418,48 @@ var RotationalScroll = /*#__PURE__*/function () {
       rotational: ".js-rotational",
       rotationalWrap: ".js-rotational-wrap",
       rotationalItem: ".js-item",
-      animatedContent: ".js-animated-content",
       rotationalSpacer: ".js-rotational-spacer"
     };
-    this.rotationalWrap = document.querySelector(this.DOM.rotationalWrap);
+    this.rotationalWrap = document.querySelectorAll(this.DOM.rotationalWrap);
     this.rotational = document.querySelector(this.DOM.rotational);
     this.rotationItem = document.querySelectorAll(this.DOM.rotationalItem);
     this.animatedContent = document.querySelectorAll(this.DOM.animatedContent);
     this.rotationalSpacers = document.querySelectorAll(this.DOM.rotationalSpacer);
     this.currentSlide = -1;
   }
+  /**
+   * Init
+   */
+
 
   _createClass(RotationalScroll, [{
     key: "init",
     value: function init() {
       var _this = this;
 
-      // this.rotationalController();
-      // this.zoomItem(0);
+      //return if there is no wrapper
+      if (!this.rotationalWrap) {
+        return;
+      }
+
       this.rotationalSpacers.forEach(function (item, index) {
-        _this.rotationalController2(item, index);
+        _this.rotationalController(item, index);
       });
     }
+    /**
+     *
+     * @param item
+     * @param index
+     * Method for rotation witch calls for animation Method once is finished
+     */
+
   }, {
-    key: "rotationalController2",
-    value: function rotationalController2(item, index) {
+    key: "rotationalController",
+    value: function rotationalController(item, index) {
       var _this2 = this;
 
-      _gsap.default.fromTo(this.rotational, {
+      _gsap.default.fromTo( //rotate by number of items
+      this.rotational, {
         rotate: 90 * (index - 1)
       }, {
         rotate: 90 * index,
@@ -59457,76 +59471,24 @@ var RotationalScroll = /*#__PURE__*/function () {
           scrub: true,
           snap: 1
         },
+        //animation on enter
         onComplete: function onComplete() {
-          _this2.zoomItem(index);
+          _this2.animateItem(index);
         },
         onReverseComplete: function onReverseComplete() {
-          _this2.zoomItem(index - 1);
+          _this2.animateItem(index - 1);
         }
       });
-    } // rotationalController() {
-    //     const timeline = gsap.timeline({
-    //         scrollTrigger: {
-    //             trigger: this.rotationalWrap,
-    //             star: "top top",
-    //             end: "bottom bottom",
-    //             scrub: 0.8,
-    //             // normalizeScroll: true,
-    //             snap: {
-    //                 snapTo: "labels",
-    //                 duration: { min: 0.2, max: 0.5 },
-    //                 delay: 0,
-    //                 ease: "power1.inOut",
-    //             },
-    //         },
-    //     });
-    //
-    //     timeline
-    //         .addLabel("zero")
-    //         .to(this.rotational, {
-    //             rotate: 0,
-    //             ease: "none",
-    //             onUpdate: () => {
-    //                 this.zoomItem(0);
-    //             },
-    //         })
-    //         .addLabel("first")
-    //         .to(this.rotational, {
-    //             rotate: 90,
-    //             ease: "none",
-    //             onUpdate: () => {
-    //                 this.zoomItem(1);
-    //             },
-    //         })
-    //         .addLabel("second")
-    //         .to(this.rotational, {
-    //             rotate: 180,
-    //             ease: "none",
-    //             onUpdate: () => {
-    //                 this.zoomItem(2);
-    //             },
-    //         })
-    //         .addLabel("third")
-    //         .to(this.rotational, {
-    //             rotate: 270,
-    //             ease: "none",
-    //             onUpdate: () => {
-    //                 this.zoomItem(3);
-    //             },
-    //         })
-    //         .addLabel("fourth");
-    //     // .to(this.rotational, {
-    //     //     rotate: 270,
-    //     //     ease: "none",
-    //     //     onUpdate: () => {
-    //     //         this.zoomItem(3);
-    //     //     },
-    //     // });
-    // }
+    }
+    /**
+     *
+     * @param index
+     * gives current item active class and deals with animation
+     */
 
   }, {
-    key: "zoomItem",
-    value: function zoomItem(index) {
+    key: "animateItem",
+    value: function animateItem(index) {
       if (this.currentSlide !== index) {
         if (this.rotationItem[this.currentSlide] !== null && this.rotationItem[this.currentSlide] !== undefined) {
           this.onLeaveAnim(this.rotationItem[this.currentSlide]);
@@ -59543,6 +59505,12 @@ var RotationalScroll = /*#__PURE__*/function () {
         }
       }
     }
+    /**
+     *
+     * @param currentSlide
+     * Animations when curren item is visible
+     */
+
   }, {
     key: "onEnterAnim",
     value: function onEnterAnim(currentSlide) {
@@ -59589,10 +59557,19 @@ var RotationalScroll = /*#__PURE__*/function () {
         stagger: 2
       });
     }
+    /**
+     *
+     * @param currentSlide
+     * Animation when current item leaves the screen
+     */
+
   }, {
     key: "onLeaveAnim",
     value: function onLeaveAnim(currentSlide) {
       this.animatedItems = currentSlide.querySelectorAll(".js-content-animated");
+      this.animatedItemsLeft = currentSlide.querySelectorAll(".js-content-animated-left");
+      this.animatedItemsRight = currentSlide.querySelectorAll(".js-content-animated-right");
+      this.animatedItemsFloat = currentSlide.querySelectorAll(".js-content-animated-float");
 
       _gsap.default.to(this.animatedItems, {
         opacity: 0,
@@ -59600,17 +59577,21 @@ var RotationalScroll = /*#__PURE__*/function () {
       });
 
       _gsap.default.to(this.animatedItemsLeft, {
+        overwrite: true,
         x: "0%",
         delay: 0.3
       });
 
       _gsap.default.to(this.animatedItemsRight, {
+        overwrite: true,
         x: "0%",
         delay: 0.3
       });
 
       _gsap.default.to(this.animatedItemsFloat, {
-        x: "200%"
+        overwrite: true,
+        x: "200%",
+        delay: 0.3
       });
     }
   }]);
