@@ -28,6 +28,11 @@ export default class RotationalScroll {
         if (!this.rotationalWrap) {
             return;
         }
+
+        window.onbeforeunload = () => {
+            window.scrollTo(0, 0);
+        };
+
         this.rotationalSpacers.forEach((item, index) => {
             this.rotationalController(item, index);
         });
@@ -100,62 +105,70 @@ export default class RotationalScroll {
         this.animatedItemsRight = currentSlide.querySelectorAll(".js-content-animated-right");
         this.animatedItemsFloat = currentSlide.querySelectorAll(".js-content-animated-float");
 
-        gsap.fromTo(
-            this.animatedItems,
-            {
-                opacity: 0,
-                y: "50%",
-                duration: 1,
-            },
-            {
-                opacity: 1,
-                y: "0%",
-                stagger: 0.3,
-                ease: "power1.out",
-            },
-        );
+        if (this.animatedItems.length > 0) {
+            gsap.fromTo(
+                this.animatedItems,
+                {
+                    opacity: 0,
+                    y: "50%",
+                    duration: 1,
+                },
+                {
+                    opacity: 1,
+                    y: "0%",
+                    stagger: 0.3,
+                    ease: "power1.out",
+                },
+            );
+        }
 
-        gsap.fromTo(
-            this.animatedItemsLeft,
-            {
-                x: "0%",
-            },
-            {
-                x: "-80%",
-                duration: 15,
-                repeat: -1,
-                yoyo: true,
-                ease: "power1.out",
-            },
-        );
+        if (this.animatedItemsLeft.length > 0) {
+            gsap.fromTo(
+                this.animatedItemsLeft,
+                {
+                    x: "0%",
+                },
+                {
+                    x: "-80%",
+                    duration: 15,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power1.out",
+                },
+            );
+        }
 
-        gsap.fromTo(
-            this.animatedItemsRight,
-            {
-                x: "0%",
-            },
-            {
-                x: "80%",
-                duration: 15,
-                repeat: -1,
-                yoyo: true,
-                ease: "power1.out",
-            },
-        );
+        if (this.animatedItemsRight.length > 0) {
+            gsap.fromTo(
+                this.animatedItemsRight,
+                {
+                    x: "0%",
+                },
+                {
+                    x: "80%",
+                    duration: 15,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power1.out",
+                },
+            );
+        }
 
-        gsap.fromTo(
-            this.animatedItemsFloat,
-            {
-                x: "200%",
-            },
-            {
-                x: "-700%",
-                duration: 15,
-                repeat: -1,
-                stagger: 2,
-                ease: "power1.out",
-            },
-        );
+        if (this.animatedItemsFloat.length > 0) {
+            gsap.fromTo(
+                this.animatedItemsFloat,
+                {
+                    x: "200%",
+                },
+                {
+                    x: "-700%",
+                    duration: 15,
+                    repeat: -1,
+                    stagger: 2,
+                    ease: "power1.out",
+                },
+            );
+        }
     }
 
     /**
@@ -170,27 +183,35 @@ export default class RotationalScroll {
         this.animatedItemsRight = currentSlide.querySelectorAll(".js-content-animated-right");
         this.animatedItemsFloat = currentSlide.querySelectorAll(".js-content-animated-float");
 
-        gsap.to(this.animatedItems, {
-            opacity: 0,
-            delay: 0.7,
-        });
+        if (this.animatedItems.length > 0) {
+            gsap.to(this.animatedItems, {
+                opacity: 0,
+                delay: 0.7,
+            });
+        }
 
-        gsap.to(this.animatedItemsLeft, {
-            overwrite: true,
-            x: "0%",
-            delay: 0.3,
-        });
+        if (this.animatedItemsLeft.length > 0) {
+            gsap.to(this.animatedItemsLeft, {
+                overwrite: true,
+                x: "0%",
+                delay: 0.3,
+            });
+        }
 
-        gsap.to(this.animatedItemsRight, {
-            overwrite: true,
-            x: "0%",
-            delay: 0.3,
-        });
+        if (this.animatedItemsRight.length > 0) {
+            gsap.to(this.animatedItemsRight, {
+                overwrite: true,
+                x: "0%",
+                delay: 0.3,
+            });
+        }
 
-        gsap.to(this.animatedItemsFloat, {
-            overwrite: true,
-            x: "200%",
-            delay: 0.3,
-        });
+        if (this.animatedItemsFloat.length > 0) {
+            gsap.to(this.animatedItemsFloat, {
+                overwrite: true,
+                x: "200%",
+                delay: 0.3,
+            });
+        }
     }
 }

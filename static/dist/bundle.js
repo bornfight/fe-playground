@@ -60417,6 +60417,10 @@ var RotationalScroll = /*#__PURE__*/function () {
         return;
       }
 
+      window.onbeforeunload = function () {
+        window.scrollTo(0, 0);
+      };
+
       this.rotationalSpacers.forEach(function (item, index) {
         _this.rotationalController(item, index);
       });
@@ -60494,46 +60498,54 @@ var RotationalScroll = /*#__PURE__*/function () {
       this.animatedItemsRight = currentSlide.querySelectorAll(".js-content-animated-right");
       this.animatedItemsFloat = currentSlide.querySelectorAll(".js-content-animated-float");
 
-      _gsap.default.fromTo(this.animatedItems, {
-        opacity: 0,
-        y: "50%",
-        duration: 1
-      }, {
-        opacity: 1,
-        y: "0%",
-        stagger: 0.3,
-        ease: "power1.out"
-      });
+      if (this.animatedItems.length > 0) {
+        _gsap.default.fromTo(this.animatedItems, {
+          opacity: 0,
+          y: "50%",
+          duration: 1
+        }, {
+          opacity: 1,
+          y: "0%",
+          stagger: 0.3,
+          ease: "power1.out"
+        });
+      }
 
-      _gsap.default.fromTo(this.animatedItemsLeft, {
-        x: "0%"
-      }, {
-        x: "-80%",
-        duration: 15,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.out"
-      });
+      if (this.animatedItemsLeft.length > 0) {
+        _gsap.default.fromTo(this.animatedItemsLeft, {
+          x: "0%"
+        }, {
+          x: "-80%",
+          duration: 15,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.out"
+        });
+      }
 
-      _gsap.default.fromTo(this.animatedItemsRight, {
-        x: "0%"
-      }, {
-        x: "80%",
-        duration: 15,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.out"
-      });
+      if (this.animatedItemsRight.length > 0) {
+        _gsap.default.fromTo(this.animatedItemsRight, {
+          x: "0%"
+        }, {
+          x: "80%",
+          duration: 15,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.out"
+        });
+      }
 
-      _gsap.default.fromTo(this.animatedItemsFloat, {
-        x: "200%"
-      }, {
-        x: "-700%",
-        duration: 15,
-        repeat: -1,
-        stagger: 2,
-        ease: "power1.out"
-      });
+      if (this.animatedItemsFloat.length > 0) {
+        _gsap.default.fromTo(this.animatedItemsFloat, {
+          x: "200%"
+        }, {
+          x: "-700%",
+          duration: 15,
+          repeat: -1,
+          stagger: 2,
+          ease: "power1.out"
+        });
+      }
     }
     /**
      *
@@ -60549,28 +60561,36 @@ var RotationalScroll = /*#__PURE__*/function () {
       this.animatedItemsRight = currentSlide.querySelectorAll(".js-content-animated-right");
       this.animatedItemsFloat = currentSlide.querySelectorAll(".js-content-animated-float");
 
-      _gsap.default.to(this.animatedItems, {
-        opacity: 0,
-        delay: 0.7
-      });
+      if (this.animatedItems.length > 0) {
+        _gsap.default.to(this.animatedItems, {
+          opacity: 0,
+          delay: 0.7
+        });
+      }
 
-      _gsap.default.to(this.animatedItemsLeft, {
-        overwrite: true,
-        x: "0%",
-        delay: 0.3
-      });
+      if (this.animatedItemsLeft.length > 0) {
+        _gsap.default.to(this.animatedItemsLeft, {
+          overwrite: true,
+          x: "0%",
+          delay: 0.3
+        });
+      }
 
-      _gsap.default.to(this.animatedItemsRight, {
-        overwrite: true,
-        x: "0%",
-        delay: 0.3
-      });
+      if (this.animatedItemsRight.length > 0) {
+        _gsap.default.to(this.animatedItemsRight, {
+          overwrite: true,
+          x: "0%",
+          delay: 0.3
+        });
+      }
 
-      _gsap.default.to(this.animatedItemsFloat, {
-        overwrite: true,
-        x: "200%",
-        delay: 0.3
-      });
+      if (this.animatedItemsFloat.length > 0) {
+        _gsap.default.to(this.animatedItemsFloat, {
+          overwrite: true,
+          x: "200%",
+          delay: 0.3
+        });
+      }
     }
   }]);
 
