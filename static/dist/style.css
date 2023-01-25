@@ -3968,7 +3968,8 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   height: 100%; }
 
 .e-rotational-scroll {
-  position: relative; }
+  position: relative;
+  background: #000; }
 
 .e-rotational-scroll__credits {
   position: fixed;
