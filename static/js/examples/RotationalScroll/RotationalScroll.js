@@ -53,13 +53,14 @@ export default class RotationalScroll {
             },
             {
                 rotate: 90 * index,
-                ease: "power1.inOut",
+                ease: "sine1.inOut",
                 scrollTrigger: {
                     trigger: item,
                     start: "top bottom",
                     end: "bottom bottom",
                     scrub: true,
                     snap: 1,
+                    duration: 0.5,
                 },
                 //animation on enter
                 onComplete: () => {
@@ -111,7 +112,7 @@ export default class RotationalScroll {
                 {
                     opacity: 0,
                     y: "50%",
-                    duration: 1,
+                    duration: 0.5,
                 },
                 {
                     opacity: 1,

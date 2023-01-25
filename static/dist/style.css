@@ -4197,7 +4197,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   right: 0%;
   top: 1.38889vw;
   border-radius: 40px;
-  max-width: 300px;
+  max-width: 20.83333vw;
   overflow: hidden;
   -webkit-transform: translateX(200%);
           transform: translateX(200%); }

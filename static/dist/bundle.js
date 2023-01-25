@@ -60442,13 +60442,14 @@ var RotationalScroll = /*#__PURE__*/function () {
         rotate: 90 * (index - 1)
       }, {
         rotate: 90 * index,
-        ease: "power1.inOut",
+        ease: "sine1.inOut",
         scrollTrigger: {
           trigger: item,
           start: "top bottom",
           end: "bottom bottom",
           scrub: true,
-          snap: 1
+          snap: 1,
+          duration: 0.5
         },
         //animation on enter
         onComplete: function onComplete() {
@@ -60502,7 +60503,7 @@ var RotationalScroll = /*#__PURE__*/function () {
         _gsap.default.fromTo(this.animatedItems, {
           opacity: 0,
           y: "50%",
-          duration: 1
+          duration: 0.5
         }, {
           opacity: 1,
           y: "0%",
