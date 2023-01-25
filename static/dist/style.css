@@ -3970,6 +3970,20 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
 .e-rotational-scroll {
   position: relative; }
 
+.e-rotational-scroll__credits {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10; }
+
+.e-rotational-scroll__credits a {
+  opacity: 0.5;
+  -webkit-transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  transition: all 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53); }
+
+.e-rotational-scroll__credits a:hover {
+  opacity: 1; }
+
 .e-rotational-scroll__spacer {
   height: 100vh;
   display: block;

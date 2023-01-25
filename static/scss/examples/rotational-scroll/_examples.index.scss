@@ -2,6 +2,21 @@
 .e-rotational-scroll {
     position: relative;
 
+    &__credits {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+
+        a {
+            opacity: 0.5;
+            transition: getTransition();
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
     &__spacer {
         height: 100vh;
         display: block;
