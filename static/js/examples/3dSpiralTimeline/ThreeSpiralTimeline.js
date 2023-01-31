@@ -341,12 +341,12 @@ export default class ThreeSpiralTimeline {
         timelineItemInner.appendChild(timelineItemInnerContent);
 
         let title = document.createElement("div");
-        title.className = "c-3d-spiral-timeline-item__title u-a3";
+        title.className = "c-3d-spiral-timeline-item__title u-a3 pp-reader";
         title.textContent = timelineLoopItem.title;
         timelineItemInnerContent.appendChild(title);
 
         let year = document.createElement("div");
-        year.className = "c-3d-spiral-timeline-item__year u-a1";
+        year.className = "c-3d-spiral-timeline-item__year u-a1 pp-reader";
         year.textContent = timelineLoopItem.year;
         timelineItemInnerContent.appendChild(year);
 
@@ -476,7 +476,7 @@ export default class ThreeSpiralTimeline {
                 el: ".js-3d-spiral-timeline-pagination",
                 clickable: false,
                 renderBullet: (index, className) => {
-                    return `<span class="c-3d-spiral-timeline__pagination-bullet js-3d-spiral-timeline-bullet u-b2 ${className}">${
+                    return `<span class="c-3d-spiral-timeline__pagination-bullet js-3d-spiral-timeline-bullet u-b2 pp-reader ${className}">${
                         this.timelineItems[index] ? this.timelineItems[index].year : ""
                     }</span>`;
                 },

@@ -5,9 +5,23 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>FE Playground - 3d spiral timeline</title>
         <link rel="stylesheet" href="../../static/dist/style.css" />
+
+        <style>
+            @font-face {
+                font-family: "PP Rader";
+                src: url("PPRader-Regular.woff2") format("woff2"), url("PPRader-Regular.woff") format("woff");
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+            }
+
+            .pp-reader {
+                font-family: "PP Rader", sans-serif;
+            }
+        </style>
     </head>
     <body>
-        <div class="c-3d-spiral-timeline-wrapper" id="timeline-slider">
+        <div class="c-3d-spiral-timeline-wrapper pp-reader" id="timeline-slider">
             <div class="c-3d-spiral-timeline">
                 <div class="js-3d-spiral-timeline-slider swiper-container">
                     <div class="swiper-wrapper js-3d-spiral-timeline-slider-wrapper"></div>
