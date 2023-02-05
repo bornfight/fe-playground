@@ -57048,7 +57048,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
       this.scene.add(this.helix);
       this.vector = new THREE.Vector3();
       var planeBackMaterial = new THREE.MeshBasicMaterial({
-        color: 0x555555,
+        color: 0x000000,
         transparent: true,
         depthTest: false
       });
@@ -57599,14 +57599,8 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
         });
       }
 
-      if (this.helixItems[index].children[3] && this.helixItems[index].children[3].material.opacity < opacity) {
+      if (this.helixItems[index].children[3]) {
         _gsap.gsap.to(this.helixItems[index].children[3].material, {
-          opacity: "+=0.1"
-        });
-      }
-
-      if (this.helixItems[index].children[4]) {
-        _gsap.gsap.set(this.helixItems[index].children[4].material, {
           opacity: opacity
         });
       }
@@ -58118,7 +58112,7 @@ var AnimatedGradient = /*#__PURE__*/function () {
   }, {
     key: "buildScene",
     value: function buildScene() {
-      var event = new CustomEvent('loaded');
+      var event = new CustomEvent("loaded");
       document.dispatchEvent(event);
       this.shape = new _Plane.default({
         sizes: this.sizes,
@@ -58190,7 +58184,7 @@ var Camera = function Camera(_ref) {
   this.sizes = sizes;
   this.scene = scene;
   this.camera = new _three.PerspectiveCamera(75, this.sizes.width / this.sizes.height, 1, 1000);
-  this.camera.position.set(0, 0., 2.5);
+  this.camera.position.set(0, 0, 2.5);
   this.scene.add(this.camera);
   return this.camera; // const helper = new THREE.CameraHelper( this.camera );
   // this.scene.add( helper );
@@ -58259,7 +58253,7 @@ var Renderer = function Renderer(_ref) {
 
   this.renderer = new _three.WebGLRenderer({
     canvas: canvas,
-    powerPreference: 'high-performance',
+    powerPreference: "high-performance",
     antialias: false
   });
   this.renderer.setSize(sizes.width, sizes.height);
@@ -59035,12 +59029,12 @@ var ImageSequence = /*#__PURE__*/function () {
         var width = this.canvasWrapper.clientWidth;
         var height = this.canvasWrapper.clientHeight; // scale the canvas by window.devicePixelRatio
 
-        this.sequence.setAttribute('width', "".concat(width * window.devicePixelRatio));
-        this.sequence.setAttribute('height', "".concat(height * window.devicePixelRatio)); // use css to bring it back to regular size
+        this.sequence.setAttribute("width", "".concat(width * window.devicePixelRatio));
+        this.sequence.setAttribute("height", "".concat(height * window.devicePixelRatio)); // use css to bring it back to regular size
 
-        this.sequence.setAttribute('style', 'width="' + width + '"; height="' + height + '";'); // set the scale of the context
+        this.sequence.setAttribute("style", 'width="' + width + '"; height="' + height + '";'); // set the scale of the context
 
-        this.sequence.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
+        this.sequence.getContext("2d").scale(window.devicePixelRatio, window.devicePixelRatio);
       }
     }
   }]);
@@ -61271,7 +61265,7 @@ var EffectComposer = function EffectComposer(renderer, renderTarget) {
     this._width = size.width;
     this._height = size.height;
     renderTarget = new _three.WebGLRenderTarget(this._width * this._pixelRatio, this._height * this._pixelRatio, parameters);
-    renderTarget.texture.name = 'EffectComposer.rt1';
+    renderTarget.texture.name = "EffectComposer.rt1";
   } else {
     this._pixelRatio = 1;
     this._width = renderTarget.width;
@@ -61280,18 +61274,18 @@ var EffectComposer = function EffectComposer(renderer, renderTarget) {
 
   this.renderTarget1 = renderTarget;
   this.renderTarget2 = renderTarget.clone();
-  this.renderTarget2.texture.name = 'EffectComposer.rt2';
+  this.renderTarget2.texture.name = "EffectComposer.rt2";
   this.writeBuffer = this.renderTarget1;
   this.readBuffer = this.renderTarget2;
   this.renderToScreen = true;
   this.passes = []; // dependencies
 
   if (_CopyShader.CopyShader === undefined) {
-    console.error('THREE.EffectComposer relies on CopyShader');
+    console.error("THREE.EffectComposer relies on CopyShader");
   }
 
   if (_ShaderPass.ShaderPass === undefined) {
-    console.error('THREE.EffectComposer relies on ShaderPass');
+    console.error("THREE.EffectComposer relies on ShaderPass");
   }
 
   this.copyPass = new _ShaderPass.ShaderPass(_CopyShader.CopyShader);
@@ -61415,7 +61409,7 @@ exports.Pass = Pass;
 Object.assign(Pass.prototype, {
   setSize: function setSize() {},
   render: function render() {
-    console.error('THREE.Pass: .render() must be implemented in derived pass.');
+    console.error("THREE.Pass: .render() must be implemented in derived pass.");
   }
 }); // Helper for passes that need to fill the viewport with a single quad.
 
@@ -61427,7 +61421,7 @@ Pass.FullScreenQuad = function () {
     this._mesh = new _three.Mesh(geometry, material);
   };
 
-  Object.defineProperty(FullScreenQuad.prototype, 'material', {
+  Object.defineProperty(FullScreenQuad.prototype, "material", {
     get: function get() {
       return this._mesh.material;
     },
@@ -61777,16 +61771,16 @@ exports.BlendShader = void 0;
  */
 var BlendShader = {
   uniforms: {
-    "tDiffuse1": {
+    tDiffuse1: {
       value: null
     },
-    "tDiffuse2": {
+    tDiffuse2: {
       value: null
     },
-    "mixRatio": {
+    mixRatio: {
       value: 0.5
     },
-    "opacity": {
+    opacity: {
       value: 1.0
     }
   },
@@ -61808,10 +61802,10 @@ exports.CopyShader = void 0;
  */
 var CopyShader = {
   uniforms: {
-    "tDiffuse": {
+    tDiffuse: {
       value: null
     },
-    "opacity": {
+    opacity: {
       value: 1.0
     }
   },

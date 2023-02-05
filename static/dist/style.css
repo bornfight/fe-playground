@@ -4044,7 +4044,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
           transition-delay: 1s; }
 
 .e-rotational-scroll__item:nth-child(1) {
-  background: #F1E1D0; }
+  background: #f1e1d0; }
 
 .e-rotational-scroll__item:nth-child(1).active {
   -webkit-transform: translate(-12%, -50%) scale(1.12);
@@ -4068,7 +4068,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   text-align: center; }
 
 .e-rotational-scroll__item:nth-child(2) {
-  background: #5C8950;
+  background: #5c8950;
   -webkit-transform: translate(0, -50%) rotate(-90deg) scale(1);
           transform: translate(0, -50%) rotate(-90deg) scale(1); }
 
@@ -4091,7 +4091,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
           transform: translate(0, -27%) rotate(-90deg) scale(1.12); }
 
 .e-rotational-scroll__item:nth-child(3) {
-  background: #F1E1D0;
+  background: #f1e1d0;
   -webkit-transform: translate(0, -50%) rotate(-180deg) scale(1);
           transform: translate(0, -50%) rotate(-180deg) scale(1); }
 
@@ -4108,7 +4108,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
           transform: translate(12%, -50%) rotate(-180deg) scale(1.12); }
 
 .e-rotational-scroll__item:nth-child(4) {
-  background: #5C8950;
+  background: #5c8950;
   -webkit-transform: translate(0, -50%) rotate(-270deg) scale(1);
           transform: translate(0, -50%) rotate(-270deg) scale(1); }
 
@@ -4156,7 +4156,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  color: #F1E1D0; }
+  color: #f1e1d0; }
 
 .e-rotational-scroll__content h2 {
   font-family: "Roslindale", sans-serif;
@@ -4197,7 +4197,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   font-family: "Roslindale", sans-serif;
   font-size: 6.94444vw;
   line-height: 7.22222vw;
-  color: #23441A; }
+  color: #23441a; }
 
 .e-rotational-scroll__content-wrap p {
   font-family: "Reckless", sans-serif;
@@ -4218,7 +4218,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   font-family: "Roslindale", sans-serif;
   font-size: 2.63889vw;
   line-height: 2.63889vw;
-  color: #23441A;
+  color: #23441a;
   padding-left: 40px;
   padding-top: 2.08333vw; }
 
@@ -4226,7 +4226,7 @@ a:active:not(:disabled):focus-visible, a:focus:not(:disabled):focus-visible {
   font-family: "Roslindale", sans-serif;
   font-size: 11.25vw;
   line-height: 11.66667vw;
-  color: #F1E1D0; }
+  color: #f1e1d0; }
 
 .e-rotational-scroll__floating {
   position: absolute;

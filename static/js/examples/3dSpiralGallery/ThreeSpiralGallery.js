@@ -110,7 +110,7 @@ export default class ThreeSpiralGallery {
         this.vector = new THREE.Vector3();
 
         const planeBackMaterial = new THREE.MeshBasicMaterial({
-            color: 0x555555,
+            color: 0x000000,
             transparent: true,
             depthTest: false,
         });
@@ -685,14 +685,8 @@ export default class ThreeSpiralGallery {
             });
         }
 
-        if (this.helixItems[index].children[3] && this.helixItems[index].children[3].material.opacity < opacity) {
+        if (this.helixItems[index].children[3]) {
             gsap.to(this.helixItems[index].children[3].material, {
-                opacity: "+=0.1",
-            });
-        }
-
-        if (this.helixItems[index].children[4]) {
-            gsap.set(this.helixItems[index].children[4].material, {
                 opacity: opacity,
             });
         }
