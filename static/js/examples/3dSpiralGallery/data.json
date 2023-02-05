@@ -1,0 +1,46 @@
+{
+    "output": [
+        {
+            "image": "./../../static/images/3d-spiral-gallery/moto_gp_hover.jpg",
+            "grayImage": "./../../static/images/3d-spiral-gallery/moto_gp_default.jpg",
+            "manufacturer": "YAMAHA",
+            "title": "Eddie Lawson",
+            "nav": "Moto GP"
+        },
+        {
+            "image": "./../../static/images/3d-spiral-gallery/nascar_hover.jpg",
+            "grayImage": "./../../static/images/3d-spiral-gallery/nascar_default.jpg",
+            "manufacturer": "Chevrolet",
+            "title": "Dale Earnhardt",
+            "nav": "NASCAR"
+        },
+        {
+            "image": "./../../static/images/3d-spiral-gallery/meisterschaft_hover.jpg",
+            "grayImage": "./../../static/images/3d-spiral-gallery/meisterschaft_default.jpg",
+            "manufacturer": "Ford Zakspeed / Porsche Moby Dick",
+            "title": "Klaus Ludwig  / Manfred Winkelhock",
+            "nav": "Rennsport Meisterschaft"
+        },
+        {
+            "image": "./../../static/images/3d-spiral-gallery/dtm_hover.jpg",
+            "grayImage": "./../../static/images/3d-spiral-gallery/dtm_default.jpg",
+            "manufacturer": "BMW",
+            "title": "Markus Oestreich",
+            "nav": "DTM"
+        },
+        {
+            "image": "./../../static/images/3d-spiral-gallery/formula_1_hover.jpg",
+            "grayImage": "./../../static/images/3d-spiral-gallery/formula_1_default.jpg",
+            "manufacturer": "BENETTON",
+            "title": "Gerhard Berger",
+            "nav": "Formula 1"
+        },
+        {
+            "image": "./../../static/images/3d-spiral-gallery/group_b_hover.jpg",
+            "grayImage": "./../../static/images/3d-spiral-gallery/group_b_default.jpg",
+            "manufacturer": "AUDI SPORT",
+            "title": "Michelle Mouton",
+            "nav": "Group B Rally"
+        }
+    ]
+}

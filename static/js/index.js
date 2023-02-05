@@ -26,7 +26,7 @@ import PetPakAwwwards from "./examples/PetPakAwwwards";
 import AimeConcept from "./examples/AimeConcept/AimeConcept";
 import WeightViewer from "./examples/WeightViewer/WeightViewer";
 import TypeSetter from "./examples/TypeSetter/TypeSetter";
-import ThreeSpiralTimeline from "./examples/3dSpiralTimeline/ThreeSpiralTimeline";
+import ThreeSpiralGallery from "./examples/3dSpiralGallery/ThreeSpiralGallery";
 import RotationalScroll from "./examples/RotationalScroll/RotationalScroll";
 
 /**
@@ -190,10 +190,10 @@ ready(() => {
     typeSetter.init();
 
     /**
-     * ThreeSpiralTimeline
-     * @type {ThreeSpiralTimeline}
+     * ThreeSpiralGallery
+     * @type {ThreeSpiralGallery}
      */
-    const threeSpiralTimeline = new ThreeSpiralTimeline();
+    const threeSpiralGallery = new ThreeSpiralGallery();
 
     /**
      * RotationalScroll
