@@ -57372,6 +57372,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
             var swiper = this;
             self.paginationProgressController(swiper);
             self.indexOffset = 1;
+            self.dimeHelixItems(self.swiper.activeIndex);
           },
           slideChangeTransitionEnd: function slideChangeTransitionEnd() {
             _this4.bulletClicked = false;

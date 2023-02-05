@@ -467,6 +467,8 @@ export default class ThreeSpiralGallery {
                     let swiper = this;
                     self.paginationProgressController(swiper);
                     self.indexOffset = 1;
+
+                    self.dimeHelixItems(self.swiper.activeIndex);
                 },
                 slideChangeTransitionEnd: () => {
                     this.bulletClicked = false;
