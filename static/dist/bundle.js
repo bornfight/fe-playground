@@ -56971,25 +56971,26 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
   function ThreeSpiralGallery() {
     _classCallCheck(this, ThreeSpiralGallery);
 
-    if (document.querySelector("#timeline-slider") == null) {
+    if (document.querySelector("#gallery-slider") == null) {
       return;
     }
 
     THREE.Cache.enabled = true;
     this.DOM = {
-      timeline: ".js-3d-spiral-gallery",
-      timelineSlider: ".js-3d-spiral-gallery-slider",
-      timelineSliderWrapper: ".js-3d-spiral-gallery-slider-wrapper",
-      timelineProgressLine: ".js-3d-spiral-gallery-pagination-progress-line",
-      timelineSliderPaginationBullet: ".swiper-pagination-bullet"
+      gallery: ".js-3d-spiral-gallery",
+      gradient: ".js-3d-spiral-gallery-gradient",
+      slider: ".js-3d-spiral-gallery-slider",
+      sliderWrapper: ".js-3d-spiral-gallery-slider-wrapper",
+      progressLine: ".js-3d-spiral-gallery-pagination-progress-line",
+      sliderPaginationBullet: ".swiper-pagination-bullet"
     };
-    this.swiperPrevTranslate = 0;
-    this.timeline = document.querySelector(this.DOM.timeline);
-    this.winWidth = this.timeline.offsetWidth;
-    this.winHeight = this.timeline.offsetHeight;
-    this.slider = document.querySelector(this.DOM.timelineSlider);
-    this.progressLine = document.querySelector(this.DOM.timelineProgressLine);
-    this.sliderWrapper = document.querySelector(this.DOM.timelineSliderWrapper);
+    this.gallery = document.querySelector(this.DOM.gallery);
+    this.gradient = document.querySelector(this.DOM.gradient);
+    this.winWidth = this.gallery.offsetWidth;
+    this.winHeight = this.gallery.offsetHeight;
+    this.slider = document.querySelector(this.DOM.slider);
+    this.progressLine = document.querySelector(this.DOM.progressLine);
+    this.sliderWrapper = document.querySelector(this.DOM.sliderWrapper);
     this.swiper = null;
     this.PIval = Math.PI;
     this.camera = null;
@@ -57000,13 +57001,13 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
     this.mouse = new THREE.Vector2();
     this.bulletClicked = false;
     this.indexOffset = 1;
-    this.getTimeline();
+    this.getGallery();
   }
 
   _createClass(ThreeSpiralGallery, [{
-    key: "getTimeline",
-    value: function getTimeline() {
-      this.timelineItems = _data.default.output;
+    key: "getGallery",
+    value: function getGallery() {
+      this.items = _data.default.output;
       this.init();
       var vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty("--vh", "".concat(vh, "px"));
@@ -57064,8 +57065,8 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
       var planeGeometryOverlay = planeGeometry.clone();
       planeGeometryBack.rotateY(this.PIval); // create items
 
-      for (var i = 0, l = this.timelineItems.length; i < l; i++) {
-        this.createItem(i, this.timelineItems[i], planeGeometryBack, planeBackMaterial, planeGeometry, planeGeometryBlue, planeBlueMaterial, planeGeometryOverlay);
+      for (var i = 0, l = this.items.length; i < l; i++) {
+        this.createItem(i, this.items[i], planeGeometryBack, planeBackMaterial, planeGeometry, planeGeometryBlue, planeBlueMaterial, planeGeometryOverlay);
       }
 
       var topOfTheHelix = this.helixItems[0].position.y;
@@ -57081,7 +57082,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
       this.renderer.setSize(this.winWidth, this.winHeight);
       this.renderer.setClearColor(0xffffff, 0);
       this.renderer.shadowMap.enabled = false;
-      this.timeline.appendChild(this.renderer.domElement);
+      this.gallery.appendChild(this.renderer.domElement);
       this.motionBlur();
       this.animate();
 
@@ -57173,7 +57174,6 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
           this.returnHelixItemSkew();
         }
 
-        this.swiperPrevTranslate = swiperTranslate;
         this.progressController();
       }
 
@@ -57208,7 +57208,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
     /**
      *
      * @param {number} i
-     * @param {object} timelineLoopItem
+     * @param {object} loopItem
      * @param {THREE.Geometry} planeGeometryBack
      * @param {THREE.Material} planeBackMaterial
      * @param {THREE.Geometry} planeGeometry
@@ -57219,41 +57219,41 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
 
   }, {
     key: "createItem",
-    value: function createItem(i, timelineLoopItem, planeGeometryBack, planeBackMaterial, planeGeometry, planeGeometryBlue, planeBlueMaterial, planeGeometryOverlay) {
+    value: function createItem(i, loopItem, planeGeometryBack, planeBackMaterial, planeGeometry, planeGeometryBlue, planeBlueMaterial, planeGeometryOverlay) {
       var _this3 = this;
 
-      var timelineItem = document.createElement("div");
-      timelineItem.className = "c-3d-spiral-gallery-item swiper-slide";
-      var timelineItemInner = document.createElement("div");
-      timelineItemInner.className = "c-3d-spiral-gallery-item__inner";
-      timelineItemInner.dataset.swiperParallaxOpacity = "-1.3";
+      var item = document.createElement("div");
+      item.className = "c-3d-spiral-gallery-item swiper-slide";
+      var itemInner = document.createElement("div");
+      itemInner.className = "c-3d-spiral-gallery-item__inner";
+      itemInner.dataset.swiperParallaxOpacity = "-1.3";
 
       if (_is_js.default.not.mobile()) {
-        timelineItemInner.dataset.swiperParallaxY = "-".concat(this.winHeight * 0.4);
+        itemInner.dataset.swiperParallaxY = "-".concat(this.winHeight * 0.4);
       }
 
-      timelineItem.appendChild(timelineItemInner);
-      var timelineItemInnerContent = document.createElement("div");
-      timelineItemInnerContent.className = "c-3d-spiral-gallery-item__inner-content";
-      timelineItemInner.appendChild(timelineItemInnerContent);
+      item.appendChild(itemInner);
+      var itemInnerContent = document.createElement("div");
+      itemInnerContent.className = "c-3d-spiral-gallery-item__inner-content";
+      itemInner.appendChild(itemInnerContent);
       var title = document.createElement("div");
       title.className = "c-3d-spiral-gallery-item__title u-a3 pp-reader";
-      title.textContent = timelineLoopItem.title;
-      timelineItemInnerContent.appendChild(title);
+      title.textContent = loopItem.title;
+      itemInnerContent.appendChild(title);
       var manufacturer = document.createElement("div");
       manufacturer.className = "c-3d-spiral-gallery-item__manufacturer u-a1 pp-reader";
-      manufacturer.textContent = timelineLoopItem.manufacturer;
-      timelineItemInnerContent.appendChild(manufacturer);
-      this.sliderWrapper.appendChild(timelineItem);
+      manufacturer.textContent = loopItem.manufacturer;
+      itemInnerContent.appendChild(manufacturer);
+      this.sliderWrapper.appendChild(item);
       var theta = i * this.itemRadiusOffset + this.PIval;
       var y = -(i * 200) + 600; // canvas
 
       var planeGroup = new THREE.Object3D();
-      var texture = new THREE.TextureLoader().load(timelineLoopItem.image, function () {
+      var texture = new THREE.TextureLoader().load(loopItem.image, function () {
         // image position to cover the plane
         _this3.textureCentering(texture);
       });
-      var textureGray = new THREE.TextureLoader().load(timelineLoopItem.grayImage, function () {
+      var textureGray = new THREE.TextureLoader().load(loopItem.grayImage, function () {
         // image position to cover the plane
         _this3.textureCentering(textureGray);
       });
@@ -57281,7 +57281,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
       helixItem.name = "image";
       helixItemGray.name = "gray image";
       helixItemGray.position.z = 0.1;
-      planeGroup.name = "canvas-plane-".concat(timelineLoopItem.title, ", index: ").concat(i);
+      planeGroup.name = "canvas-plane-".concat(loopItem.title, ", index: ").concat(i);
       planeGroup.add(planeBlue);
       planeGroup.add(helixItem);
       planeGroup.add(helixItemGray);
@@ -57351,7 +57351,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
           el: ".js-3d-spiral-gallery-pagination",
           clickable: false,
           renderBullet: function renderBullet(index, className) {
-            return "<span class=\"c-3d-spiral-gallery__pagination-bullet js-3d-spiral-gallery-bullet u-b2 u-uppercase pp-reader ".concat(className, "\">").concat(_this4.timelineItems[index] ? _this4.timelineItems[index].nav : "", "</span>");
+            return "<span class=\"c-3d-spiral-gallery__pagination-bullet js-3d-spiral-gallery-bullet u-b2 u-uppercase pp-reader ".concat(className, "\">").concat(_this4.items[index] ? _this4.items[index].nav : "", "</span>");
           }
         },
         on: {
@@ -57633,6 +57633,12 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
         }
 
         _this8.mouse.x = mouseX;
+
+        _gsap.gsap.to(_this8.gradient, {
+          x: -_this8.mouse.x * 40,
+          y: _this8.mouse.y * 40,
+          ease: "power4.out"
+        });
       });
       this.onMouseMove();
     }
@@ -57725,7 +57731,7 @@ var ThreeSpiralGallery = /*#__PURE__*/function () {
     value: function detectPaginationBulletClick() {
       var _this11 = this;
 
-      var bullets = document.querySelectorAll(this.DOM.timelineSliderPaginationBullet);
+      var bullets = document.querySelectorAll(this.DOM.sliderPaginationBullet);
 
       var _loop5 = function _loop5(i) {
         bullets[i].addEventListener("click", function () {

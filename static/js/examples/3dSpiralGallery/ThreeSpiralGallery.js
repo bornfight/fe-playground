@@ -8,35 +8,35 @@ import { BlendShader } from "../../vendor/three/jsm/shaders/BlendShader";
 import { gsap } from "gsap";
 import Swiper from "swiper";
 import is from "is_js";
-import timelineData from "./data.json";
+import data from "./data.json";
 
 export default class ThreeSpiralGallery {
     constructor() {
-        if (document.querySelector("#timeline-slider") == null) {
+        if (document.querySelector("#gallery-slider") == null) {
             return;
         }
 
         THREE.Cache.enabled = true;
 
         this.DOM = {
-            timeline: ".js-3d-spiral-gallery",
-            timelineSlider: ".js-3d-spiral-gallery-slider",
-            timelineSliderWrapper: ".js-3d-spiral-gallery-slider-wrapper",
-            timelineProgressLine: ".js-3d-spiral-gallery-pagination-progress-line",
-            timelineSliderPaginationBullet: ".swiper-pagination-bullet",
+            gallery: ".js-3d-spiral-gallery",
+            gradient: ".js-3d-spiral-gallery-gradient",
+            slider: ".js-3d-spiral-gallery-slider",
+            sliderWrapper: ".js-3d-spiral-gallery-slider-wrapper",
+            progressLine: ".js-3d-spiral-gallery-pagination-progress-line",
+            sliderPaginationBullet: ".swiper-pagination-bullet",
         };
 
-        this.swiperPrevTranslate = 0;
+        this.gallery = document.querySelector(this.DOM.gallery);
+        this.gradient = document.querySelector(this.DOM.gradient);
 
-        this.timeline = document.querySelector(this.DOM.timeline);
+        this.winWidth = this.gallery.offsetWidth;
+        this.winHeight = this.gallery.offsetHeight;
 
-        this.winWidth = this.timeline.offsetWidth;
-        this.winHeight = this.timeline.offsetHeight;
+        this.slider = document.querySelector(this.DOM.slider);
 
-        this.slider = document.querySelector(this.DOM.timelineSlider);
-
-        this.progressLine = document.querySelector(this.DOM.timelineProgressLine);
-        this.sliderWrapper = document.querySelector(this.DOM.timelineSliderWrapper);
+        this.progressLine = document.querySelector(this.DOM.progressLine);
+        this.sliderWrapper = document.querySelector(this.DOM.sliderWrapper);
 
         this.swiper = null;
 
@@ -54,11 +54,11 @@ export default class ThreeSpiralGallery {
 
         this.indexOffset = 1;
 
-        this.getTimeline();
+        this.getGallery();
     }
 
-    getTimeline() {
-        this.timelineItems = timelineData.output;
+    getGallery() {
+        this.items = data.output;
         this.init();
 
         let vh = window.innerHeight * 0.01;
@@ -130,10 +130,10 @@ export default class ThreeSpiralGallery {
         planeGeometryBack.rotateY(this.PIval);
 
         // create items
-        for (let i = 0, l = this.timelineItems.length; i < l; i++) {
+        for (let i = 0, l = this.items.length; i < l; i++) {
             this.createItem(
                 i,
-                this.timelineItems[i],
+                this.items[i],
                 planeGeometryBack,
                 planeBackMaterial,
                 planeGeometry,
@@ -158,7 +158,7 @@ export default class ThreeSpiralGallery {
         this.renderer.setSize(this.winWidth, this.winHeight);
         this.renderer.setClearColor(0xffffff, 0);
         this.renderer.shadowMap.enabled = false;
-        this.timeline.appendChild(this.renderer.domElement);
+        this.gallery.appendChild(this.renderer.domElement);
 
         this.motionBlur();
 
@@ -256,8 +256,6 @@ export default class ThreeSpiralGallery {
                 this.returnHelixItemSkew();
             }
 
-            this.swiperPrevTranslate = swiperTranslate;
-
             this.progressController();
         }
 
@@ -297,7 +295,7 @@ export default class ThreeSpiralGallery {
     /**
      *
      * @param {number} i
-     * @param {object} timelineLoopItem
+     * @param {object} loopItem
      * @param {THREE.Geometry} planeGeometryBack
      * @param {THREE.Material} planeBackMaterial
      * @param {THREE.Geometry} planeGeometry
@@ -305,45 +303,45 @@ export default class ThreeSpiralGallery {
      * @param {THREE.Material} planeBlueMaterial
      * @param {THREE.Geometry} planeGeometryOverlay
      */
-    createItem(i, timelineLoopItem, planeGeometryBack, planeBackMaterial, planeGeometry, planeGeometryBlue, planeBlueMaterial, planeGeometryOverlay) {
-        let timelineItem = document.createElement("div");
-        timelineItem.className = "c-3d-spiral-gallery-item swiper-slide";
+    createItem(i, loopItem, planeGeometryBack, planeBackMaterial, planeGeometry, planeGeometryBlue, planeBlueMaterial, planeGeometryOverlay) {
+        let item = document.createElement("div");
+        item.className = "c-3d-spiral-gallery-item swiper-slide";
 
-        let timelineItemInner = document.createElement("div");
-        timelineItemInner.className = "c-3d-spiral-gallery-item__inner";
-        timelineItemInner.dataset.swiperParallaxOpacity = "-1.3";
+        let itemInner = document.createElement("div");
+        itemInner.className = "c-3d-spiral-gallery-item__inner";
+        itemInner.dataset.swiperParallaxOpacity = "-1.3";
         if (is.not.mobile()) {
-            timelineItemInner.dataset.swiperParallaxY = `-${this.winHeight * 0.4}`;
+            itemInner.dataset.swiperParallaxY = `-${this.winHeight * 0.4}`;
         }
-        timelineItem.appendChild(timelineItemInner);
+        item.appendChild(itemInner);
 
-        let timelineItemInnerContent = document.createElement("div");
-        timelineItemInnerContent.className = "c-3d-spiral-gallery-item__inner-content";
-        timelineItemInner.appendChild(timelineItemInnerContent);
+        let itemInnerContent = document.createElement("div");
+        itemInnerContent.className = "c-3d-spiral-gallery-item__inner-content";
+        itemInner.appendChild(itemInnerContent);
 
         let title = document.createElement("div");
         title.className = "c-3d-spiral-gallery-item__title u-a3 pp-reader";
-        title.textContent = timelineLoopItem.title;
-        timelineItemInnerContent.appendChild(title);
+        title.textContent = loopItem.title;
+        itemInnerContent.appendChild(title);
 
         let manufacturer = document.createElement("div");
         manufacturer.className = "c-3d-spiral-gallery-item__manufacturer u-a1 pp-reader";
-        manufacturer.textContent = timelineLoopItem.manufacturer;
-        timelineItemInnerContent.appendChild(manufacturer);
+        manufacturer.textContent = loopItem.manufacturer;
+        itemInnerContent.appendChild(manufacturer);
 
-        this.sliderWrapper.appendChild(timelineItem);
+        this.sliderWrapper.appendChild(item);
 
         let theta = i * this.itemRadiusOffset + this.PIval;
         let y = -(i * 200) + 600;
 
         // canvas
         const planeGroup = new THREE.Object3D();
-        const texture = new THREE.TextureLoader().load(timelineLoopItem.image, () => {
+        const texture = new THREE.TextureLoader().load(loopItem.image, () => {
             // image position to cover the plane
             this.textureCentering(texture);
         });
 
-        const textureGray = new THREE.TextureLoader().load(timelineLoopItem.grayImage, () => {
+        const textureGray = new THREE.TextureLoader().load(loopItem.grayImage, () => {
             // image position to cover the plane
             this.textureCentering(textureGray);
         });
@@ -378,7 +376,7 @@ export default class ThreeSpiralGallery {
         helixItem.name = "image";
         helixItemGray.name = "gray image";
         helixItemGray.position.z = 0.1;
-        planeGroup.name = `canvas-plane-${timelineLoopItem.title}, index: ${i}`;
+        planeGroup.name = `canvas-plane-${loopItem.title}, index: ${i}`;
 
         planeGroup.add(planeBlue);
         planeGroup.add(helixItem);
@@ -447,7 +445,7 @@ export default class ThreeSpiralGallery {
                 clickable: false,
                 renderBullet: (index, className) => {
                     return `<span class="c-3d-spiral-gallery__pagination-bullet js-3d-spiral-gallery-bullet u-b2 u-uppercase pp-reader ${className}">${
-                        this.timelineItems[index] ? this.timelineItems[index].nav : ""
+                        this.items[index] ? this.items[index].nav : ""
                     }</span>`;
                 },
             },
@@ -718,6 +716,12 @@ export default class ThreeSpiralGallery {
             }
 
             this.mouse.x = mouseX;
+
+            gsap.to(this.gradient, {
+                x: -this.mouse.x * 40,
+                y: this.mouse.y * 40,
+                ease: "power4.out",
+            });
         });
 
         this.onMouseMove();
@@ -790,7 +794,7 @@ export default class ThreeSpiralGallery {
      * Detection for bullet click is needed for slides transition (it glitches without some restrictions)
      */
     detectPaginationBulletClick() {
-        let bullets = document.querySelectorAll(this.DOM.timelineSliderPaginationBullet);
+        let bullets = document.querySelectorAll(this.DOM.sliderPaginationBullet);
 
         for (let i = 0; i < bullets.length; i++) {
             bullets[i].addEventListener("click", () => {
