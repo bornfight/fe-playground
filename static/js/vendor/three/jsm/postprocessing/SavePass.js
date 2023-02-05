@@ -1,67 +1,52 @@
-import {
-	LinearFilter,
-	RGBFormat,
-	ShaderMaterial,
-	UniformsUtils,
-	WebGLRenderTarget
-} from "../../../three";
+import { LinearFilter, RGBFormat, ShaderMaterial, UniformsUtils, WebGLRenderTarget } from "../../../three";
 import { Pass } from "../postprocessing/Pass.js";
 import { CopyShader } from "../shaders/CopyShader.js";
 
-var SavePass = function ( renderTarget ) {
+var SavePass = function (renderTarget) {
+    Pass.call(this);
 
-	Pass.call( this );
+    if (CopyShader === undefined) console.error("SavePass relies on CopyShader");
 
-	if ( CopyShader === undefined )
-		console.error( "SavePass relies on CopyShader" );
+    var shader = CopyShader;
 
-	var shader = CopyShader;
+    this.textureID = "tDiffuse";
 
-	this.textureID = "tDiffuse";
+    this.uniforms = UniformsUtils.clone(shader.uniforms);
 
-	this.uniforms = UniformsUtils.clone( shader.uniforms );
+    this.material = new ShaderMaterial({
+        uniforms: this.uniforms,
+        vertexShader: shader.vertexShader,
+        fragmentShader: shader.fragmentShader,
+    });
 
-	this.material = new ShaderMaterial( {
+    this.renderTarget = renderTarget;
 
-		uniforms: this.uniforms,
-		vertexShader: shader.vertexShader,
-		fragmentShader: shader.fragmentShader
+    if (this.renderTarget === undefined) {
+        this.renderTarget = new WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+            minFilter: LinearFilter,
+            magFilter: LinearFilter,
+            format: RGBFormat,
+        });
+        this.renderTarget.texture.name = "SavePass.rt";
+    }
 
-	} );
+    this.needsSwap = false;
 
-	this.renderTarget = renderTarget;
-
-	if ( this.renderTarget === undefined ) {
-
-		this.renderTarget = new WebGLRenderTarget( window.innerWidth, window.innerHeight, { minFilter: LinearFilter, magFilter: LinearFilter, format: RGBFormat } );
-		this.renderTarget.texture.name = "SavePass.rt";
-
-	}
-
-	this.needsSwap = false;
-
-	this.fsQuad = new Pass.FullScreenQuad( this.material );
-
+    this.fsQuad = new Pass.FullScreenQuad(this.material);
 };
 
-SavePass.prototype = Object.assign( Object.create( Pass.prototype ), {
+SavePass.prototype = Object.assign(Object.create(Pass.prototype), {
+    constructor: SavePass,
 
-	constructor: SavePass,
+    render: function (renderer, writeBuffer, readBuffer) {
+        if (this.uniforms[this.textureID]) {
+            this.uniforms[this.textureID].value = readBuffer.texture;
+        }
 
-	render: function ( renderer, writeBuffer, readBuffer ) {
-
-		if ( this.uniforms[ this.textureID ] ) {
-
-			this.uniforms[ this.textureID ].value = readBuffer.texture;
-
-		}
-
-		renderer.setRenderTarget( this.renderTarget );
-		if ( this.clear ) renderer.clear();
-		this.fsQuad.render( renderer );
-
-	}
-
-} );
+        renderer.setRenderTarget(this.renderTarget);
+        if (this.clear) renderer.clear();
+        this.fsQuad.render(renderer);
+    },
+});
 
 export { SavePass };

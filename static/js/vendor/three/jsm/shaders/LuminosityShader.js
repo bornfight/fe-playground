@@ -1,51 +1,42 @@
-
 /**
  * Luminosity
  * http://en.wikipedia.org/wiki/Luminosity
  */
 
 var LuminosityShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+    },
 
-	uniforms: {
+    vertexShader: [
+        "varying vec2 vUv;",
 
-		"tDiffuse": { value: null }
+        "void main() {",
 
-	},
+        "	vUv = uv;",
 
-	vertexShader: [
+        "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-		"varying vec2 vUv;",
+        "}",
+    ].join("\n"),
 
-		"void main() {",
+    fragmentShader: [
+        "#include <common>",
 
-		"	vUv = uv;",
+        "uniform sampler2D tDiffuse;",
 
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+        "varying vec2 vUv;",
 
-		"}"
+        "void main() {",
 
-	].join( "\n" ),
+        "	vec4 texel = texture2D( tDiffuse, vUv );",
 
-	fragmentShader: [
+        "	float l = linearToRelativeLuminance( texel.rgb );",
 
-		"#include <common>",
+        "	gl_FragColor = vec4( l, l, l, texel.w );",
 
-		"uniform sampler2D tDiffuse;",
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-		"	vec4 texel = texture2D( tDiffuse, vUv );",
-
-		"	float l = linearToRelativeLuminance( texel.rgb );",
-
-		"	gl_FragColor = vec4( l, l, l, texel.w );",
-
-		"}"
-
-	].join( "\n" )
-
+        "}",
+    ].join("\n"),
 };
 
 export { LuminosityShader };

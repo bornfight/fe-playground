@@ -3,7 +3,7 @@ import ScrollTrigger from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-import {DRACOLoader} from "three/examples/jsm/loaders/DRACOLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 import ScrollMarquee from "./ScrollMarquee";
 
@@ -211,7 +211,7 @@ export default class ThreeScrollytelling {
             this.loadModel(mesh);
             model = mesh;
 
-            this.models.push({model, index});
+            this.models.push({ model, index });
 
             mesh.name = modelName;
 

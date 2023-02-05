@@ -1,4 +1,3 @@
-
 /**
  * Simple fake tilt-shift effect, modulating two pass Gaussian blur (see above) by vertical position
  *
@@ -9,58 +8,50 @@
  */
 
 var HorizontalTiltShiftShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        h: { value: 1.0 / 512.0 },
+        r: { value: 0.35 },
+    },
 
-	uniforms: {
+    vertexShader: [
+        "varying vec2 vUv;",
 
-		"tDiffuse": { value: null },
-		"h": { value: 1.0 / 512.0 },
-		"r": { value: 0.35 }
+        "void main() {",
 
-	},
+        "	vUv = uv;",
+        "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	vertexShader: [
+        "}",
+    ].join("\n"),
 
-		"varying vec2 vUv;",
+    fragmentShader: [
+        "uniform sampler2D tDiffuse;",
+        "uniform float h;",
+        "uniform float r;",
 
-		"void main() {",
+        "varying vec2 vUv;",
 
-		"	vUv = uv;",
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+        "void main() {",
 
-		"}"
+        "	vec4 sum = vec4( 0.0 );",
 
-	].join( "\n" ),
+        "	float hh = h * abs( r - vUv.y );",
 
-	fragmentShader: [
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * hh, vUv.y ) ) * 0.051;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * hh, vUv.y ) ) * 0.0918;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * hh, vUv.y ) ) * 0.12245;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * hh, vUv.y ) ) * 0.1531;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * hh, vUv.y ) ) * 0.1531;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * hh, vUv.y ) ) * 0.12245;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * hh, vUv.y ) ) * 0.0918;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * hh, vUv.y ) ) * 0.051;",
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float h;",
-		"uniform float r;",
+        "	gl_FragColor = sum;",
 
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-		"	vec4 sum = vec4( 0.0 );",
-
-		"	float hh = h * abs( r - vUv.y );",
-
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * hh, vUv.y ) ) * 0.051;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * hh, vUv.y ) ) * 0.0918;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * hh, vUv.y ) ) * 0.12245;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * hh, vUv.y ) ) * 0.1531;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * hh, vUv.y ) ) * 0.1531;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * hh, vUv.y ) ) * 0.12245;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * hh, vUv.y ) ) * 0.0918;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * hh, vUv.y ) ) * 0.051;",
-
-		"	gl_FragColor = sum;",
-
-		"}"
-
-	].join( "\n" )
-
+        "}",
+    ].join("\n"),
 };
 
 export { HorizontalTiltShiftShader };

@@ -19,20 +19,19 @@ export default class HoverClippingNavigation {
             return;
         }
 
-
         let clipList = document.querySelector(this.DOM.clipList);
         let clipListWrapper = document.querySelector(this.DOM.clipListWrapper);
         let centerHeight = clipListWrapper.offsetHeight / 2;
 
         gsap.set(clipListWrapper, {
-            y: 0
+            y: 0,
         });
 
         gsap.set(clipList, {
-            y: 0
+            y: 0,
         });
 
-        wrapper.addEventListener("mousemove", ev => {
+        wrapper.addEventListener("mousemove", (ev) => {
             const posY = ev.pageY - wrapper.offsetTop;
             const offsetWrapper = posY - centerHeight;
             const offsetList = -posY + centerHeight;
@@ -41,14 +40,14 @@ export default class HoverClippingNavigation {
                 duration: 0.5,
                 delay: 0.1,
                 ease: "power4.out",
-                y: offsetWrapper
+                y: offsetWrapper,
             });
 
             gsap.to(clipList, {
                 duration: 0.5,
                 delay: 0.1,
                 ease: "power4.out",
-                y: offsetList
+                y: offsetList,
             });
         });
     }

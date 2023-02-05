@@ -1,4 +1,3 @@
-
 /**
  * Afterimage shader
  * I created this effect inspired by a demo on codepen:
@@ -6,56 +5,48 @@
  */
 
 var AfterimageShader = {
+    uniforms: {
+        damp: { value: 0.96 },
+        tOld: { value: null },
+        tNew: { value: null },
+    },
 
-	uniforms: {
+    vertexShader: [
+        "varying vec2 vUv;",
 
-		"damp": { value: 0.96 },
-		"tOld": { value: null },
-		"tNew": { value: null }
+        "void main() {",
 
-	},
+        "	vUv = uv;",
+        "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	vertexShader: [
+        "}",
+    ].join("\n"),
 
-		"varying vec2 vUv;",
+    fragmentShader: [
+        "uniform float damp;",
 
-		"void main() {",
+        "uniform sampler2D tOld;",
+        "uniform sampler2D tNew;",
 
-		"	vUv = uv;",
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+        "varying vec2 vUv;",
 
-		"}"
+        "vec4 when_gt( vec4 x, float y ) {",
 
-	].join( "\n" ),
+        "	return max( sign( x - y ), 0.0 );",
 
-	fragmentShader: [
+        "}",
 
-		"uniform float damp;",
+        "void main() {",
 
-		"uniform sampler2D tOld;",
-		"uniform sampler2D tNew;",
+        "	vec4 texelOld = texture2D( tOld, vUv );",
+        "	vec4 texelNew = texture2D( tNew, vUv );",
 
-		"varying vec2 vUv;",
+        "	texelOld *= damp * when_gt( texelOld, 0.1 );",
 
-		"vec4 when_gt( vec4 x, float y ) {",
+        "	gl_FragColor = max(texelNew, texelOld);",
 
-		"	return max( sign( x - y ), 0.0 );",
-
-		"}",
-
-		"void main() {",
-
-		"	vec4 texelOld = texture2D( tOld, vUv );",
-		"	vec4 texelNew = texture2D( tNew, vUv );",
-
-		"	texelOld *= damp * when_gt( texelOld, 0.1 );",
-
-		"	gl_FragColor = max(texelNew, texelOld);",
-
-		"}"
-
-	].join( "\n" )
-
+        "}",
+    ].join("\n"),
 };
 
 export { AfterimageShader };

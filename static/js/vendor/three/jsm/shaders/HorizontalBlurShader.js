@@ -1,4 +1,3 @@
-
 /**
  * Two pass Gaussian blur filter (horizontal and vertical blur shaders)
  * - described in http://www.gamerendering.com/2008/10/11/gaussian-blur-filter-shader/
@@ -10,54 +9,46 @@
  */
 
 var HorizontalBlurShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        h: { value: 1.0 / 512.0 },
+    },
 
-	uniforms: {
+    vertexShader: [
+        "varying vec2 vUv;",
 
-		"tDiffuse": { value: null },
-		"h": { value: 1.0 / 512.0 }
+        "void main() {",
 
-	},
+        "	vUv = uv;",
+        "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	vertexShader: [
+        "}",
+    ].join("\n"),
 
-		"varying vec2 vUv;",
+    fragmentShader: [
+        "uniform sampler2D tDiffuse;",
+        "uniform float h;",
 
-		"void main() {",
+        "varying vec2 vUv;",
 
-		"	vUv = uv;",
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+        "void main() {",
 
-		"}"
+        "	vec4 sum = vec4( 0.0 );",
 
-	].join( "\n" ),
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * h, vUv.y ) ) * 0.1531;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * h, vUv.y ) ) * 0.1531;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * h, vUv.y ) ) * 0.12245;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * h, vUv.y ) ) * 0.0918;",
+        "	sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * h, vUv.y ) ) * 0.051;",
 
-	fragmentShader: [
+        "	gl_FragColor = sum;",
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float h;",
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-		"	vec4 sum = vec4( 0.0 );",
-
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * h, vUv.y ) ) * 0.1531;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * h, vUv.y ) ) * 0.1531;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * h, vUv.y ) ) * 0.12245;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * h, vUv.y ) ) * 0.0918;",
-		"	sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * h, vUv.y ) ) * 0.051;",
-
-		"	gl_FragColor = sum;",
-
-		"}"
-
-	].join( "\n" )
-
+        "}",
+    ].join("\n"),
 };
 
 export { HorizontalBlurShader };

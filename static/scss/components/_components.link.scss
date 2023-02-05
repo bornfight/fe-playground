@@ -96,7 +96,7 @@
     &__item {
         width: 50%;
 
-        @include mq(lg){
+        @include mq(lg) {
             width: 100%;
         }
 

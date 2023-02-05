@@ -1,46 +1,37 @@
-
 /**
  * Gamma Correction Shader
  * http://en.wikipedia.org/wiki/gamma_correction
  */
 
 var GammaCorrectionShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+    },
 
-	uniforms: {
+    vertexShader: [
+        "varying vec2 vUv;",
 
-		"tDiffuse": { value: null }
+        "void main() {",
 
-	},
+        "	vUv = uv;",
+        "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	vertexShader: [
+        "}",
+    ].join("\n"),
 
-		"varying vec2 vUv;",
+    fragmentShader: [
+        "uniform sampler2D tDiffuse;",
 
-		"void main() {",
+        "varying vec2 vUv;",
 
-		"	vUv = uv;",
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+        "void main() {",
 
-		"}"
+        "	vec4 tex = texture2D( tDiffuse, vUv );",
 
-	].join( "\n" ),
+        "	gl_FragColor = LinearTosRGB( tex );", // optional: LinearToGamma( tex, float( GAMMA_FACTOR ) );
 
-	fragmentShader: [
-
-		"uniform sampler2D tDiffuse;",
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-		"	vec4 tex = texture2D( tDiffuse, vUv );",
-
-		"	gl_FragColor = LinearTosRGB( tex );", // optional: LinearToGamma( tex, float( GAMMA_FACTOR ) );
-
-		"}"
-
-	].join( "\n" )
-
+        "}",
+    ].join("\n"),
 };
 
 export { GammaCorrectionShader };

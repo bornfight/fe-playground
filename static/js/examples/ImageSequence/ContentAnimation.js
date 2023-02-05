@@ -1,5 +1,5 @@
-import {gsap} from "gsap";
-import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,7 +40,7 @@ export default class ContentAnimation {
 
         gsap.set(content, {
             autoAlpha: 0,
-            y: "5vh"
+            y: "5vh",
         });
 
         let tl = gsap
@@ -63,5 +63,4 @@ export default class ContentAnimation {
                 autoAlpha: 0,
             });
     }
-
 }

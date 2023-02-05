@@ -45,10 +45,10 @@ export default class ScrollingMarquee {
                 trigger: line,
                 start: "top bottom",
                 end: `bottom+=${this.topAnimOffset * 2} top`,
-                scrub: true
+                scrub: true,
             },
             x: "-100%",
-            ease: "power3.inOut"
+            ease: "power3.inOut",
         });
     }
 
@@ -64,10 +64,10 @@ export default class ScrollingMarquee {
                 trigger: divider,
                 start: "top bottom",
                 end: "bottom top",
-                scrub: true
+                scrub: true,
             },
             x: `${offset}%`,
-            scaleX: 1 + random
+            scaleX: 1 + random,
         });
     }
 }

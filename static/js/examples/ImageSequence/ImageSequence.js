@@ -1,5 +1,5 @@
-import {gsap} from "gsap";
-import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import is from "is_js";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -88,9 +88,7 @@ export default class ImageSequence {
         };
 
         // num of images in single chunk - for preload sequence
-        this.singleChunk = Math.floor(
-            this.frameCount / this.timeSequenceSegments.length,
-        );
+        this.singleChunk = Math.floor(this.frameCount / this.timeSequenceSegments.length);
 
         this.images = [];
 
@@ -99,11 +97,7 @@ export default class ImageSequence {
 
     preloadImages() {
         if (this.segmentsLoaded < this.timeSequenceSegments.length) {
-            for (
-                let i = this.singleChunk * this.segmentsLoaded;
-                i < this.singleChunk * (this.segmentsLoaded + 1);
-                i++
-            ) {
+            for (let i = this.singleChunk * this.segmentsLoaded; i < this.singleChunk * (this.segmentsLoaded + 1); i++) {
                 const img = new Image();
                 img.src = this.currentFrame(i);
                 const imageProps = [img, i];
@@ -157,10 +151,8 @@ export default class ImageSequence {
         let scrollDirection = 1;
 
         this.steps.forEach((step, i) => {
-            const segmentLength =
-                this.timeSequenceSegments[i + 1] - this.timeSequenceSegments[i];
-            const inc =
-                segmentLength / this.timeSequenceSegments[this.steps.length];
+            const segmentLength = this.timeSequenceSegments[i + 1] - this.timeSequenceSegments[i];
+            const inc = segmentLength / this.timeSequenceSegments[this.steps.length];
 
             this.scrollInteractions(inc, scrollDirection, i, step);
         });
@@ -197,10 +189,7 @@ export default class ImageSequence {
             onUpdate: (self) => {
                 let progress = 0;
                 if (this.timeSequenceSegments[this.steps.length] != null) {
-                    progress =
-                        this.timeSequenceSegments[i] /
-                        this.timeSequenceSegments[this.steps.length] +
-                        self.progress * inc;
+                    progress = this.timeSequenceSegments[i] / this.timeSequenceSegments[this.steps.length] + self.progress * inc;
                 }
 
                 this.frameIndex = Math.floor(progress * this.frameCount);
@@ -211,8 +200,9 @@ export default class ImageSequence {
     }
 
     progressController() {
-        const frameCount = parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond) * this.frameCount;
-        const progress = Math.floor((100 / (frameCount)) * this.framesLoaded);
+        const frameCount =
+            (parseFloat(this.steps[1].dataset.frameSecond) / parseFloat(this.steps[this.steps.length - 1].dataset.frameSecond)) * this.frameCount;
+        const progress = Math.floor((100 / frameCount) * this.framesLoaded);
 
         if (progress < 100) {
             // console.log(progress);
@@ -241,14 +231,14 @@ export default class ImageSequence {
             const height = this.canvasWrapper.clientHeight;
 
             // scale the canvas by window.devicePixelRatio
-            this.sequence.setAttribute('width', `${width * window.devicePixelRatio}`);
-            this.sequence.setAttribute('height', `${height * window.devicePixelRatio}`);
+            this.sequence.setAttribute("width", `${width * window.devicePixelRatio}`);
+            this.sequence.setAttribute("height", `${height * window.devicePixelRatio}`);
 
             // use css to bring it back to regular size
-            this.sequence.setAttribute('style', 'width="' + width + '"; height="' + height + '";')
+            this.sequence.setAttribute("style", 'width="' + width + '"; height="' + height + '";');
 
             // set the scale of the context
-            this.sequence.getContext('2d').scale(window.devicePixelRatio, window.devicePixelRatio);
+            this.sequence.getContext("2d").scale(window.devicePixelRatio, window.devicePixelRatio);
         }
     }
 }

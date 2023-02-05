@@ -1,5 +1,5 @@
-import {getGPUTier} from "detect-gpu";
-import {Clock, Color} from "three";
+import { getGPUTier } from "detect-gpu";
+import { Clock, Color } from "three";
 
 import Camera from "./Core/Camera";
 import Lights from "./Core/Lights";
@@ -56,7 +56,7 @@ export default class AnimatedGradient {
         this.canvas.height = window.innerHeight;
 
         // Scene
-        this.scene = new Scene({background: 0x00032d});
+        this.scene = new Scene({ background: 0x00032d });
 
         /**
          * Lights
@@ -101,7 +101,7 @@ export default class AnimatedGradient {
     }
 
     buildScene() {
-        const event = new CustomEvent('loaded')
+        const event = new CustomEvent("loaded");
         document.dispatchEvent(event);
 
         this.shape = new Plane({
