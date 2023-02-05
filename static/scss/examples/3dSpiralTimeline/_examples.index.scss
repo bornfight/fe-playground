@@ -11,6 +11,23 @@
     background-color: #3e0e12;
     color: $white;
 
+    &__credits {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        pointer-events: none;
+        padding: 15px 30px;
+        width: 100%;
+        color: $white;
+
+        @include mq(md) {
+            top: 0;
+            padding-right: 15px;
+            padding-left: 15px;
+            text-align: right;
+        }
+    }
+
     &__gradient {
         position: absolute;
         top: 0;
