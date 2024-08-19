@@ -198,7 +198,7 @@ export default class ThreeScrollytelling {
 
         // loader
         const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath("https://threejs.org/examples/js/libs/draco/");
+        dracoLoader.setDecoderPath('./../../static/js/draco/');
         dracoLoader.setDecoderConfig({
             type: "js",
         });
